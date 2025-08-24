@@ -1,0 +1,12 @@
+
+
+En los endpoint de nuevaCompra, nuevaVenta y nuevoGasto.. se debe obtener el idUsuario del header
+
+Hace falta subtotal en los detalles de la compra?
+
+falta agregar la lógica para el stockSuma
+
+validaciones Jakarta para los requestDTO
+
+
+

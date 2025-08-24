@@ -1,0 +1,46 @@
+package com.example.negocio.controller;
+
+import com.example.negocio.dto.marca.MarcaDTO;
+import com.example.negocio.dto.marca.MarcaAbmDTO;
+import com.example.negocio.dto.marca.MarcaListaDTO;
+import com.example.negocio.entity.Marca;
+import com.example.negocio.service.MarcaService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/marca")
+public class MarcaController {
+    private final MarcaService marcaService;
+
+    @PostMapping("/nueva")
+    public ResponseEntity<Marca> nuevaMarca(@RequestBody MarcaDTO dto) {
+        return ResponseEntity.ok(marcaService.nuevaMarca(dto));
+    }
+
+    @PutMapping("/modificar/{idMarca}")
+    public ResponseEntity<Marca> modificarMarca(@PathVariable Long idMarca, @RequestBody MarcaDTO dto) {
+        return ResponseEntity.ok(marcaService.modificarMarca(idMarca, dto));
+    }
+
+    @GetMapping("/abm")
+    public ResponseEntity<List<MarcaAbmDTO>> obtenerMarcas(){
+        return ResponseEntity.ok(marcaService.obtenerMarcas());
+    }
+
+    @GetMapping("/lista")
+    public ResponseEntity<List<MarcaListaDTO>> listarMarcas(){
+        return ResponseEntity.ok(marcaService.listarMarcas());
+    }
+
+    @PatchMapping("/cambiarEstado/{idMarca}")
+    public ResponseEntity<Void> cambiarEstadoMarca(@PathVariable Long idMarca) {
+        marcaService.cambiarEstadoMarca(idMarca);
+        return ResponseEntity.ok().build();
+    }
+
+}
