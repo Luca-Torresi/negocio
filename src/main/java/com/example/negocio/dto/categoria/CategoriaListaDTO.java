@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 public class CategoriaListaDTO {
     private Long idCategoria;
     private String nombre;
+    private Long idCategoriaPadre;
 }

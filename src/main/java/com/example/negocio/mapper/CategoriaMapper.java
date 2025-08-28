@@ -23,6 +23,7 @@ public interface CategoriaMapper {
     @Mapping(source = "categoriaPadre.idCategoria", target = "idCategoriaPadre")
     CategoriaAbmDTO toAbmDTO(Categoria categoria);
 
+    @Mapping(source = "categoriaPadre.idCategoria", target = "idCategoriaPadre")
     CategoriaListaDTO toListaDTO(Categoria categoria);
 
     @Named("mapCategoria")

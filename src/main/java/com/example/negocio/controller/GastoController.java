@@ -6,6 +6,7 @@ import com.example.negocio.entity.Gasto;
 import com.example.negocio.enums.TipoGasto;
 import com.example.negocio.service.GastoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +30,7 @@ public class GastoController {
     }
 
     @GetMapping("/lista")
-    public ResponseEntity<List<GastoListaDTO>> listarGastos(
+    public ResponseEntity<Page<GastoListaDTO>> listarGastos(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) TipoGasto tipoGasto,
@@ -37,6 +38,11 @@ public class GastoController {
             @RequestParam(required = false) LocalDate fechaFin
             ){
         return ResponseEntity.ok(gastoService.listarGastos(page, size, tipoGasto, fechaInicio, fechaFin));
+    }
+
+    @GetMapping("/tipos")
+    public ResponseEntity<List<String>> listarTipoGastos(){
+        return  ResponseEntity.ok(gastoService.listarTipoGastos());
     }
 
 }

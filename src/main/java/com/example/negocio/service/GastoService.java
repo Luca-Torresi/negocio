@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,5 +49,11 @@ public class GastoService {
 
         return gastoRepository.findAll(spec, pageable)
                 .map(gastoMapper::toDto);
+    }
+
+    public List<String> listarTipoGastos(){
+        return Arrays.stream(TipoGasto.values())
+                .map(Enum::name)
+                .toList();
     }
 }
