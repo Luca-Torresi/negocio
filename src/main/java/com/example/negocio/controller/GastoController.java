@@ -40,4 +40,9 @@ public class GastoController {
         return ResponseEntity.ok(gastoService.listarGastos(page, size, tipoGasto, fechaInicio, fechaFin));
     }
 
+    @GetMapping("/tipos")
+    public ResponseEntity<List<String>> listarTipoGastos(){
+        return  ResponseEntity.ok(gastoService.listarTipoGastos());
+    }
+
 }
