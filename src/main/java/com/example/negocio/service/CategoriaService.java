@@ -5,7 +5,6 @@ import com.example.negocio.dto.categoria.CategoriaDTO;
 import com.example.negocio.dto.categoria.CategoriaListaDTO;
 import com.example.negocio.entity.Categoria;
 import com.example.negocio.mapper.CategoriaMapper;
-import com.example.negocio.mapper.CategoriaMapperImpl;
 import com.example.negocio.repository.CategoriaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,8 +18,15 @@ public class CategoriaService {
     private final CategoriaMapper categoriaMapper;
 
     public Categoria nuevaCategoria(CategoriaDTO dto) {
-        Categoria categoria = categoriaMapper.toEntity(dto, categoriaRepository);
+
+        Categoria categoria = categoriaMapper.toEntity(dto);
         categoria.setEstado(true);
+
+        if(dto.getIdCategoriaPadre() != null){
+            Categoria categoriaPadre = categoriaRepository.findById(dto.getIdCategoriaPadre())
+                    .orElseThrow(() -> new RuntimeException("Categoria no encontrada"));
+            categoria.setCategoriaPadre(categoriaPadre);
+        }
 
         return categoriaRepository.save(categoria);
     }
@@ -29,7 +35,14 @@ public class CategoriaService {
         Categoria categoria = categoriaRepository.findById(idCategoria)
                 .orElseThrow(() -> new RuntimeException());
 
-        categoriaMapper.updateFromDto(dto, categoria, categoriaRepository);
+        categoriaMapper.updateFromDto(dto, categoria);
+
+        if(dto.getIdCategoriaPadre() != null){
+            Categoria categoriaPadre = categoriaRepository.findById(dto.getIdCategoriaPadre())
+                    .orElseThrow(() -> new RuntimeException("Categoria no encontrada"));
+            categoria.setCategoriaPadre(categoriaPadre);
+        }
+
         return categoriaRepository.save(categoria);
     }
 

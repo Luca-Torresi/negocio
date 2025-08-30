@@ -1,7 +1,6 @@
 package com.example.negocio.dto.categoria;
 
 import com.example.negocio.dto.producto.ProductoItemDTO;
-import com.example.negocio.dto.producto.ProductoListaDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

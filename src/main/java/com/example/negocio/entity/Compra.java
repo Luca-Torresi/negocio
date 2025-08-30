@@ -20,7 +20,7 @@ public class Compra {
     @ManyToOne @JoinColumn(name = "idProveedor")
     private Proveedor proveedor;
 
-    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleCompra> detalles;
 
     @ManyToOne @JoinColumn(name = "idUsuario")

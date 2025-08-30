@@ -12,15 +12,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface DetalleCompraMapper {
 
-    @Mapping(source = "idProducto", target = "producto")
-    DetalleCompra toEntity(DetalleCompraDTO dto, @Context ProductoRepository productoRepository);
+    DetalleCompra toEntity(DetalleCompraDTO dto);
 
     @Mapping(source = "producto.nombre", target = "producto")
     DetalleCompraFullDTO toFullDto(DetalleCompra entity);
-
-    default Producto mapProducto(Long idProducto, @Context ProductoRepository productoRepository) {
-        return productoRepository.findById(idProducto)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-    }
 
 }

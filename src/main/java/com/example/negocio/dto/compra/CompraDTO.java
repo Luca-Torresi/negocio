@@ -9,6 +9,5 @@ import java.util.List;
 @Data @Builder @AllArgsConstructor @NoArgsConstructor
 public class CompraDTO {
     private Long idProveedor;
-    private Double total;
     private List<DetalleCompraDTO> detalles;
 }

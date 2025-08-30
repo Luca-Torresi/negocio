@@ -10,6 +10,7 @@ public class ProductoAbmDTO {
     private Long idProducto;
     private String nombre;
     private Double precio;
+    private Double porcentaje;
     private Double precioConDescuento;
     private Double costo;
     private Integer stock;

@@ -24,6 +24,11 @@ public class CompraController {
         return compraService.nuevaCompra(dto);
     }
 
+    @PutMapping("/modificar/{idCompra}")
+    public Compra modificarCompra(@PathVariable Long idCompra, @RequestBody CompraDTO dto) {
+        return compraService.modificarCompra(idCompra, dto);
+    }
+
     @GetMapping("/obtener")
     public Page<CompraFullDTO> obtenerCompras(
             @RequestParam(defaultValue = "0") Integer page,

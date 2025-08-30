@@ -1,9 +1,6 @@
 package com.example.negocio.controller;
 
-import com.example.negocio.dto.producto.ProductoDTO;
-import com.example.negocio.dto.producto.ProductoAbmDTO;
-import com.example.negocio.dto.producto.ProductoItemDTO;
-import com.example.negocio.dto.producto.ProductoListaDTO;
+import com.example.negocio.dto.producto.*;
 import com.example.negocio.entity.Producto;
 import com.example.negocio.service.ProductoService;
 import lombok.RequiredArgsConstructor;
@@ -33,17 +30,19 @@ public class ProductoController {
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String nombre,
-            @RequestParam(required = false) Long idCategoria) {
-        return productoService.obtenerProductos(page, size, nombre, idCategoria);
+            @RequestParam(required = false) Long idCategoria,
+            @RequestParam(required = false) Long idMarca,
+            @RequestParam(required = false) Long idProveedor) {
+        return productoService.obtenerProductos(page, size, nombre, idCategoria, idMarca, idProveedor);
     }
 
     @GetMapping("/listaVenta")
-    public ResponseEntity<List<ProductoListaDTO>> listarProductosVenta(){
+    public ResponseEntity<List<ProductoVentaDTO>> listarProductosVenta(){
         return ResponseEntity.ok(productoService.listarProductosVenta());
     }
 
     @GetMapping("/listaCompra/{idProveedor}")
-    public ResponseEntity<List<ProductoItemDTO>> listarProductosCompra(@PathVariable Long idProveedor){
+    public ResponseEntity<List<ProductoCompraDTO>> listarProductosCompra(@PathVariable Long idProveedor){
         return ResponseEntity.ok(productoService.listarProductosCompra(idProveedor));
     }
 

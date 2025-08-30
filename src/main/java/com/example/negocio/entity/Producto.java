@@ -28,6 +28,6 @@ public class Producto {
     @ManyToOne @JoinColumn(name = "idProveedor")
     private Proveedor proveedor;
 
-    @OneToOne(mappedBy = "producto")
+    @OneToOne(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     private Descuento descuento;
 }

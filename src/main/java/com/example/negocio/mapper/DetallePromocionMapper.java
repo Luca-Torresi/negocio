@@ -12,14 +12,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface DetallePromocionMapper {
 
-    @Mapping(source = "idProducto", target = "producto")
-    DetallePromocion toEntity(DetallePromocionDTO dto, @Context ProductoRepository productoRepository);
+    DetallePromocion toEntity(DetallePromocionDTO dto);
 
     @Mapping(source = "producto.nombre", target = "producto")
     DetallePromocionAbmDTO toAbmDTO(DetallePromocion detallePromocion);
 
-    default Producto mapProducto(Long idProducto, @Context ProductoRepository productoRepository) {
-        return productoRepository.findById(idProducto)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-    }
 }

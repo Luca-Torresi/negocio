@@ -21,7 +21,7 @@ public class Venta {
     @Enumerated(EnumType.STRING)
     private MetodoDePago metodoDePago;
 
-    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleVenta> detalles;
 
     @ManyToOne @JoinColumn(name = "idUsuario")

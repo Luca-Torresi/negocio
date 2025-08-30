@@ -1,10 +1,10 @@
 package com.example.negocio.service;
 
-import com.example.negocio.dto.producto.ProductoDTO;
-import com.example.negocio.dto.producto.ProductoAbmDTO;
-import com.example.negocio.dto.producto.ProductoItemDTO;
-import com.example.negocio.dto.producto.ProductoListaDTO;
+import com.example.negocio.dto.producto.*;
+import com.example.negocio.entity.Categoria;
+import com.example.negocio.entity.Marca;
 import com.example.negocio.entity.Producto;
+import com.example.negocio.entity.Proveedor;
 import com.example.negocio.mapper.ProductoMapper;
 import com.example.negocio.repository.CategoriaRepository;
 import com.example.negocio.repository.MarcaRepository;
@@ -30,8 +30,25 @@ public class ProductoService {
     private final ProductoMapper productoMapper;
 
     public Producto nuevoProducto(ProductoDTO dto) {
-        Producto producto = productoMapper.toEntity(dto, marcaRepository, categoriaRepository, proveedorRepository);
+        Producto producto = productoMapper.toEntity(dto);
         producto.setEstado(true);
+
+        if(dto.getIdMarca() != null){
+            Marca marca = marcaRepository.findById(dto.getIdMarca())
+                    .orElseThrow(() -> new RuntimeException("No existe una marca"));
+            producto.setMarca(marca);
+        } else{
+            producto.setMarca(null);
+        }
+
+        Categoria categoria = categoriaRepository.findById(dto.getIdCategoria())
+                .orElseThrow(() -> new RuntimeException("No existe una categoria con ese id"));
+        producto.setCategoria(categoria);
+
+        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor())
+                .orElseThrow(() -> new RuntimeException("No existe una proveedor"));
+        producto.setProveedor(proveedor);
+
 
         return productoRepository.save(producto);
     }
@@ -40,32 +57,47 @@ public class ProductoService {
         Producto producto = productoRepository.findById(idProducto)
                 .orElseThrow(() -> new RuntimeException());
 
-        productoMapper.updateFromDto(dto, producto, marcaRepository, categoriaRepository, proveedorRepository);
+        Categoria categoria = categoriaRepository.findById(dto.getIdCategoria())
+                .orElseThrow(() -> new RuntimeException("No existe una categoria con ese id"));
+
+        Marca marca = marcaRepository.findById(dto.getIdMarca())
+                .orElseThrow(() -> new RuntimeException("No existe una marca"));
+
+        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor())
+                .orElseThrow(() -> new RuntimeException("No existe una proveedor"));
+
+        productoMapper.updateFromDto(dto, producto);
+        producto.setCategoria(categoria);
+        producto.setMarca(marca);
+        producto.setProveedor(proveedor);
+
         return productoRepository.save(producto);
     }
 
-    public Page<ProductoAbmDTO> obtenerProductos(Integer page, Integer size, String nombre, Long idCategoria){
+    public Page<ProductoAbmDTO> obtenerProductos(Integer page, Integer size, String nombre, Long idCategoria, Long idMarca, Long idProveedor) {
         Pageable pageable = PageRequest.of(page, size);
         Specification<Producto> spec = ProductoSpecification.conNombre(nombre)
-                .and(ProductoSpecification.conCategoria(idCategoria));
+                .and(ProductoSpecification.conCategoria(idCategoria))
+                .and(ProductoSpecification.conMarca(idMarca))
+                .and(ProductoSpecification.conProveedor(idProveedor));
 
         return productoRepository.findAll(spec, pageable)
                 .map(productoMapper::toAbmDto);
     }
 
-    public List<ProductoListaDTO> listarProductosVenta(){
+    public List<ProductoVentaDTO> listarProductosVenta(){
         List<Producto> productos = productoRepository.findByEstadoTrue();
 
         return productos.stream()
-                .map(productoMapper::toListaDto)
+                .map(productoMapper::toVentaDto)
                 .collect(Collectors.toList());
     }
 
-    public List<ProductoItemDTO> listarProductosCompra(Long idProveedor){
+    public List<ProductoCompraDTO> listarProductosCompra(Long idProveedor){
         List<Producto> productos = productoRepository.findByEstadoTrueAndProveedorIdProveedor(idProveedor);
 
         return productos.stream()
-                .map(productoMapper::toItemDto)
+                .map(productoMapper::toCompraDto)
                 .collect(Collectors.toList());
     }
 

@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 public class DetalleCompraFullDTO {
     private String producto;
     private Integer cantidad;
-    private Double precioUnitario;
+    private Double costoUnitario;
 }

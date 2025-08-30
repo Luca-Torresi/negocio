@@ -6,7 +6,6 @@ import com.example.negocio.entity.Venta;
 import com.example.negocio.service.VentaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;

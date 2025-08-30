@@ -10,14 +10,11 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", uses = {ProductoMapper.class})
 public interface CategoriaMapper {
 
-    @Mapping(source = "idCategoriaPadre", target = "categoriaPadre", qualifiedByName = "mapCategoria")
-    Categoria toEntity(CategoriaDTO dto, @Context CategoriaRepository categoriaRepository);
+    Categoria toEntity(CategoriaDTO dto);
 
-    @Mapping(source = "idCategoriaPadre", target = "categoriaPadre", qualifiedByName = "mapCategoria")
     void updateFromDto(
             CategoriaDTO dto,
-            @MappingTarget Categoria entity,
-            @Context CategoriaRepository categoriaRepository
+            @MappingTarget Categoria entity
     );
 
     @Mapping(source = "categoriaPadre.idCategoria", target = "idCategoriaPadre")
@@ -25,12 +22,5 @@ public interface CategoriaMapper {
 
     @Mapping(source = "categoriaPadre.idCategoria", target = "idCategoriaPadre")
     CategoriaListaDTO toListaDTO(Categoria categoria);
-
-    @Named("mapCategoria")
-    default Categoria mapCategoria(Long idCategoria, @Context CategoriaRepository categoriaRepository) {
-        if (idCategoria == null) return null;
-        return categoriaRepository.findById(idCategoria)
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
-    }
 
 }

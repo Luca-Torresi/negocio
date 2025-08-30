@@ -13,12 +13,12 @@ public class DetalleCompra {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idDetalleCompra;
     private Integer cantidad;
-    private Double precioUnitario;
+    private Double costoUnitario;
 
     @ManyToOne @JoinColumn(name = "idProducto")
     private Producto producto;
 
-    @ManyToOne @JoinColumn(name = "compra")
+    @ManyToOne @JoinColumn(name = "idCompra")
     private Compra compra;
 
 }
