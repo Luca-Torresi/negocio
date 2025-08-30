@@ -1,0 +1,242 @@
+"use client"
+
+import type React from "react"
+import { useState, useEffect, useMemo } from "react"
+import { Users, Plus, Pencil, Search } from "lucide-react"
+import type { Proveedor, ProveedorDTO } from "../types/dto/Proveedor"
+import { obtenerProveedores, crearProveedor, modificarProveedor, cambiarEstadoProveedor } from "../api/proveedorApi"
+import { ModalNuevoProveedor } from "../components/proveedores/ModalNuevoProveedor"
+import { ModalEditarProveedor } from "../components/proveedores/ModalEditarProveedor"
+
+const PaginaProveedores: React.FC = () => {
+  const [proveedores, setProveedores] = useState<Proveedor[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string>("")
+  const [busqueda, setBusqueda] = useState<string>("")
+  const [filtroEstado, setFiltroEstado] = useState<"todos" | "activos" | "inactivos">("todos")
+  const [modalNuevoAbierto, setModalNuevoAbierto] = useState<boolean>(false)
+  const [modalEditarAbierto, setModalEditarAbierto] = useState<boolean>(false)
+  const [proveedorSeleccionado, setProveedorSeleccionado] = useState<Proveedor | null>(null)
+
+  // Cargar proveedores al montar el componente
+  useEffect(() => {
+    cargarProveedores()
+  }, [])
+
+  const cargarProveedores = async () => {
+    try {
+      setLoading(true)
+      setError("")
+      const data = await obtenerProveedores()
+      setProveedores(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al cargar proveedores")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Filtrar proveedores basado en búsqueda y estado
+  const proveedoresFiltrados = useMemo(() => {
+    return proveedores.filter((proveedor) => {
+      const coincideNombre = proveedor.nombre.toLowerCase().includes(busqueda.toLowerCase())
+      const coincideEstado =
+        filtroEstado === "todos" ||
+        (filtroEstado === "activos" && proveedor.estado) ||
+        (filtroEstado === "inactivos" && !proveedor.estado)
+
+      return coincideNombre && coincideEstado
+    })
+  }, [proveedores, busqueda, filtroEstado])
+
+  const handleCrearProveedor = async (data: ProveedorDTO) => {
+    try {
+      await crearProveedor(data)
+      setModalNuevoAbierto(false)
+      await cargarProveedores()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al crear proveedor")
+    }
+  }
+
+  const handleEditarProveedor = async (id: number, data: ProveedorDTO) => {
+    try {
+      await modificarProveedor(id, data)
+      setModalEditarAbierto(false)
+      setProveedorSeleccionado(null)
+      await cargarProveedores()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al editar proveedor")
+    }
+  }
+
+  const handleCambiarEstado = async (id: number) => {
+    try {
+      await cambiarEstadoProveedor(id)
+      await cargarProveedores()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al cambiar estado")
+    }
+  }
+
+  const abrirModalEditar = (proveedor: Proveedor) => {
+    setProveedorSeleccionado(proveedor)
+    setModalEditarAbierto(true)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-gray-600">Cargando proveedores...</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-6">
+      {/* Encabezado */}
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <Users className="h-8 w-8 text-blue-600" />
+          <h1 className="text-3xl font-bold text-gray-800">Proveedores</h1>
+        </div>
+        <p className="text-gray-600">Gestiona los proveedores del negocio</p>
+      </div>
+
+      {/* Panel de filtros y botón de creación */}
+      <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          {/* Filtros */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Búsqueda por nombre */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <input
+                type="text"
+                placeholder="Buscar por nombre..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64"
+              />
+            </div>
+
+            {/* Filtro por estado */}
+            <select
+              value={filtroEstado}
+              onChange={(e) => setFiltroEstado(e.target.value as "todos" | "activos" | "inactivos")}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="todos">Todos</option>
+              <option value="activos">Activos</option>
+              <option value="inactivos">Inactivos</option>
+            </select>
+          </div>
+
+          {/* Botón nuevo proveedor */}
+          <button
+            onClick={() => setModalNuevoAbierto(true)}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+          >
+            <Plus size={20} />
+            Nuevo Proveedor
+          </button>
+        </div>
+      </div>
+
+      {/* Mensaje de error */}
+      {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">{error}</div>}
+
+      {/* Tabla de proveedores */}
+      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Nombre
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Teléfono
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {proveedoresFiltrados.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                    No se encontraron proveedores
+                  </td>
+                </tr>
+              ) : (
+                proveedoresFiltrados.map((proveedor) => (
+                  <tr key={proveedor.idProveedor} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{proveedor.idProveedor}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {proveedor.nombre}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{proveedor.telefono}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{proveedor.email}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center gap-4">
+
+                        {/* Botón editar */}
+                        <button
+                          onClick={() => abrirModalEditar(proveedor)}
+                          className="text-black"
+                          title="Editar proveedor"
+                        >
+                          <Pencil size={18} />
+                        </button>
+
+                        {/* Toggle estado */}
+                        <button
+                          onClick={() => handleCambiarEstado(proveedor.idProveedor)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${proveedor.estado
+                            ? "bg-green-500 focus:ring-green-500"
+                            : "bg-red-400 focus:ring-red-400"
+                            }`}
+                          title={proveedor.estado ? "Desactivar" : "Activar"}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${proveedor.estado ? "translate-x-6" : "translate-x-1"
+                              }`}
+                          />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Modales */}
+      <ModalNuevoProveedor
+        isOpen={modalNuevoAbierto}
+        onClose={() => setModalNuevoAbierto(false)}
+        onConfirm={handleCrearProveedor}
+      />
+
+      <ModalEditarProveedor
+        isOpen={modalEditarAbierto}
+        onClose={() => {
+          setModalEditarAbierto(false)
+          setProveedorSeleccionado(null)
+        }}
+        onConfirm={handleEditarProveedor}
+        proveedor={proveedorSeleccionado}
+      />
+    </div>
+  )
+}
+
+export default PaginaProveedores;
