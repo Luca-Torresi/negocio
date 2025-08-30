@@ -3,6 +3,8 @@ package com.example.negocio.service;
 import com.example.negocio.dto.descuento.DescuentoDTO;
 import com.example.negocio.entity.Descuento;
 import com.example.negocio.entity.Producto;
+import com.example.negocio.exception.DescuentoNoEncontradoException;
+import com.example.negocio.exception.ProductoNoEncontradoException;
 import com.example.negocio.mapper.DescuentoMapper;
 import com.example.negocio.repository.DescuentoRepository;
 import com.example.negocio.repository.ProductoRepository;
@@ -17,8 +19,7 @@ public class DescuentoService {
     private final DescuentoMapper descuentoMapper;
 
     public Descuento nuevoDescuento(DescuentoDTO dto) {
-        Producto producto = productoRepository.findById(dto.getIdProducto())
-                .orElseThrow(() -> new RuntimeException("No existe el producto"));
+        Producto producto = productoRepository.findById(dto.getIdProducto()).orElseThrow(() -> new ProductoNoEncontradoException());
 
         Descuento descuento = descuentoMapper.toEntity(dto);
         descuento.setProducto(producto);
@@ -27,16 +28,14 @@ public class DescuentoService {
     }
 
     public Descuento modificarDescuento(Long idDescuento, DescuentoDTO dto) {
-        Descuento descuento = descuentoRepository.findById(idDescuento)
-                .orElseThrow(() -> new RuntimeException("Descuento no encontrado"));
+        Descuento descuento = descuentoRepository.findById(idDescuento).orElseThrow(() -> new DescuentoNoEncontradoException());
 
         descuentoMapper.updateFromDto(dto, descuento);
         return descuentoRepository.save(descuento);
     }
 
     public void eliminarDescuento(Long idDescuento) {
-        Descuento descuento = descuentoRepository.findById(idDescuento)
-                .orElseThrow(() -> new RuntimeException("Descuento no encontrado"));
+        Descuento descuento = descuentoRepository.findById(idDescuento).orElseThrow(() -> new DescuentoNoEncontradoException());
 
         Producto producto = descuento.getProducto();
         producto.setDescuento(null);

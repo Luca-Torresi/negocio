@@ -4,6 +4,7 @@ import com.example.negocio.dto.marca.MarcaAbmDTO;
 import com.example.negocio.dto.marca.MarcaDTO;
 import com.example.negocio.dto.marca.MarcaListaDTO;
 import com.example.negocio.entity.Marca;
+import com.example.negocio.exception.MarcaNoEncontradaException;
 import com.example.negocio.mapper.MarcaMapper;
 import com.example.negocio.repository.MarcaRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,7 @@ public class MarcaService {
     }
 
     public Marca modificarMarca(Long idMarca, MarcaDTO dto){
-        Marca marca = marcaRepository.findById(idMarca)
-                .orElseThrow(() -> new RuntimeException("Marca no encontrada"));
+        Marca marca = marcaRepository.findById(idMarca).orElseThrow(() -> new MarcaNoEncontradaException());
 
         marcaMapper.updateFromDto(dto, marca);
         return marcaRepository.save(marca);
@@ -49,8 +49,7 @@ public class MarcaService {
     }
 
     public void cambiarEstadoMarca(Long idMarca){
-        Marca marca = marcaRepository.findById(idMarca)
-                .orElseThrow(() -> new RuntimeException("Marca no encontrada"));
+        Marca marca = marcaRepository.findById(idMarca).orElseThrow(() -> new MarcaNoEncontradaException());
 
         marca.setEstado(!marca.getEstado());
         marcaRepository.save(marca);

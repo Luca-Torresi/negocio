@@ -7,6 +7,9 @@ import com.example.negocio.entity.Compra;
 import com.example.negocio.entity.DetalleCompra;
 import com.example.negocio.entity.Producto;
 import com.example.negocio.entity.Proveedor;
+import com.example.negocio.exception.CompraNoEncontradaException;
+import com.example.negocio.exception.ProductoNoEncontradoException;
+import com.example.negocio.exception.ProveedorNoEncontradoException;
 import com.example.negocio.mapper.CompraMapper;
 import com.example.negocio.mapper.DetalleCompraMapper;
 import com.example.negocio.repository.CompraRepository;
@@ -36,8 +39,7 @@ public class CompraService {
     private final DetalleCompraMapper detalleCompraMapper;
 
     public Compra nuevaCompra(CompraDTO dto){
-        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor())
-                .orElseThrow(() -> new RuntimeException("Proveedor no encontrado"));
+        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor()).orElseThrow(() -> new ProveedorNoEncontradoException());
 
         Compra compra = compraMapper.toEntity(dto);
         compra.setFechaHora(LocalDateTime.now());
@@ -47,8 +49,7 @@ public class CompraService {
 
         List<DetalleCompra> detalles = new ArrayList<>();
         for(DetalleCompraDTO detalleDto :dto.getDetalles()){
-            Producto producto = productoRepository.findById(detalleDto.getIdProducto())
-                    .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+            Producto producto = productoRepository.findById(detalleDto.getIdProducto()).orElseThrow(() -> new ProductoNoEncontradoException());
 
             DetalleCompra detalle = detalleCompraMapper.toEntity(detalleDto);
             detalle.setProducto(producto);
@@ -66,8 +67,7 @@ public class CompraService {
     }
 
     public Compra modificarCompra(Long idCompra, CompraDTO dto){
-        Compra compra = compraRepository.findById(idCompra)
-                .orElseThrow(() -> new RuntimeException("Compra no encontrado"));
+        Compra compra = compraRepository.findById(idCompra).orElseThrow(() -> new CompraNoEncontradaException());
 
         compraMapper.updateFromDto(dto, compra);
 
@@ -77,8 +77,7 @@ public class CompraService {
 
         List<DetalleCompra> detalles = new ArrayList<>();
         for(DetalleCompraDTO detalleDto :dto.getDetalles()){
-            Producto producto = productoRepository.findById(detalleDto.getIdProducto())
-                    .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+            Producto producto = productoRepository.findById(detalleDto.getIdProducto()).orElseThrow(() -> new ProductoNoEncontradoException());
 
             DetalleCompra detalle = detalleCompraMapper.toEntity(detalleDto);
             detalle.setProducto(producto);

@@ -4,6 +4,7 @@ import com.example.negocio.dto.gasto.GastoDTO;
 import com.example.negocio.dto.gasto.GastoListaDTO;
 import com.example.negocio.entity.Gasto;
 import com.example.negocio.enums.TipoGasto;
+import com.example.negocio.exception.GastoNoEncontradoException;
 import com.example.negocio.mapper.GastoMapper;
 import com.example.negocio.repository.GastoRepository;
 import com.example.negocio.specification.GastoSpecification;
@@ -34,8 +35,7 @@ public class GastoService {
     }
 
     public Gasto modificarGasto(Long idGasto, GastoDTO dto){
-        Gasto gasto = gastoRepository.findById(idGasto)
-                .orElseThrow(() -> new RuntimeException("Gasto no encontrado"));
+        Gasto gasto = gastoRepository.findById(idGasto).orElseThrow(() -> new GastoNoEncontradoException());
 
         gastoMapper.updateFromDto(dto, gasto);
         return gastoRepository.save(gasto);

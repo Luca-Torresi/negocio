@@ -7,6 +7,8 @@ import com.example.negocio.entity.DetalleVenta;
 import com.example.negocio.entity.Producto;
 import com.example.negocio.entity.Promocion;
 import com.example.negocio.entity.Venta;
+import com.example.negocio.exception.ProductoNoEncontradoException;
+import com.example.negocio.exception.PromocionNoEncontradaException;
 import com.example.negocio.mapper.DetalleVentaMapper;
 import com.example.negocio.mapper.VentaMapper;
 import com.example.negocio.repository.ProductoRepository;
@@ -49,14 +51,12 @@ public class VentaService {
         DetalleVenta detalle = detalleVentaMapper.toEntity(dto);
 
         if (dto.getIdProducto() != null) {
-            Producto producto = productoRepository.findById(dto.getIdProducto())
-                    .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+            Producto producto = productoRepository.findById(dto.getIdProducto()).orElseThrow(() -> new ProductoNoEncontradoException());
             detalle.setProducto(producto);
             detalle.setPrecioUnitario(producto.getPrecio());
 
         } else if (dto.getIdPromocion() != null) {
-            Promocion promocion = promocionRepository.findById(dto.getIdPromocion())
-                    .orElseThrow(() -> new RuntimeException("Promoción no encontrada"));
+            Promocion promocion = promocionRepository.findById(dto.getIdPromocion()).orElseThrow(() -> new PromocionNoEncontradaException());
             detalle.setPromocion(promocion);
             detalle.setPrecioUnitario(promocion.getPrecio());
         }

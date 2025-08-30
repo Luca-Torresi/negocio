@@ -28,8 +28,6 @@ public interface ProductoMapper {
 
     ProductoCompraDTO toCompraDto(Producto entity);
 
-    ProductoItemDTO toItemDto(Producto entity);
-
     default Double mapPrecioConDescuento(Producto producto) {
         if (producto.getDescuento() != null) {
             Double porcentaje = producto.getDescuento().getPorcentaje();

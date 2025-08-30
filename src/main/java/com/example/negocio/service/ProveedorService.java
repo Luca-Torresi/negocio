@@ -4,6 +4,7 @@ import com.example.negocio.dto.proveedor.ProveedorAbmDTO;
 import com.example.negocio.dto.proveedor.ProveedorDTO;
 import com.example.negocio.dto.proveedor.ProveedorListaDTO;
 import com.example.negocio.entity.Proveedor;
+import com.example.negocio.exception.ProveedorNoEncontradoException;
 import com.example.negocio.mapper.ProveedorMapper;
 import com.example.negocio.repository.ProveedorRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,7 @@ public class ProveedorService {
     }
 
     public Proveedor modificarProveedor(Long idProveedor, ProveedorDTO dto) {
-        Proveedor proveedor = proveedorRepository.findById(idProveedor)
-                .orElseThrow(() -> new RuntimeException("No existe el proveedor"));
+        Proveedor proveedor = proveedorRepository.findById(idProveedor).orElseThrow(() -> new ProveedorNoEncontradoException());
 
         proveedorMapper.updateFromDto(dto, proveedor);
         return proveedorRepository.save(proveedor);
@@ -49,8 +49,7 @@ public class ProveedorService {
     }
 
     public void cambiarEstadoProveedor(Long idProveedor) {
-        Proveedor proveedor = proveedorRepository.findById(idProveedor)
-                .orElseThrow(() -> new RuntimeException("No existe el proveedor"));
+        Proveedor proveedor = proveedorRepository.findById(idProveedor).orElseThrow(() -> new ProveedorNoEncontradoException());
 
         proveedor.setEstado(!proveedor.getEstado());
         proveedorRepository.save(proveedor);

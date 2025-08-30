@@ -1,6 +1,7 @@
 package com.example.negocio.dto.categoria;
 
 import com.example.negocio.dto.producto.ProductoItemDTO;
+import com.example.negocio.dto.producto.ProductoVentaDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +15,5 @@ public class CategoriaAbmDTO {
     private String color;
     private Boolean estado;
     private Long idCategoriaPadre;
-    private List<ProductoItemDTO> productos;
+    private List<ProductoVentaDTO> productos;
 }

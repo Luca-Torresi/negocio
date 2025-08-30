@@ -5,6 +5,10 @@ import com.example.negocio.entity.Categoria;
 import com.example.negocio.entity.Marca;
 import com.example.negocio.entity.Producto;
 import com.example.negocio.entity.Proveedor;
+import com.example.negocio.exception.CategoriaNoEncontradaException;
+import com.example.negocio.exception.MarcaNoEncontradaException;
+import com.example.negocio.exception.ProductoNoEncontradoException;
+import com.example.negocio.exception.ProveedorNoEncontradoException;
 import com.example.negocio.mapper.ProductoMapper;
 import com.example.negocio.repository.CategoriaRepository;
 import com.example.negocio.repository.MarcaRepository;
@@ -34,37 +38,26 @@ public class ProductoService {
         producto.setEstado(true);
 
         if(dto.getIdMarca() != null){
-            Marca marca = marcaRepository.findById(dto.getIdMarca())
-                    .orElseThrow(() -> new RuntimeException("No existe una marca"));
+            Marca marca = marcaRepository.findById(dto.getIdMarca()).orElseThrow(() -> new MarcaNoEncontradaException());
             producto.setMarca(marca);
         } else{
             producto.setMarca(null);
         }
 
-        Categoria categoria = categoriaRepository.findById(dto.getIdCategoria())
-                .orElseThrow(() -> new RuntimeException("No existe una categoria con ese id"));
+        Categoria categoria = categoriaRepository.findById(dto.getIdCategoria()).orElseThrow(() -> new CategoriaNoEncontradaException());
         producto.setCategoria(categoria);
 
-        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor())
-                .orElseThrow(() -> new RuntimeException("No existe una proveedor"));
+        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor()).orElseThrow(() -> new ProveedorNoEncontradoException());
         producto.setProveedor(proveedor);
-
 
         return productoRepository.save(producto);
     }
 
     public Producto modificarProducto(Long idProducto, ProductoDTO dto) {
-        Producto producto = productoRepository.findById(idProducto)
-                .orElseThrow(() -> new RuntimeException());
-
-        Categoria categoria = categoriaRepository.findById(dto.getIdCategoria())
-                .orElseThrow(() -> new RuntimeException("No existe una categoria con ese id"));
-
-        Marca marca = marcaRepository.findById(dto.getIdMarca())
-                .orElseThrow(() -> new RuntimeException("No existe una marca"));
-
-        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor())
-                .orElseThrow(() -> new RuntimeException("No existe una proveedor"));
+        Producto producto = productoRepository.findById(idProducto).orElseThrow(() -> new ProductoNoEncontradoException());
+        Categoria categoria = categoriaRepository.findById(dto.getIdCategoria()).orElseThrow(() -> new CategoriaNoEncontradaException());
+        Marca marca = marcaRepository.findById(dto.getIdMarca()).orElseThrow(() -> new MarcaNoEncontradaException());
+        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor()).orElseThrow(() -> new ProveedorNoEncontradoException());
 
         productoMapper.updateFromDto(dto, producto);
         producto.setCategoria(categoria);
@@ -102,8 +95,7 @@ public class ProductoService {
     }
 
     public void cambiarEstadoProducto(Long idProducto){
-        Producto producto = productoRepository.findById(idProducto)
-                .orElseThrow(() -> new RuntimeException());
+        Producto producto = productoRepository.findById(idProducto).orElseThrow(() -> new ProductoNoEncontradoException());
 
         producto.setEstado(!producto.getEstado());
         productoRepository.save(producto);

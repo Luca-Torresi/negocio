@@ -8,8 +8,6 @@ falta agregar la lógica para el stockSuma
 
 validaciones Jakarta para los requestDTO
 
-Corregir botones en ‘acciones’, cambiar estilo.
-
 En los detalles del producto, no se debe mostrar el color.
 
 En la pantalla Productos, las categorías dentro del select, se deben mostrar con su jerarquía.
@@ -17,4 +15,7 @@ En la pantalla Productos, las categorías dentro del select, se deben mostrar co
 Las compras, ventas y gastos se deben poder filtrar por usuario
 
 En la pantalla de compras, corregir el modal para editar una compra (no se debe poder cambiar el proveeedor)
+
+Todos los select de productos deben tener un input para escribir,
+y que se filtre en tiempo real a medida que se escribe
 

@@ -7,6 +7,8 @@ import com.example.negocio.dto.promocion.PromocionListaDTO;
 import com.example.negocio.entity.DetallePromocion;
 import com.example.negocio.entity.Producto;
 import com.example.negocio.entity.Promocion;
+import com.example.negocio.exception.ProductoNoEncontradoException;
+import com.example.negocio.exception.PromocionNoEncontradaException;
 import com.example.negocio.mapper.DetallePromocionMapper;
 import com.example.negocio.mapper.PromocionMapper;
 import com.example.negocio.repository.ProductoRepository;
@@ -32,11 +34,11 @@ public class PromocionService {
 
         List<DetallePromocion> detalles = new ArrayList<>();
         for(DetallePromocionDTO detalleDto: dto.getDetalles()){
-            Producto producto = productoRepository.findById(detalleDto.getIdProducto())
-                    .orElseThrow(() -> new RuntimeException("No existe el producto"));
+            Producto producto = productoRepository.findById(detalleDto.getIdProducto()).orElseThrow(() -> new ProductoNoEncontradoException());
 
             DetallePromocion detallePromocion = detallePromocionMapper.toEntity(detalleDto);
             detallePromocion.setProducto(producto);
+            detallePromocion.setPromocion(promocion);
 
             detalles.add(detallePromocion);
         }
@@ -46,17 +48,16 @@ public class PromocionService {
     }
 
     public Promocion modificarPromocion(Long idPromocion, PromocionDTO dto) {
-        Promocion promocion = promocionRepository.findById(idPromocion)
-                .orElseThrow(() -> new RuntimeException("Promoción no encontrada"));
+        Promocion promocion = promocionRepository.findById(idPromocion).orElseThrow(() -> new PromocionNoEncontradaException());
 
         promocionMapper.updateFromDto(dto, promocion);
         List<DetallePromocion> detalles = new ArrayList<>();
         for(DetallePromocionDTO detalleDto: dto.getDetalles()){
-            Producto producto = productoRepository.findById(detalleDto.getIdProducto())
-                    .orElseThrow(() -> new RuntimeException("No existe el producto"));
+            Producto producto = productoRepository.findById(detalleDto.getIdProducto()).orElseThrow(() -> new ProductoNoEncontradoException());
 
             DetallePromocion detallePromocion = detallePromocionMapper.toEntity(detalleDto);
             detallePromocion.setProducto(producto);
+            detallePromocion.setPromocion(promocion);
 
             detalles.add(detallePromocion);
         }
@@ -82,8 +83,7 @@ public class PromocionService {
     }
 
     public void cambiarEstadoPromocion(Long idPromocion){
-        Promocion promocion = promocionRepository.findById(idPromocion)
-                .orElseThrow(() -> new RuntimeException("Promocion no encontrada"));
+        Promocion promocion = promocionRepository.findById(idPromocion).orElseThrow(() -> new PromocionNoEncontradaException());
 
         promocion.setEstado(!promocion.getEstado());
         promocionRepository.save(promocion);
