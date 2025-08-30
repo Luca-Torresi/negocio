@@ -24,8 +24,6 @@ public interface ProductoMapper {
     @Mapping(target = "precioConDescuento", expression = "java(mapPrecioConDescuento(entity))")
     ProductoAbmDTO toAbmDto(Producto entity);
 
-    @Mapping(source = "categoria.color", target = "color")
-    @Mapping(target = "precioFinal", expression = "java(mapPrecioFinal(entity))")
     ProductoVentaDTO toVentaDto(Producto entity);
 
     ProductoCompraDTO toCompraDto(Producto entity);
