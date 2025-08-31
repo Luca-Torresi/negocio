@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data @Builder @AllArgsConstructor @NoArgsConstructor
@@ -15,7 +16,7 @@ public class Gasto {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idGasto;
     private String descripcion;
-    private Double monto;
+    private BigDecimal monto;
     private LocalDateTime fechaHora;
 
     @Enumerated(EnumType.STRING)

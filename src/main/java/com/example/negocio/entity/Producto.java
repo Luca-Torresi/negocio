@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data @Builder @AllArgsConstructor @NoArgsConstructor
 @Entity @Table
 public class Producto {
@@ -13,8 +15,8 @@ public class Producto {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idProducto;
     private String nombre;
-    private Double precio;
-    private Double costo;
+    private BigDecimal precio;
+    private BigDecimal costo;
     private Integer stock;
     private Integer stockMinimo;
     private Boolean estado;
@@ -30,4 +32,7 @@ public class Producto {
 
     @OneToOne(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     private Descuento descuento;
+
+    @OneToOne(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Oferta oferta;
 }

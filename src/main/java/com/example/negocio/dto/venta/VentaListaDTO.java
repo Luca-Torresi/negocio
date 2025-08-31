@@ -5,13 +5,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data @Builder @AllArgsConstructor @NoArgsConstructor
 public class VentaListaDTO {
     private Long idVenta;
-    private Double total;
+    private BigDecimal total;
     private LocalDateTime fechaHora;
     private MetodoDePago metodoDePago;
     private List<DetalleVentaListaDTO> detalles;

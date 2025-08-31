@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,7 +16,7 @@ public class Compra {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idCompra;
-    private Double total;
+    private BigDecimal total;
     private LocalDateTime fechaHora;
 
     @ManyToOne @JoinColumn(name = "idProveedor")

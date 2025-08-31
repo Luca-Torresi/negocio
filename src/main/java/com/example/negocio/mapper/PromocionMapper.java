@@ -9,7 +9,6 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", uses = {DetallePromocionMapper.class})
 public interface PromocionMapper {
 
-    //@Mapping(source = "detalles", target = "detalles")
     Promocion toEntity(PromocionDTO dto);
 
     void updateFromDto(PromocionDTO dto, @MappingTarget Promocion entity);

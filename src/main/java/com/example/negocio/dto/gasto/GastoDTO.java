@@ -6,9 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data @Builder @AllArgsConstructor @NoArgsConstructor
 public class GastoDTO {
     private TipoGasto tipoGasto;
     private String descripcion;
-    private Double monto;
+    private BigDecimal monto;
 }

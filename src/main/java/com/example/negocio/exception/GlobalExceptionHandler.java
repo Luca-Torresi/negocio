@@ -56,4 +56,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
+    @ExceptionHandler(OfertaNoEncontradaException.class)
+    public ResponseEntity<String> handleOfertaNoEncontradaException(OfertaNoEncontradaException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
 }

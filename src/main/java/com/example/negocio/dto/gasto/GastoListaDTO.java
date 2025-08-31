@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data @Builder @AllArgsConstructor @NoArgsConstructor
@@ -12,7 +14,7 @@ public class GastoListaDTO {
     private Integer idGasto;
     private TipoGasto tipoGasto;
     private String descripcion;
-    private Double monto;
+    private BigDecimal monto;
     private LocalDateTime fechaHora;
     private String usuario;
 }

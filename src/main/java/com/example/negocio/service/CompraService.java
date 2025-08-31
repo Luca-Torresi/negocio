@@ -23,6 +23,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -45,7 +47,7 @@ public class CompraService {
         compra.setFechaHora(LocalDateTime.now());
         compra.setProveedor(proveedor);
 
-        Double total = 0.0;
+        BigDecimal total = BigDecimal.ZERO;
 
         List<DetalleCompra> detalles = new ArrayList<>();
         for(DetalleCompraDTO detalleDto :dto.getDetalles()){
@@ -56,7 +58,9 @@ public class CompraService {
             detalle.setCostoUnitario(producto.getCosto());
             detalle.setCompra(compra);
 
-            total = total + detalle.getCostoUnitario() * detalle.getCantidad();
+            BigDecimal cantidad = new BigDecimal(detalle.getCantidad());
+            BigDecimal subtotal = detalle.getCostoUnitario().multiply(cantidad);
+            total = total.add(subtotal);
 
             detalles.add(detalle);
         }
@@ -70,10 +74,9 @@ public class CompraService {
         Compra compra = compraRepository.findById(idCompra).orElseThrow(() -> new CompraNoEncontradaException());
 
         compraMapper.updateFromDto(dto, compra);
-
         compra.getDetalles().clear();
 
-        Double total = 0.0;
+        BigDecimal total = BigDecimal.ZERO;
 
         List<DetalleCompra> detalles = new ArrayList<>();
         for(DetalleCompraDTO detalleDto :dto.getDetalles()){
@@ -83,11 +86,14 @@ public class CompraService {
             detalle.setProducto(producto);
             detalle.setCostoUnitario(producto.getCosto());
 
-            total = total + detalle.getCostoUnitario() * detalle.getCantidad();
+            BigDecimal cantidad = new BigDecimal(detalle.getCantidad());
+            BigDecimal subtotal = detalle.getCostoUnitario().multiply(cantidad);
+            total = total.add(subtotal);
 
             detalles.add(detalle);
         }
         compra.setDetalles(detalles);
+        compra.setTotal(total);
 
         return compraRepository.save(compra);
     }

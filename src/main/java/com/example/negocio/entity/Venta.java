@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,7 +17,7 @@ public class Venta {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idVenta;
-    private Double total;
+    private BigDecimal total;
     private LocalDateTime fechaHora;
 
     @Enumerated(EnumType.STRING)

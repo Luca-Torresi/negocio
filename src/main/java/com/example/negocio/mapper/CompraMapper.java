@@ -8,7 +8,6 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", uses = {DetalleCompraMapper.class})
 public interface CompraMapper {
 
-    //@Mapping(source = "detalles", target = "detalles")
     Compra toEntity(CompraDTO dto);
 
     @Mapping(source = "proveedor.nombre", target = "proveedor")

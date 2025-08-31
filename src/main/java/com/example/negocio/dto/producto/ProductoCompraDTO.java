@@ -5,9 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data @Builder @AllArgsConstructor @NoArgsConstructor
 public class ProductoCompraDTO {
     private Long idProducto;
     private String nombre;
-    private Double costo;
+    private BigDecimal costo;
 }

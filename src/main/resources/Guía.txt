@@ -1,5 +1,4 @@
 
-
 En los endpoint de nuevaCompra, nuevaVenta y nuevoGasto.. se debe obtener el idUsuario del header
 
 Hace falta subtotal en los detalles de la compra?
@@ -19,3 +18,10 @@ En la pantalla de compras, corregir el modal para editar una compra (no se debe 
 Todos los select de productos deben tener un input para escribir,
 y que se filtre en tiempo real a medida que se escribe
 
+En los mapper que utilizan Detalle...Mapper.class, se conserva esto o no? para mapear los detalles
+
+Antes de empaquetar la aplicación, eliminar todos los imports que no se esten utilizando
+
+El modal para ver promociones debe ser separado y ubicado con los componentes
+
+Corregir el modal de gestión de descuentos de un producto
