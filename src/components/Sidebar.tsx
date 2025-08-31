@@ -12,11 +12,11 @@ const Sidebar: React.FC = () => {
   const itemsNavegacion: ItemNavegacion[] = [
     { label: "Categorías", path: "/categorias", icon: <Tag size={20} /> },
     { label: "Productos", path: "/productos", icon: <Package size={20} /> },
-    { label: "Ventas", path: "/ventas", icon: <TrendingUp size={20} /> },
+    //{ label: "Ventas", path: "/ventas", icon: <TrendingUp size={20} /> },
     { label: "Compras", path: "/compras", icon: <ShoppingCart size={20} /> },
     { label: "Proveedores", path: "/proveedores", icon: <Users size={20} /> },
     { label: "Gastos", path: "/gastos", icon: <Receipt size={20} /> },
-    { label: "Reportes", path: "/reportes", icon: <BarChart3 size={20} /> },
+    //{ label: "Reportes", path: "/reportes", icon: <BarChart3 size={20} /> },
     { label: "Promociones", path: "/promociones", icon: <ShoppingBag size={20} /> },
   ]
 

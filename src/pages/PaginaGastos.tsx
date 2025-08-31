@@ -2,12 +2,13 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Receipt, Plus, Edit, ChevronLeft, ChevronRight } from "lucide-react"
+import { Receipt, Plus, Pencil, ChevronLeft, ChevronRight } from "lucide-react"
 import type { Gasto, PaginaDeGastos } from "../types/dto/Gasto"
 import { obtenerTiposGasto, obtenerGastos } from "../api/gastoApi"
 import { formatearFecha, formatearHora } from "../utils/fechaUtils"
 import { ModalNuevoGasto } from "../components/gastos/ModalNuevoGasto"
 import { ModalEditarGasto } from "../components/gastos/ModalEditarGasto"
+import { formatCurrency } from "../utils/numberFormatUtils"
 
 const PaginaGastos: React.FC = () => {
   // Estados principales
@@ -233,7 +234,7 @@ const PaginaGastos: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{gasto.idGasto}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{gasto.tipoGasto}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">{gasto.descripcion}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${gasto.monto.toFixed(2)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(gasto.monto)}</td> 
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{gasto.usuario}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatearFecha(gasto.fechaHora)}
@@ -242,8 +243,10 @@ const PaginaGastos: React.FC = () => {
                         {formatearHora(gasto.fechaHora)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button onClick={() => abrirModalEditar(gasto)} className="text-blue-600 hover:text-blue-900">
-                          <Edit size={16} />
+                        <button
+                          onClick={() => abrirModalEditar(gasto)}
+                          className="text-black">
+                          <Pencil size={18} />
                         </button>
                       </td>
                     </tr>

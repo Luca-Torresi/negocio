@@ -5,7 +5,11 @@ export interface Categoria {
   color: string
   estado: boolean
   idCategoriaPadre: number | null
-  productos: { nombre: string; precio: number }[]
+  productos: { 
+    idProducto: number
+    nombre: string
+    precio: number
+  }[]
 }
 
 // Para el POST /categoria/nueva

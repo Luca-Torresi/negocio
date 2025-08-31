@@ -9,6 +9,7 @@ import { obtenerListaProveedores } from "../api/proveedorApi"
 import { formatearFecha, formatearHora } from "../utils/fechaUtils"
 import { ModalGestionarCompra } from "../components/compras/ModalGestionarCompra"
 import { ModalDetallesCompra } from "../components/compras/ModalDetallesCompra"
+import { formatCurrency } from "../utils/numberFormatUtils"
 
 const PaginaCompras: React.FC = () => {
   // Estados principales
@@ -114,7 +115,7 @@ const PaginaCompras: React.FC = () => {
       {/* Encabezado */}
       <div className="mb-6">
         <div className="flex items-center mb-2">
-          <ShoppingCart className="mr-3 text-blue-600" size={32} />
+          <ShoppingCart className="mr-3 text-gray-700" size={32} />
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Compras</h1>
             <p className="text-gray-600">Historial de compras a proveedores</p>
@@ -217,7 +218,7 @@ const PaginaCompras: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{compra.idCompra}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{compra.proveedor}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
-                        ${compra.total.toFixed(2)}
+                        {formatCurrency(compra.total)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{compra.usuario}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

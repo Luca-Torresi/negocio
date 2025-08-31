@@ -1,5 +1,5 @@
 import axios from "axios"
-import type { PaginaDeProductos, ProductoDTO, ProductoLista } from "../types/dto/Producto"
+import type { PaginaDeProductos, ProductoDTO, ProductoLista, ProductoVenta } from "../types/dto/Producto"
 
 const API_BASE_URL = "http://localhost:8080"
 
@@ -60,5 +60,15 @@ export const obtenerListaProductosPorProveedor = async (idProveedor: number): Pr
   } catch (error) {
     console.error("Error al obtener lista de productos por proveedor:", error)
     throw new Error("No se pudo cargar la lista de productos del proveedor")
+  }
+}
+
+export const obtenerListaProductosVenta = async (): Promise<ProductoVenta[]> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/producto/listaVenta`)
+    return response.data
+  } catch (error) {
+    console.error("Error al obtener lista de productos para venta:", error)
+    throw new Error("No se pudo cargar la lista de productos para venta")
   }
 }

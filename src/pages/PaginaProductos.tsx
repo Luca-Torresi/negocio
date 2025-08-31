@@ -11,7 +11,8 @@ import { obtenerListaProveedores } from "../api/proveedorApi"
 import { ModalNuevoProducto } from "../components/productos/ModalNuevoProducto"
 import { ModalEditarProducto } from "../components/productos/ModalEditarProducto"
 import { ModalDetallesProducto } from "../components/productos/ModalDetallesProducto"
-import { ModalGestionarDescuento } from "../components/productos/ModalGestionarDescuento"
+import { ModalGestionarPrecio } from "../components/productos/ModalGestionarPrecio"
+import { formatCurrency } from "../utils/numberFormatUtils"
 
 export const PaginaProductos: React.FC = () => {
   const [datosProductos, setDatosProductos] = useState<PaginaDeProductos | null>(null)
@@ -279,7 +280,6 @@ export const PaginaProductos: React.FC = () => {
                   {datosProductos?.content.map((producto) => (
                     <tr
                       key={producto.idProducto}
-                      style={{ backgroundColor: producto.color }}
                       className="hover:bg-opacity-80"
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.idProducto}</td>
@@ -290,13 +290,13 @@ export const PaginaProductos: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {producto.precioConDescuento ? (
                           <div>
-                            <div className="line-through text-gray-500">${producto.precio.toFixed(2)}</div>
+                            <div className="line-through text-gray-500">{formatCurrency(producto.precio)}</div>
                             <div className="text-gray-900 font-semibold text-lg">
-                              ${producto.precioConDescuento.toFixed(2)}
+                              {formatCurrency(producto.precioConDescuento)}
                             </div>
                           </div>
                         ) : (
-                          <div className="font-semibold">${producto.precio.toFixed(2)}</div>
+                          <div className="font-semibold">{formatCurrency(producto.precio)}</div>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.stockSuma}</td>
@@ -330,7 +330,7 @@ export const PaginaProductos: React.FC = () => {
                           <button
                             onClick={() => abrirModalDescuento(producto)}
                             className="text-black"
-                            title="Gestionar descuento"
+                            title="Gestionar precio"
                           >
                             <Percent size={18} />
                           </button>                          
@@ -449,7 +449,7 @@ export const PaginaProductos: React.FC = () => {
         alCerrar={cerrarModales}
       />
 
-      <ModalGestionarDescuento
+      <ModalGestionarPrecio
         estaAbierto={modalDescuentoAbierto}
         producto={productoSeleccionado}
         alCerrar={cerrarModales}

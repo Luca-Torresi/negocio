@@ -3,6 +3,7 @@
 import type React from "react"
 import { X } from "lucide-react"
 import type { ProductoAbm } from "../../types/dto/Producto"
+import { formatCurrency } from "../../utils/numberFormatUtils"
 
 interface Props {
   estaAbierto: boolean
@@ -14,7 +15,7 @@ export const ModalDetallesProducto: React.FC<Props> = ({ estaAbierto, producto, 
   if (!estaAbierto || !producto) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">Detalles del Producto</h2>
@@ -49,11 +50,11 @@ export const ModalDetallesProducto: React.FC<Props> = ({ estaAbierto, producto, 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Precio Original</label>
-              <p className="text-gray-900">${producto.precio.toFixed(2)}</p>
+              <p className="text-gray-900">{formatCurrency(producto.precio)}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Costo</label>
-              <p className="text-gray-900">${producto.costo.toFixed(2)}</p>
+              <p className="text-gray-900">{formatCurrency(producto.costo)}</p>
             </div>
           </div>
 
@@ -98,15 +99,7 @@ export const ModalDetallesProducto: React.FC<Props> = ({ estaAbierto, producto, 
               <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
               <p className="text-gray-900">{producto.proveedor}</p>
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded border border-gray-300" style={{ backgroundColor: producto.color }}></div>
-              <p className="text-gray-900">{producto.color}</p>
-            </div>
-          </div>
+          </div> 
         </div>
 
         <div className="flex justify-end pt-6">

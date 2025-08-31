@@ -5,6 +5,8 @@ export interface ProductoAbm {
   precio: number
   porcentaje: number | null // El descuento puede no existir
   precioConDescuento: number | null
+  cantidadMinima: number | null 
+  nuevoPrecio: number | null 
   costo: number
   stock: number
   stockSuma: number
@@ -58,4 +60,11 @@ export interface ProductoLista {
   idProducto: number // Necesitaremos el ID para el DTO final
   nombre: string
   costo: number
+}
+
+// Para la respuesta de GET /producto/listaVenta
+export interface ProductoVenta {
+  idProducto: number
+  nombre: string
+  precio: number
 }

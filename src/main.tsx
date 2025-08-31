@@ -8,6 +8,7 @@ import PaginaGastos from './pages/PaginaGastos.tsx';
 import PaginaProveedores from './pages/PaginaProveedores.tsx';
 import { PaginaProductos } from './pages/PaginaProductos.tsx';
 import  PaginaCompras from './pages/PaginaCompras.tsx';
+import { PaginaPromociones } from './pages/PaginaPromociones.tsx';
 
 const router = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
       {
         path: 'compras',
         element: <PaginaCompras />,
+      },
+      {
+        path: 'promociones',
+        element: <PaginaPromociones />,
       },
     ],
   },
