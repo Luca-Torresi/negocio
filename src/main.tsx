@@ -9,6 +9,8 @@ import PaginaProveedores from './pages/PaginaProveedores.tsx';
 import { PaginaProductos } from './pages/PaginaProductos.tsx';
 import  PaginaCompras from './pages/PaginaCompras.tsx';
 import { PaginaPromociones } from './pages/PaginaPromociones.tsx';
+import PaginaVentas from './pages/PaginaVentas.tsx';
+import PaginaHistorialVentas from './pages/PaginaHistorialVentas.tsx';
 
 const router = createBrowserRouter([
   {
@@ -39,6 +41,14 @@ const router = createBrowserRouter([
         path: 'promociones',
         element: <PaginaPromociones />,
       },
+      {
+        path: 'ventas',
+        element: <PaginaVentas />,
+      },
+      {
+        path: 'ventas/historial',
+        element: <PaginaHistorialVentas />,
+      }, 
     ],
   },
 ]);
