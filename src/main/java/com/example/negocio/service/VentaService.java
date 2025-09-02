@@ -1,15 +1,15 @@
 package com.example.negocio.service;
 
+import com.example.negocio.dto.venta.CatalogoDTO;
 import com.example.negocio.dto.venta.DetalleVentaDTO;
 import com.example.negocio.dto.venta.VentaDTO;
 import com.example.negocio.dto.venta.VentaListaDTO;
-import com.example.negocio.entity.DetalleVenta;
-import com.example.negocio.entity.Producto;
-import com.example.negocio.entity.Promocion;
-import com.example.negocio.entity.Venta;
+import com.example.negocio.entity.*;
+import com.example.negocio.enums.MetodoDePago;
 import com.example.negocio.exception.ProductoNoEncontradoException;
 import com.example.negocio.exception.PromocionNoEncontradaException;
 import com.example.negocio.mapper.DetalleVentaMapper;
+import com.example.negocio.mapper.ProductoMapper;
 import com.example.negocio.mapper.VentaMapper;
 import com.example.negocio.repository.ProductoRepository;
 import com.example.negocio.repository.PromocionRepository;
@@ -21,8 +21,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,26 +38,46 @@ public class VentaService {
     private final DetalleVentaMapper detalleVentaMapper;
     private final ProductoRepository productoRepository;
     private final PromocionRepository promocionRepository;
+    private final ProductoMapper productoMapper;
 
     public Venta nuevaVenta(VentaDTO dto) {
         Venta venta = ventaMapper.toEntity(dto);
         venta.setFechaHora(LocalDateTime.now());
 
         List<DetalleVenta> detalles = dto.getDetalles().stream()
-                .map(detalleDto -> procesarDetalle(detalleDto))
+                .map(detalleDto -> procesarDetalle(detalleDto, venta))
                 .collect(Collectors.toList());
-
         venta.setDetalles(detalles);
+
+        BigDecimal total = detalles.stream()
+                .map(detalle -> detalle.getPrecioUnitario().multiply(new BigDecimal(detalle.getCantidad())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        venta.setTotal(total);
+
         return ventaRepository.save(venta);
     }
 
-    private DetalleVenta procesarDetalle(DetalleVentaDTO dto) {
+    private DetalleVenta procesarDetalle(DetalleVentaDTO dto, Venta venta) {
         DetalleVenta detalle = detalleVentaMapper.toEntity(dto);
+        detalle.setVenta(venta);
 
         if (dto.getIdProducto() != null) {
             Producto producto = productoRepository.findById(dto.getIdProducto()).orElseThrow(() -> new ProductoNoEncontradoException());
             detalle.setProducto(producto);
-            detalle.setPrecioUnitario(producto.getPrecio());
+
+            boolean ofertaAplicada = false;
+            Oferta oferta = producto.getOferta();
+            if (oferta != null && detalle.getCantidad() >= oferta.getCantidadMinima()) {
+                detalle.setPrecioUnitario(oferta.getNuevoPrecio());
+                ofertaAplicada = true;
+            }
+
+            if (!ofertaAplicada && producto.getDescuento() != null) {
+                BigDecimal precioConDescuento = productoMapper.mapPrecioAbm(producto);
+                detalle.setPrecioUnitario(precioConDescuento);
+            } else if (!ofertaAplicada) {
+                detalle.setPrecioUnitario(producto.getPrecio());
+            }
 
         } else if (dto.getIdPromocion() != null) {
             Promocion promocion = promocionRepository.findById(dto.getIdPromocion()).orElseThrow(() -> new PromocionNoEncontradaException());
@@ -63,6 +87,25 @@ public class VentaService {
         return detalle;
     }
 
+    public List<CatalogoDTO> obtenerCatalogo(){
+        List<Producto> productos = productoRepository.findByEstadoTrue();
+        List<Promocion> promociones = promocionRepository.findByEstadoTrue();
+
+        List<CatalogoDTO> catalogoProductos = productos.stream()
+                .map(ventaMapper::productoToCalalogoDto)
+                .toList();
+
+        List<CatalogoDTO> catalogoPromociones = promociones.stream()
+                .map(ventaMapper::promocionToCatalogoDto)
+                .toList();
+
+        List<CatalogoDTO> catalogo = new ArrayList<>();
+        catalogo.addAll(catalogoProductos);
+        catalogo.addAll(catalogoPromociones);
+
+        return catalogo;
+    }
+
     public Page<VentaListaDTO> obtenerVentas(Integer page, Integer size, LocalDate fechaInicio, LocalDate fechaFin){
         Pageable pageable = PageRequest.of(page, size);
         Specification<Venta> spec = VentaSpecification.porFechaInicio(fechaInicio)
@@ -70,6 +113,12 @@ public class VentaService {
 
         return ventaRepository.findAll(spec, pageable)
                 .map(ventaMapper::toDto);
+    }
+
+    public List<String> listarMetodosDePago(){
+        return Arrays.stream(MetodoDePago.values())
+                .map(Enum::name)
+                .toList();
     }
 
 }

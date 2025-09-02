@@ -11,8 +11,16 @@ public interface DetalleVentaMapper {
 
     DetalleVenta toEntity(DetalleVentaDTO dto);
 
-    @Mapping(source = "producto.nombre", target = "producto")
-    @Mapping(source = "promocion.nombre", target = "promocion")
+    @Mapping(source = "detalleVenta", target = "nombre")
     DetalleVentaListaDTO toDto(DetalleVenta detalleVenta);
 
+    default String mapNombreFromDetalle(DetalleVenta detalleVenta) {
+        if (detalleVenta.getProducto() != null) {
+            return detalleVenta.getProducto().getNombre();
+        }
+        if (detalleVenta.getPromocion() != null) {
+            return detalleVenta.getPromocion().getNombre();
+        }
+        return "Item no identificado"; // O null, o lo que prefieras como fallback
+    }
 }

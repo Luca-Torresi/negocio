@@ -1,6 +1,6 @@
 package com.example.negocio.service;
 
-import com.example.negocio.dto.oferta.OfertaDTO;
+import com.example.negocio.dto.oferta.NuevaOfertaDTO;
 import com.example.negocio.entity.Oferta;
 import com.example.negocio.entity.Producto;
 import com.example.negocio.exception.OfertaNoEncontradaException;
@@ -18,7 +18,7 @@ public class OfertaService {
     private final OfertaMapper ofertaMapper;
     private final ProductoRepository productoRepository;
 
-    public Oferta nuevaOferta(OfertaDTO dto) {
+    public Oferta nuevaOferta(NuevaOfertaDTO dto) {
         Oferta oferta = ofertaMapper.toEntity(dto);
 
         Producto producto = productoRepository.findById(dto.getIdProducto()).orElseThrow(() -> new ProductoNoEncontradoException());
@@ -27,7 +27,7 @@ public class OfertaService {
         return ofertaRepository.save(oferta);
     }
 
-    public Oferta modificarOferta(Long idOferta, OfertaDTO dto) {
+    public Oferta modificarOferta(Long idOferta, NuevaOfertaDTO dto) {
         Oferta oferta = ofertaRepository.findById(idOferta).orElseThrow(() -> new OfertaNoEncontradaException());
 
         ofertaMapper.updateFromDto(dto, oferta);

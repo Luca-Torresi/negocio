@@ -78,19 +78,19 @@ public class ProductoService {
                 .map(productoMapper::toAbmDto);
     }
 
-    public List<ProductoVentaDTO> listarProductosVenta(){
-        List<Producto> productos = productoRepository.findByEstadoTrue();
-
-        return productos.stream()
-                .map(productoMapper::toVentaDto)
-                .collect(Collectors.toList());
-    }
-
     public List<ProductoCompraDTO> listarProductosCompra(Long idProveedor){
         List<Producto> productos = productoRepository.findByEstadoTrueAndProveedorIdProveedor(idProveedor);
 
         return productos.stream()
                 .map(productoMapper::toCompraDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductoVentaDTO> listarProductosVenta(){
+        List<Producto> productos = productoRepository.findByEstadoTrue();
+
+        return productos.stream()
+                .map(productoMapper::toVentaDto)
                 .collect(Collectors.toList());
     }
 

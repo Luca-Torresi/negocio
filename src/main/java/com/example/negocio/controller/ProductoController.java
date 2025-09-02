@@ -36,14 +36,14 @@ public class ProductoController {
         return productoService.obtenerProductos(page, size, nombre, idCategoria, idMarca, idProveedor);
     }
 
-    @GetMapping("/listaVenta")
-    public ResponseEntity<List<ProductoVentaDTO>> listarProductosVenta(){
-        return ResponseEntity.ok(productoService.listarProductosVenta());
-    }
-
     @GetMapping("/listaCompra/{idProveedor}")
     public ResponseEntity<List<ProductoCompraDTO>> listarProductosCompra(@PathVariable Long idProveedor){
         return ResponseEntity.ok(productoService.listarProductosCompra(idProveedor));
+    }
+
+    @GetMapping("/listaVenta")
+    public ResponseEntity<List<ProductoVentaDTO>> listarProductosVenta(){
+        return ResponseEntity.ok(productoService.listarProductosVenta());
     }
 
     @PatchMapping("/cambiarEstado/{idProducto}")

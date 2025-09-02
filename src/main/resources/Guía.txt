@@ -25,3 +25,6 @@ Antes de empaquetar la aplicación, eliminar todos los imports que no se esten u
 El modal para ver promociones debe ser separado y ubicado con los componentes
 
 Corregir el modal de gestión de descuentos de un producto
+
+utilizar react-datepicker en todas las páginas, y cambiar el idioma a español
+

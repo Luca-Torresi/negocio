@@ -1,5 +1,6 @@
 package com.example.negocio.controller;
 
+import com.example.negocio.dto.venta.CatalogoDTO;
 import com.example.negocio.dto.venta.VentaDTO;
 import com.example.negocio.dto.venta.VentaListaDTO;
 import com.example.negocio.entity.Venta;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +23,11 @@ public class VentaController {
         return ResponseEntity.ok(ventaService.nuevaVenta(dto));
     }
 
+    @GetMapping("/catalogo")
+    public ResponseEntity<List<CatalogoDTO>> obtenerCatalogo() {
+        return ResponseEntity.ok(ventaService.obtenerCatalogo());
+    }
+
     @GetMapping("/obtener")
     public Page<VentaListaDTO> obtenerVentas(
             @RequestParam(defaultValue = "0") Integer page,
@@ -28,6 +35,11 @@ public class VentaController {
             @RequestParam(required = false) LocalDate fechaInicio,
             @RequestParam(required = false) LocalDate fechaFin) {
         return ventaService.obtenerVentas(page, size, fechaInicio, fechaFin);
+    }
+
+    @GetMapping("/metodosDePago")
+    public ResponseEntity<List<String>> listarMetodosDePago(){
+        return ResponseEntity.ok(ventaService.listarMetodosDePago());
     }
 
 }
