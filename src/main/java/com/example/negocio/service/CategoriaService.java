@@ -2,7 +2,6 @@ package com.example.negocio.service;
 
 import com.example.negocio.dto.categoria.CategoriaAbmDTO;
 import com.example.negocio.dto.categoria.CategoriaDTO;
-import com.example.negocio.dto.categoria.CategoriaListaDTO;
 import com.example.negocio.entity.Categoria;
 import com.example.negocio.exception.CategoriaNoEncontradaException;
 import com.example.negocio.mapper.CategoriaMapper;
@@ -49,14 +48,6 @@ public class CategoriaService {
 
         return categorias.stream()
                 .map(categoriaMapper::toAbmDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<CategoriaListaDTO> listarCategorias(){
-        List<Categoria> categorias = categoriaRepository.findAll();
-
-        return categorias.stream()
-                .map(categoriaMapper::toListaDTO)
                 .collect(Collectors.toList());
     }
 

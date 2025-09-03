@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class CategoriaDTO {
     @NotBlank
     private String nombre;
-    private String color;
+    private String descripcion;
     private Long idCategoriaPadre;
 }

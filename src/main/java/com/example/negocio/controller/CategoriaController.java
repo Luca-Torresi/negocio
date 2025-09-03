@@ -2,7 +2,6 @@ package com.example.negocio.controller;
 
 import com.example.negocio.dto.categoria.CategoriaAbmDTO;
 import com.example.negocio.dto.categoria.CategoriaDTO;
-import com.example.negocio.dto.categoria.CategoriaListaDTO;
 import com.example.negocio.entity.Categoria;
 import com.example.negocio.service.CategoriaService;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +28,6 @@ public class CategoriaController {
     @GetMapping("/abm")
     public ResponseEntity<List<CategoriaAbmDTO>> obtenerCategorias(){
         return ResponseEntity.ok(categoriaService.obtenerCategorias());
-    }
-
-    @GetMapping("/lista")
-    public ResponseEntity<List<CategoriaListaDTO>> listarCategorias(){
-        return ResponseEntity.ok(categoriaService.listarCategorias());
     }
 
     @PatchMapping("/cambiarEstado/{idCategoria}")

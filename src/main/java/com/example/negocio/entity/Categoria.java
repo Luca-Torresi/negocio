@@ -15,7 +15,7 @@ public class Categoria {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idCategoria;
     private String nombre;
-    private String color;
+    private String descripcion;
     private Boolean estado;
 
     @ManyToOne @JoinColumn(name = "idCategoriaPadre")

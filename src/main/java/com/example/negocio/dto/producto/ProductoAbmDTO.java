@@ -24,4 +24,7 @@ public class ProductoAbmDTO {
     private String marca;
     private String categoria;
     private String proveedor;
+    private Long idCategoria;
+    private Long idDescuento;
+    private Long idOferta;
 }

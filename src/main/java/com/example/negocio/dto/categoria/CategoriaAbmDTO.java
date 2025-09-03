@@ -11,7 +11,7 @@ import java.util.List;
 public class CategoriaAbmDTO {
     private Long idCategoria;
     private String nombre;
-    private String color;
+    private String descripcion;
     private Boolean estado;
     private Long idCategoriaPadre;
     private List<ProductoVentaDTO> productos;

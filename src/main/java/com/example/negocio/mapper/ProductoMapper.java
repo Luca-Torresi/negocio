@@ -24,6 +24,11 @@ public interface ProductoMapper {
     @Mapping(source = "proveedor.nombre", target = "proveedor")
     @Mapping(source = "descuento.porcentaje", target = "porcentaje")
     @Mapping(target = "precioConDescuento", expression = "java(mapPrecioAbm(entity))")
+    @Mapping(source = "oferta.cantidadMinima", target = "cantidadMinima")
+    @Mapping(source = "oferta.nuevoPrecio", target = "nuevoPrecio")
+    @Mapping(source = "categoria.idCategoria", target = "idCategoria")
+    @Mapping(source = "descuento.idDescuento", target = "idDescuento")
+    @Mapping(source = "oferta.idOferta", target = "idOferta")
     ProductoAbmDTO toAbmDto(Producto entity);
 
     @Mapping(target = "precio", expression = "java(mapPrecioLista(entity))")
