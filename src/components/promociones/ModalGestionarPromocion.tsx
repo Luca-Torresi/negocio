@@ -29,9 +29,10 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
   const [productosDisponibles, setProductosDisponibles] = useState<ProductoVenta[]>([])
   const [detalles, setDetalles] = useState<DetalleFormulario[]>([])
 
-  // Estados para el constructor de items
-  const [productoSeleccionado, setProductoSeleccionado] = useState("")
-  const [cantidad, setCantidad] = useState("")
+  const [busquedaProducto, setBusquedaProducto] = useState<string>("")
+  const [productoSeleccionado, setProductoSeleccionado] = useState<ProductoVenta | null>(null)
+  const [mostrarSugerencias, setMostrarSugerencias] = useState<boolean>(false)
+  const [cantidad, setCantidad] = useState<number>(1)
 
   const [cargando, setCargando] = useState(false)
   const [precioSugerido, setPrecioSugerido] = useState(0)
@@ -69,6 +70,10 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
     setPrecioSugerido(total)
   }, [detalles])
 
+  const productosFiltrados = productosDisponibles.filter((producto) =>
+    producto.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()),
+  )
+
   const cargarProductosDisponibles = async (): Promise<void> => {
     try {
       const productos = await obtenerListaProductosVenta()
@@ -83,36 +88,38 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
     setDescripcion("")
     setPrecio("")
     setDetalles([])
-    setProductoSeleccionado("")
-    setCantidad("")
+    setBusquedaProducto("")
+    setProductoSeleccionado(null)
+    setMostrarSugerencias(false)
+    setCantidad(1)
     setPrecioSugerido(0)
   }
 
   const agregarProducto = (): void => {
-    if (!productoSeleccionado || !cantidad || Number.parseInt(cantidad) <= 0) {
+    if (!productoSeleccionado || cantidad <= 0) {
       return
     }
 
-    const producto = productosDisponibles.find((p) => p.idProducto.toString() === productoSeleccionado)
-    if (!producto) return
-
     // Verificar si el producto ya está en la lista
-    const yaExiste = detalles.some((d) => d.idProducto === producto.idProducto)
+    const yaExiste = detalles.some((d) => d.idProducto === productoSeleccionado.idProducto)
     if (yaExiste) {
       alert("Este producto ya está agregado a la promoción")
       return
     }
 
     const nuevoDetalle: DetalleFormulario = {
-      idProducto: producto.idProducto,
-      nombreProducto: producto.nombre,
-      cantidad: Number.parseInt(cantidad),
-      precio: producto.precio,
+      idProducto: productoSeleccionado.idProducto,
+      nombreProducto: productoSeleccionado.nombre,
+      cantidad: cantidad,
+      precio: productoSeleccionado.precio,
     }
 
     setDetalles([...detalles, nuevoDetalle])
-    setProductoSeleccionado("")
-    setCantidad("")
+
+    setBusquedaProducto("")
+    setProductoSeleccionado(null)
+    setMostrarSugerencias(false)
+    setCantidad(1)
   }
 
   const eliminarProducto = (idProducto: number): void => {
@@ -215,20 +222,42 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Productos del Combo</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-              <div className="md:col-span-2">
+              <div className="md:col-span-2 relative">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Producto</label>
-                <select
-                  value={productoSeleccionado}
-                  onChange={(e) => setProductoSeleccionado(e.target.value)}
+                <input
+                  type="text"
+                  placeholder="Buscar producto..."
+                  value={busquedaProducto}
+                  onChange={(e) => {
+                    setBusquedaProducto(e.target.value)
+                    setMostrarSugerencias(true)
+                    setProductoSeleccionado(null)
+                  }}
+                  onFocus={() => setMostrarSugerencias(true)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Seleccionar producto...</option>
-                  {productosDisponibles.map((producto) => (
-                    <option key={producto.idProducto} value={producto.idProducto.toString()}>
-                      {producto.nombre} - ${producto.precio}
-                    </option>
-                  ))}
-                </select>
+                />
+
+                {/* Sugerencias */}
+                {mostrarSugerencias && busquedaProducto && productosFiltrados.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {productosFiltrados.slice(0, 10).map((producto) => (
+                      <div
+                        key={producto.idProducto}
+                        onClick={() => {
+                          setProductoSeleccionado(producto)
+                          setBusquedaProducto(producto.nombre)
+                          setMostrarSugerencias(false)
+                        }}
+                        className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">{producto.nombre}</span>
+                          <span className="font-semibold text-green-600">${producto.precio.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -237,7 +266,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
                   type="number"
                   min="1"
                   value={cantidad}
-                  onChange={(e) => setCantidad(e.target.value)}
+                  onChange={(e) => setCantidad(Number(e.target.value) || 1)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -246,13 +275,27 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
                 <button
                   type="button"
                   onClick={agregarProducto}
-                  className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center justify-center gap-2"
+                  disabled={!productoSeleccionado}
+                  className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <Plus size={16} />
                   Añadir
                 </button>
               </div>
             </div>
+
+            {/* Vista previa del producto seleccionado */}
+            {productoSeleccionado && (
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-gray-900">{productoSeleccionado.nombre}</h4>
+                <div className="text-sm text-gray-600 mt-1">
+                  Precio unitario: ${productoSeleccionado.precio.toFixed(2)}
+                </div>
+                <div className="font-semibold text-green-600 mt-1">
+                  Subtotal: ${(productoSeleccionado.precio * cantidad).toFixed(2)}
+                </div>
+              </div>
+            )}
 
             {/* Precio sugerido */}
             <div className="mb-4">

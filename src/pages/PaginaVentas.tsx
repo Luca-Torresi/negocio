@@ -67,10 +67,10 @@ const PaginaVentas: React.FC = () => {
 
       // Convertir detalles de venta a items del carrito
       const itemsCarrito: ItemVenta[] = venta.detalles.map((detalle) => {
-        const itemCatalogo = catalogo.find((item) => item.nombre === detalle.nombreItem)
+        const itemCatalogo = catalogo.find((item) => item.nombre === detalle.nombre)
 
         if (!itemCatalogo) {
-          throw new Error(`Item no encontrado en catálogo: ${detalle.nombreItem}`)
+          throw new Error(`Item no encontrado en catálogo: ${detalle.nombre}`)
         }
 
         return {

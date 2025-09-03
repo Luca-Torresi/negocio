@@ -52,14 +52,3 @@ export const cambiarEstadoCategoria = async (id: number): Promise<any> => {
     throw new Error("No se pudo cambiar el estado de la categoría")
   }
 }
-
-// Obtener lista de categorías para filtros
-export const obtenerListaCategorias = async (): Promise<{ idCategoria: number; nombre: string }[]> => {
-  try {
-    const response = await api.get("/categoria/lista")
-    return response.data
-  } catch (error) {
-    console.error("Error al obtener lista de categorías:", error)
-    throw new Error("No se pudieron cargar las categorías")
-  }
-}

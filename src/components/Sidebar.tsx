@@ -1,6 +1,6 @@
 import type React from "react"
 import { NavLink } from "react-router-dom"
-import { Package, ShoppingCart, TrendingUp, ShoppingBag, Users, Receipt, BarChart3, Tag } from "lucide-react"
+import { Package, ShoppingCart, TrendingUp, ShoppingBag, Users, ReceiptText, BarChart3, Tag } from "lucide-react"
 
 interface ItemNavegacion {
   label: string
@@ -15,7 +15,7 @@ const Sidebar: React.FC = () => {
     { label: "Ventas", path: "/ventas/historial", icon: <TrendingUp size={20} /> },
     { label: "Compras", path: "/compras", icon: <ShoppingCart size={20} /> },
     { label: "Proveedores", path: "/proveedores", icon: <Users size={20} /> },
-    { label: "Gastos", path: "/gastos", icon: <Receipt size={20} /> },
+    { label: "Gastos", path: "/gastos", icon: <ReceiptText size={20} /> },
     { label: "Reportes", path: "/reportes", icon: <BarChart3 size={20} /> },
     { label: "Promociones", path: "/promociones", icon: <ShoppingBag size={20} /> },
   ]

@@ -2,7 +2,9 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { ShoppingCart, Plus, Eye, Pencil, ChevronLeft, ChevronRight } from "lucide-react"
+import { ShoppingCart, Plus, Eye, ChevronLeft, ChevronRight } from "lucide-react"
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
 import type { PaginaDeCompras, Compra } from "../types/dto/Compra"
 import { obtenerCompras } from "../api/compraApi"
 import { obtenerListaProveedores } from "../api/proveedorApi"
@@ -23,13 +25,12 @@ const PaginaCompras: React.FC = () => {
     pagina: 0,
     tamaño: 10,
     idProveedor: null as number | null,
-    fechaInicio: null as string | null,
-    fechaFin: null as string | null,
+    fechaInicio: null as Date | null,
+    fechaFin: null as Date | null,
   })
 
   // Estados de modales
   const [modalNuevoAbierto, setModalNuevoAbierto] = useState(false)
-  const [modalEditarAbierto, setModalEditarAbierto] = useState(false)
   const [modalDetallesAbierto, setModalDetallesAbierto] = useState(false)
   const [compraSeleccionada, setCompraSeleccionada] = useState<Compra | null>(null)
 
@@ -57,7 +58,12 @@ const PaginaCompras: React.FC = () => {
     setError(null)
 
     try {
-      const data = await obtenerCompras(filtros)
+      const filtrosApi = {
+        ...filtros,
+        fechaInicio: filtros.fechaInicio ? filtros.fechaInicio.toISOString().split("T")[0] : null,
+        fechaFin: filtros.fechaFin ? filtros.fechaFin.toISOString().split("T")[0] : null,
+      }
+      const data = await obtenerCompras(filtrosApi)
       setPaginaDeCompras(data)
     } catch (error) {
       setError(error instanceof Error ? error.message : "Error al cargar compras")
@@ -89,11 +95,6 @@ const PaginaCompras: React.FC = () => {
     }))
   }
 
-  const abrirModalEditar = (compra: Compra) => {
-    setCompraSeleccionada(compra)
-    setModalEditarAbierto(true)
-  }
-
   const abrirModalDetalles = (compra: Compra) => {
     setCompraSeleccionada(compra)
     setModalDetallesAbierto(true)
@@ -105,7 +106,6 @@ const PaginaCompras: React.FC = () => {
 
   const cerrarModales = () => {
     setModalNuevoAbierto(false)
-    setModalEditarAbierto(false)
     setModalDetallesAbierto(false)
     setCompraSeleccionada(null)
   }
@@ -114,11 +114,11 @@ const PaginaCompras: React.FC = () => {
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* Encabezado */}
       <div className="mb-6">
-        <div className="flex items-center mb-2">
-          <ShoppingCart className="mr-3 text-gray-700" size={32} />
+        <div className="flex items-center gap-3">
+          <ShoppingCart className="text-blue-600" size={32} />
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Compras</h1>
-            <p className="text-gray-600">Historial de compras a proveedores</p>
+            <h1 className="text-3xl font-bold text-gray-800">Compras</h1>
+            <p className="text-gray-600">Gestiona las compras a proveedores</p>
           </div>
         </div>
       </div>
@@ -144,20 +144,24 @@ const PaginaCompras: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
-            <input
-              type="date"
-              value={filtros.fechaInicio || ""}
-              onChange={(e) => manejarCambioFiltro("fechaInicio", e.target.value || null)}
+            <DatePicker
+              selected={filtros.fechaInicio}
+              onChange={(date) => manejarCambioFiltro("fechaInicio", date)}
+              locale="es"
+              dateFormat="dd/MM/yyyy"
+              placeholderText="Seleccionar fecha"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin</label>
-            <input
-              type="date"
-              value={filtros.fechaFin || ""}
-              onChange={(e) => manejarCambioFiltro("fechaFin", e.target.value || null)}
+            <DatePicker
+              selected={filtros.fechaFin}
+              onChange={(date) => manejarCambioFiltro("fechaFin", date)}
+              locale="es"
+              dateFormat="dd/MM/yyyy"
+              placeholderText="Seleccionar fecha"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -235,9 +239,6 @@ const PaginaCompras: React.FC = () => {
                             title="Ver detalles"
                           >
                             <Eye size={18} />
-                          </button>
-                          <button onClick={() => abrirModalEditar(compra)} className="text-black" title="Editar">
-                            <Pencil size={18} />
                           </button>
                         </div>
                       </td>
@@ -322,16 +323,9 @@ const PaginaCompras: React.FC = () => {
         idCompra={null}
       />
 
-      <ModalGestionarCompra
-        isOpen={modalEditarAbierto}
-        onClose={cerrarModales}
-        onSuccess={refrescarDatos}
-        idCompra={compraSeleccionada?.idCompra || null}
-      />
-
       <ModalDetallesCompra isOpen={modalDetallesAbierto} onClose={cerrarModales} compra={compraSeleccionada} />
     </div>
   )
 }
 
-export default PaginaCompras;
+export default PaginaCompras

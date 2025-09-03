@@ -2,15 +2,15 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import type { ModificarCategoriaDTO, CategoriaArbol, Categoria } from "../../types/dto/Categoria"
-import { generarOpcionesSelect } from "../../utils/categoriaUtils"
+import type { ModificarCategoriaDTO, Categoria, CategoriaArbol } from "../../types/dto/Categoria"
+import { useCategoriaStore } from "../../store/categoriaStore"
+import { SelectJerarquicoCategorias } from "./SelectJerarquicoCategorias"
 
 interface ModalEditarCategoriaProps {
   isOpen: boolean
   onClose: () => void
   onConfirmar: (id: number, data: ModificarCategoriaDTO) => void
-  categoria: Categoria | null
-  categorias: CategoriaArbol[]
+  categoria: Categoria | null // La categoría a editar se sigue pasando por props
 }
 
 export const ModalEditarCategoria: React.FC<ModalEditarCategoriaProps> = ({
@@ -18,23 +18,25 @@ export const ModalEditarCategoria: React.FC<ModalEditarCategoriaProps> = ({
   onClose,
   onConfirmar,
   categoria,
-  categorias,
 }) => {
+  const { categoriasArbol } = useCategoriaStore()
+
   const [formData, setFormData] = useState<ModificarCategoriaDTO>({
     nombre: "",
-    color: "#3B82F6",
+    descripcion: "",
     idCategoriaPadre: null,
   })
 
+  // useEffect para rellenar el formulario cuando se abre el modal con una categoría
   useEffect(() => {
-    if (categoria) {
+    if (categoria && isOpen) {
       setFormData({
         nombre: categoria.nombre,
-        color: categoria.color,
+        descripcion: categoria.descripcion,
         idCategoriaPadre: categoria.idCategoriaPadre,
       })
     }
-  }, [categoria])
+  }, [categoria, isOpen])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,14 +45,24 @@ export const ModalEditarCategoria: React.FC<ModalEditarCategoriaProps> = ({
     }
   }
 
-  const opcionesSelect = generarOpcionesSelect(categorias).filter((opcion) => opcion.value !== categoria?.idCategoria)
+  // Lógica para filtrar la categoría actual y sus descendientes de las opciones de "Categoría Padre"
+  const filtrarJerarquia = (nodos: CategoriaArbol[], idAExcluir: number): CategoriaArbol[] => {
+    return nodos
+      .filter(nodo => nodo.idCategoria !== idAExcluir)
+      .map(nodo => ({
+        ...nodo,
+        hijos: filtrarJerarquia(nodo.hijos, idAExcluir),
+      }));
+  };
+  
+  const categoriasParaSelect = categoria ? filtrarJerarquia(categoriasArbol, categoria.idCategoria) : categoriasArbol;
 
   if (!isOpen || !categoria) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">Editar Categoría</h2>
+        <h2 className="text-xl font-semibold mb-4">Editar Categoría: {categoria.nombre}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -65,42 +77,24 @@ export const ModalEditarCategoria: React.FC<ModalEditarCategoriaProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Color</label>
-            <div className="flex items-center space-x-2">
-              <input
-                type="color"
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
-              />
-              <input
-                type="text"
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+            <label className="block text-sm font-medium mb-1">Descripción</label>
+            <input
+              type="text"
+              value={formData.descripcion}
+              onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">Categoría Padre</label>
-            <select
-              value={formData.idCategoriaPadre || ""}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  idCategoriaPadre: e.target.value ? Number(e.target.value) : null,
-                })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Sin categoría padre</option>
-              {opcionesSelect.map((opcion) => (
-                <option key={opcion.value} value={opcion.value}>
-                  {opcion.label}
-                </option>
-              ))}
-            </select>
+            <SelectJerarquicoCategorias
+              categorias={categoriasParaSelect}
+              selectedValue={formData.idCategoriaPadre}
+              onSelect={(id) => setFormData({ ...formData, idCategoriaPadre: id })}
+              placeholder="Sin categoría padre"
+            />
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">

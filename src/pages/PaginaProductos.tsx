@@ -2,17 +2,19 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Package, Plus, Eye, Pencil, Percent, ChevronLeft, ChevronRight } from "lucide-react"
-import type { PaginaDeProductos, ProductoAbm, CategoriaLista, MarcaLista, ProveedorLista } from "../types/dto/Producto"
+import { Package, Plus, Eye, Pencil, Percent, Gift, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react"
+import type { PaginaDeProductos, ProductoAbm, MarcaLista, ProveedorLista } from "../types/dto/Producto"
 import { obtenerProductos, cambiarEstadoProducto } from "../api/productoApi"
-import { obtenerListaCategorias } from "../api/categoriaApi"
+import { useCategoriaStore } from "../store/categoriaStore"
+import { SelectJerarquicoCategorias } from "../components/categorias/SelectJerarquicoCategorias"
 import { obtenerListaMarcas } from "../api/marcaApi"
 import { obtenerListaProveedores } from "../api/proveedorApi"
 import { ModalNuevoProducto } from "../components/productos/ModalNuevoProducto"
 import { ModalEditarProducto } from "../components/productos/ModalEditarProducto"
 import { ModalDetallesProducto } from "../components/productos/ModalDetallesProducto"
-import { ModalGestionarPrecio } from "../components/productos/ModalGestionarPrecio"
 import { formatCurrency } from "../utils/numberFormatUtils"
+import { ModalGestionarDescuento } from "../components/productos/ModalGestionarDescuento"
+import { ModalGestionarOferta } from "../components/productos/ModalGestionarOferta"
 
 export const PaginaProductos: React.FC = () => {
   const [datosProductos, setDatosProductos] = useState<PaginaDeProductos | null>(null)
@@ -30,41 +32,47 @@ export const PaginaProductos: React.FC = () => {
   })
 
   // Estados para las listas de los select
-  const [categorias, setCategorias] = useState<CategoriaLista[]>([])
   const [marcas, setMarcas] = useState<MarcaLista[]>([])
   const [proveedores, setProveedores] = useState<ProveedorLista[]>([])
+
+  const categoriasArbol = useCategoriaStore((state) => state.categoriasArbol);
+  const cargarCategorias = useCategoriaStore((state) => state.cargarCategorias);
 
   // Estados para los modales
   const [modalNuevoAbierto, setModalNuevoAbierto] = useState(false)
   const [modalEditarAbierto, setModalEditarAbierto] = useState(false)
   const [modalDetallesAbierto, setModalDetallesAbierto] = useState(false)
   const [modalDescuentoAbierto, setModalDescuentoAbierto] = useState(false)
+  const [modalOfertaAbierto, setModalOfertaAbierto] = useState(false)
   const [productoSeleccionado, setProductoSeleccionado] = useState<ProductoAbm | null>(null)
-
-  // Cargar datos de los select una sola vez
-  useEffect(() => {
-    cargarDatosSelect()
-  }, [])
 
   // Cargar productos cada vez que cambien los filtros
   useEffect(() => {
     cargarProductos()
-  }, [filtros])
+  }, [
+    filtros.nombre,
+    filtros.idCategoria,
+    filtros.idMarca,
+    filtros.idProveedor,
+    filtros.page,
+    filtros.size
+  ]);
 
-  const cargarDatosSelect = async (): Promise<void> => {
-    try {
-      const [categoriasData, marcasData, proveedoresData] = await Promise.all([
-        obtenerListaCategorias(),
-        obtenerListaMarcas(),
-        obtenerListaProveedores(),
-      ])
-      setCategorias(categoriasData)
-      setMarcas(marcasData)
-      setProveedores(proveedoresData)
-    } catch (error) {
-      console.error("Error al cargar datos de los select:", error)
+  useEffect(() => {
+    const cargarDatosSelect = async (): Promise<void> => {
+      try {
+        await cargarCategorias()
+
+        const [marcasData, proveedoresData] = await Promise.all([obtenerListaMarcas(), obtenerListaProveedores()])
+        setMarcas(marcasData)
+        setProveedores(proveedoresData)
+      } catch (error) {
+        console.error("Error al cargar datos de los select:", error)
+      }
     }
-  }
+
+    cargarDatosSelect()
+  }, []) // Removido cargarCategorias de las dependencias para evitar bucle infinito
 
   const cargarProductos = async (): Promise<void> => {
     setCargando(true)
@@ -128,11 +136,17 @@ export const PaginaProductos: React.FC = () => {
     setModalDescuentoAbierto(true)
   }
 
+  const abrirModalOferta = (producto: ProductoAbm): void => {
+    setProductoSeleccionado(producto)
+    setModalOfertaAbierto(true)
+  }
+
   const cerrarModales = (): void => {
     setModalNuevoAbierto(false)
     setModalEditarAbierto(false)
     setModalDetallesAbierto(false)
     setModalDescuentoAbierto(false)
+    setModalOfertaAbierto(false)
     setProductoSeleccionado(null)
   }
 
@@ -158,11 +172,11 @@ export const PaginaProductos: React.FC = () => {
     <div className="p-6">
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <Package className="h-8 w-8 text-blue-600" />
+        <div className="flex items-center gap-3">
+          <Package className="text-blue-600" size={32} />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Productos</h1>
-            <p className="text-gray-600">Gestiona los productos de tu inventario</p>
+            <h1 className="text-3xl font-bold text-gray-800">Productos</h1>
+            <p className="text-gray-600">Gestiona las productos del negocio</p>
           </div>
         </div>
         <button
@@ -190,18 +204,12 @@ export const PaginaProductos: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-            <select
-              value={filtros.idCategoria}
-              onChange={(e) => manejarCambioFiltro("idCategoria", Number.parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value={0}>Todas las categorías</option>
-              {categorias.map((categoria) => (
-                <option key={categoria.idCategoria} value={categoria.idCategoria}>
-                  {categoria.nombre}
-                </option>
-              ))}
-            </select>
+            <SelectJerarquicoCategorias
+              categorias={categoriasArbol}
+              selectedValue={filtros.idCategoria === 0 ? null : filtros.idCategoria}
+              onSelect={(id) => manejarCambioFiltro("idCategoria", id ?? 0)}
+              placeholder="Todas las categorías"
+            />
           </div>
 
           <div>
@@ -278,10 +286,7 @@ export const PaginaProductos: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {datosProductos?.content.map((producto) => (
-                    <tr
-                      key={producto.idProducto}
-                      className="hover:bg-opacity-80"
-                    >
+                    <tr key={producto.idProducto} className="hover:bg-opacity-80">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.idProducto}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{producto.nombre}</div>
@@ -301,14 +306,42 @@ export const PaginaProductos: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.stockSuma}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${producto.stock <= producto.stockMinimo
+
+                        {/* <span
+                          className={`inline-flex items-center px-3 py-1 text-sm font-bold rounded-full ${producto.stock <= producto.stockMinimo
                             ? "bg-red-100 text-red-800"
                             : "bg-green-100 text-green-800"
                             }`}
                         >
                           {producto.stock}
+                        </span> */}
+
+                        {/* <div
+                          className={`inline-flex items-center space-x-1 font-semibold ${producto.stock <= producto.stockMinimo
+                            ? "text-red-600" 
+                            : "text-green-600"
+                            }`}
+                        >
+                          {producto.stock <= producto.stockMinimo ? (
+                            <AlertTriangle size={16} />
+                          ) : (
+                            <CheckCircle2 size={16} />
+                          )}
+                          <span>{producto.stock}</span>
+                        </div> */}
+
+                        <span
+                          className={`inline-flex items-center px-3 py-1 text-sm font-bold rounded-full ${producto.stock <= producto.stockMinimo
+                            ? "bg-red-100 text-red-800"
+                            : "bg-green-100 text-green-800"
+                            }`}
+                        >
+                          {producto.stock <= producto.stockMinimo && (
+                            <AlertTriangle size={16} className="mr-1.5" />
+                          )}
+                          {producto.stock}
                         </span>
+
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.marca}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -320,25 +353,36 @@ export const PaginaProductos: React.FC = () => {
                           >
                             <Eye size={18} />
                           </button>
-                          <button
-                            onClick={() => abrirModalEditar(producto)}
-                            className="text-black"
-                            title="Editar"
-                          >
+                          <button onClick={() => abrirModalEditar(producto)} className="text-black" title="Editar">
                             <Pencil size={18} />
                           </button>
-                          <button
-                            onClick={() => abrirModalDescuento(producto)}
-                            className="text-black"
-                            title="Gestionar precio"
-                          >
-                            <Percent size={18} />
-                          </button>                          
+                          <div className="relative">
+                            <button
+                              onClick={() => abrirModalDescuento(producto)}
+                              className="text-black"
+                              title="Descuento %"
+                            >
+                              <Percent size={18} />
+                            </button>
+                            {producto.porcentaje && producto.porcentaje > 0 && (
+                              <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+                            )}
+                          </div>
+                          <div className="relative">
+                            <button
+                              onClick={() => abrirModalOferta(producto)}
+                              className="text-black"
+                              title="Oferta por Cantidad"
+                            >
+                              <Gift size={18} />
+                            </button>
+                            {producto.cantidadMinima && producto.nuevoPrecio && (
+                              <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+                            )}
+                          </div>
                           <button
                             onClick={() => manejarCambiarEstado(producto.idProducto)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${producto.estado
-                              ? "bg-green-500 focus:ring-green-500"
-                              : "bg-red-400 focus:ring-red-400"
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${producto.estado ? "bg-green-500 focus:ring-green-500" : "bg-red-400 focus:ring-red-400"
                               }`}
                             title={producto.estado ? "Desactivar" : "Activar"}
                           >
@@ -449,8 +493,15 @@ export const PaginaProductos: React.FC = () => {
         alCerrar={cerrarModales}
       />
 
-      <ModalGestionarPrecio
+      <ModalGestionarDescuento
         estaAbierto={modalDescuentoAbierto}
+        producto={productoSeleccionado}
+        alCerrar={cerrarModales}
+        alConfirmar={confirmarAccion}
+      />
+
+      <ModalGestionarOferta
+        estaAbierto={modalOfertaAbierto}
         producto={productoSeleccionado}
         alCerrar={cerrarModales}
         alConfirmar={confirmarAccion}

@@ -2,6 +2,7 @@
 
 import type React from "react"
 import type { Categoria } from "../../types/dto/Categoria"
+import { formatCurrency } from "../../utils/numberFormatUtils"
 
 interface ModalDetallesCategoriaProps {
   isOpen: boolean
@@ -34,11 +35,8 @@ export const ModalDetallesCategoria: React.FC<ModalDetallesCategoriaProps> = ({ 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-600">Color</label>
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded border" style={{ backgroundColor: categoria.color }}></div>
-              <span>{categoria.color}</span>
-            </div>
+            <label className="block text-sm font-medium text-gray-600">Descripción</label>
+            <p className="text-lg">{categoria.descripcion}</p>
           </div>
 
           <div>
@@ -50,12 +48,7 @@ export const ModalDetallesCategoria: React.FC<ModalDetallesCategoriaProps> = ({ 
             >
               {categoria.estado ? "Activa" : "Inactiva"}
             </span>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600">Categoría Padre</label>
-            <p className="text-lg">{categoria.idCategoriaPadre || "Sin categoría padre"}</p>
-          </div>
+          </div>          
 
           <div>
             <label className="block text-sm font-medium text-gray-600">Productos ({categoria.productos.length})</label>
@@ -64,7 +57,7 @@ export const ModalDetallesCategoria: React.FC<ModalDetallesCategoriaProps> = ({ 
                 categoria.productos.map((producto, index) => (
                   <div key={index} className="flex justify-between py-1 border-b last:border-b-0">
                     <span>{producto.nombre}</span>
-                    <span className="font-medium">${producto.precio.toFixed(2)}</span>
+                    <span className="font-medium">{formatCurrency(producto.precio)}</span>
                   </div>
                 ))
               ) : (

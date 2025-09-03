@@ -3,11 +3,12 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { X } from "lucide-react"
-import type { ProductoDTO, CategoriaLista, MarcaLista, ProveedorLista } from "../../types/dto/Producto"
+import type { ProductoDTO, MarcaLista, ProveedorLista } from "../../types/dto/Producto"
 import { crearProducto } from "../../api/productoApi"
-import { obtenerListaCategorias } from "../../api/categoriaApi"
+import { useCategoriaStore } from "../../store/categoriaStore"
 import { obtenerListaMarcas } from "../../api/marcaApi"
 import { obtenerListaProveedores } from "../../api/proveedorApi"
+import { SelectJerarquicoCategorias } from "../categorias/SelectJerarquicoCategorias"
 
 interface Props {
   estaAbierto: boolean
@@ -17,7 +18,10 @@ interface Props {
 
 export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alConfirmar }) => {
   const [cargando, setCargando] = useState(false)
-  const [categorias, setCategorias] = useState<CategoriaLista[]>([])
+
+  // 3. Obtiene las categorías del store de Zustand
+  const { categoriasArbol, cargarCategorias } = useCategoriaStore()
+
   const [marcas, setMarcas] = useState<MarcaLista[]>([])
   const [proveedores, setProveedores] = useState<ProveedorLista[]>([])
   const [formulario, setFormulario] = useState<ProductoDTO>({
@@ -32,6 +36,7 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
   })
 
   useEffect(() => {
+    // Carga los datos para los selects solo cuando el modal se abre
     if (estaAbierto) {
       cargarDatosSelect()
     }
@@ -39,12 +44,13 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
 
   const cargarDatosSelect = async (): Promise<void> => {
     try {
-      const [categoriasData, marcasData, proveedoresData] = await Promise.all([
-        obtenerListaCategorias(),
+      // 4. Llama a la acción del store para cargar categorías
+      await cargarCategorias()
+
+      const [marcasData, proveedoresData] = await Promise.all([
         obtenerListaMarcas(),
         obtenerListaProveedores(),
       ])
-      setCategorias(categoriasData)
       setMarcas(marcasData)
       setProveedores(proveedoresData)
     } catch (error) {
@@ -52,7 +58,7 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
     }
   }
 
-  const manejarCambio = (campo: keyof ProductoDTO, valor: string | number): void => {
+  const manejarCambio = (campo: keyof ProductoDTO, valor: string | number | null): void => {
     setFormulario((prev) => ({
       ...prev,
       [campo]: valor,
@@ -66,6 +72,7 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
     try {
       await crearProducto(formulario)
       alConfirmar()
+      // Resetea el formulario después de una creación exitosa
       setFormulario({
         nombre: "",
         precio: 0,
@@ -96,6 +103,7 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
         </div>
 
         <form onSubmit={manejarEnvio} className="space-y-4">
+          {/* ... campos de nombre, precio, costo, stock ... */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
             <input
@@ -106,7 +114,6 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
               required
             />
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Precio *</label>
@@ -132,7 +139,6 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
               />
             </div>
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Stock *</label>
@@ -144,7 +150,6 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
                 required
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo *</label>
               <input
@@ -157,21 +162,15 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
             </div>
           </div>
 
+          {/* 5. Reemplaza el select de categoría */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
-            <select
-              value={formulario.idCategoria}
-              onChange={(e) => manejarCambio("idCategoria", Number.parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value={0}>Seleccionar categoría</option>
-              {categorias.map((categoria) => (
-                <option key={categoria.idCategoria} value={categoria.idCategoria}>
-                  {categoria.nombre}
-                </option>
-              ))}
-            </select>
+            <SelectJerarquicoCategorias
+              categorias={categoriasArbol}
+              selectedValue={formulario.idCategoria === 0 ? null : formulario.idCategoria}
+              onSelect={(id) => manejarCambio("idCategoria", id ?? 0)}
+              placeholder="Seleccionar categoría"
+            />
           </div>
 
           <div>

@@ -30,8 +30,9 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState<number>(0)
   const [detalles, setDetalles] = useState<DetalleItem[]>([])
 
-  // Estados para añadir productos
-  const [productoSeleccionado, setProductoSeleccionado] = useState<number>(0)
+  const [busquedaProducto, setBusquedaProducto] = useState<string>("")
+  const [productoSeleccionado, setProductoSeleccionado] = useState<ProductoLista | null>(null)
+  const [mostrarSugerencias, setMostrarSugerencias] = useState<boolean>(false)
   const [cantidadInput, setCantidadInput] = useState<number>(1)
 
   const esEdicion = idCompra !== null
@@ -54,6 +55,10 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
       setProductos([])
     }
   }, [proveedorSeleccionado])
+
+  const productosFiltrados = productos.filter((producto) =>
+    producto.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()),
+  )
 
   const cargarProveedores = async () => {
     try {
@@ -105,36 +110,38 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
   const resetearFormulario = () => {
     setProveedorSeleccionado(0)
     setDetalles([])
-    setProductoSeleccionado(0)
+    setBusquedaProducto("")
+    setProductoSeleccionado(null)
+    setMostrarSugerencias(false)
     setCantidadInput(1)
   }
 
   const añadirProducto = () => {
-    if (productoSeleccionado === 0 || cantidadInput <= 0) return
-
-    const producto = productos.find((p) => p.idProducto === productoSeleccionado)
-    if (!producto) return
+    if (!productoSeleccionado || cantidadInput <= 0) return
 
     // Verificar si el producto ya está en la lista
-    const existeProducto = detalles.find((d) => d.idProducto === productoSeleccionado)
+    const existeProducto = detalles.find((d) => d.idProducto === productoSeleccionado.idProducto)
     if (existeProducto) {
       // Actualizar cantidad si ya existe
       setDetalles((prev) =>
-        prev.map((d) => (d.idProducto === productoSeleccionado ? { ...d, cantidad: d.cantidad + cantidadInput } : d)),
+        prev.map((d) =>
+          d.idProducto === productoSeleccionado.idProducto ? { ...d, cantidad: d.cantidad + cantidadInput } : d,
+        ),
       )
     } else {
       // Añadir nuevo producto
       const nuevoDetalle: DetalleItem = {
-        idProducto: producto.idProducto,
-        nombreProducto: producto.nombre,
+        idProducto: productoSeleccionado.idProducto,
+        nombreProducto: productoSeleccionado.nombre,
         cantidad: cantidadInput,
-        costoUnitario: producto.costo,
+        costoUnitario: productoSeleccionado.costo,
       }
       setDetalles((prev) => [...prev, nuevoDetalle])
     }
 
-    // Resetear selección
-    setProductoSeleccionado(0)
+    setBusquedaProducto("")
+    setProductoSeleccionado(null)
+    setMostrarSugerencias(false)
     setCantidadInput(1)
   }
 
@@ -213,22 +220,46 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
           {proveedorSeleccionado > 0 && !esEdicion && (
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="text-lg font-medium text-gray-800 mb-3">Añadir Productos</h3>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div>
+                <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Producto</label>
-                  <select
-                    value={productoSeleccionado}
-                    onChange={(e) => setProductoSeleccionado(Number(e.target.value))}
+                  <input
+                    type="text"
+                    placeholder="Buscar producto..."
+                    value={busquedaProducto}
+                    onChange={(e) => {
+                      setBusquedaProducto(e.target.value)
+                      setMostrarSugerencias(true)
+                      setProductoSeleccionado(null)
+                    }}
+                    onFocus={() => setMostrarSugerencias(true)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value={0}>Seleccionar producto</option>
-                    {productos.map((producto) => (
-                      <option key={producto.idProducto} value={producto.idProducto}>
-                        {producto.nombre} - ${producto.costo.toFixed(2)}
-                      </option>
-                    ))}
-                  </select>
+                  />
+
+                  {/* Sugerencias */}
+                  {mostrarSugerencias && busquedaProducto && productosFiltrados.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {productosFiltrados.slice(0, 10).map((producto) => (
+                        <div
+                          key={producto.idProducto}
+                          onClick={() => {
+                            setProductoSeleccionado(producto)
+                            setBusquedaProducto(producto.nombre)
+                            setMostrarSugerencias(false)
+                          }}
+                          className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">{producto.nombre}</span>
+                            <span className="font-semibold text-green-600">${producto.costo.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
                   <input
@@ -242,7 +273,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
                 <div>
                   <button
                     onClick={añadirProducto}
-                    disabled={productoSeleccionado === 0 || cantidadInput <= 0}
+                    disabled={!productoSeleccionado || cantidadInput <= 0}
                     className="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
                   >
                     <Plus size={20} className="mr-2" />
@@ -250,6 +281,19 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
                   </button>
                 </div>
               </div>
+
+              {/* Vista previa del producto seleccionado */}
+              {productoSeleccionado && (
+                <div className="mt-4 p-4 bg-white rounded-lg border">
+                  <h4 className="font-medium text-gray-900">{productoSeleccionado.nombre}</h4>
+                  <div className="text-sm text-gray-600 mt-1">
+                    Costo unitario: ${productoSeleccionado.costo.toFixed(2)}
+                  </div>
+                  <div className="font-semibold text-green-600 mt-1">
+                    Subtotal: ${(productoSeleccionado.costo * cantidadInput).toFixed(2)}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

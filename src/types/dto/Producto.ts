@@ -11,11 +11,13 @@ export interface ProductoAbm {
   stock: number
   stockSuma: number
   stockMinimo: number
-  estado: boolean
-  color: string
+  estado: boolean  
   marca: string
   categoria: string
   proveedor: string
+  idCategoria: number
+  idDescuento: number | null
+  idOferta: number | null
 }
 
 // Para la respuesta completa de la API

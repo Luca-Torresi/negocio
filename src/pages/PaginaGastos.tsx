@@ -2,7 +2,9 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Receipt, Plus, Pencil, ChevronLeft, ChevronRight } from "lucide-react"
+import { Plus, Pencil, ChevronLeft, ChevronRight, ReceiptText } from "lucide-react"
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
 import type { Gasto, PaginaDeGastos } from "../types/dto/Gasto"
 import { obtenerTiposGasto, obtenerGastos } from "../api/gastoApi"
 import { formatearFecha, formatearHora } from "../utils/fechaUtils"
@@ -73,12 +75,6 @@ const PaginaGastos: React.FC = () => {
     }))
   }
 
-  // Aplicar filtros
-  const aplicarFiltros = () => {
-    // Los filtros se aplican automáticamente por el useEffect
-    // Esta función puede usarse para validaciones adicionales si es necesario
-  }
-
   // Manejar paginación
   const cambiarPagina = (nuevaPagina: number) => {
     setFiltros((prev) => ({
@@ -118,10 +114,10 @@ const PaginaGastos: React.FC = () => {
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* Encabezado */}
       <div className="mb-6">
-        <div className="flex items-center mb-2">
-          <Receipt className="mr-3 text-blue-600" size={32} />
+        <div className="flex items-center gap-3">
+          <ReceiptText className="text-blue-600" size={32} />
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Gastos</h1>
+            <h1 className="text-3xl font-bold text-gray-800">Gastos</h1>
             <p className="text-gray-600">Gestiona los gastos del negocio</p>
           </div>
         </div>
@@ -148,31 +144,26 @@ const PaginaGastos: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
-            <input
-              type="date"
-              value={filtros.fechaInicio || ""}
-              onChange={(e) => handleFiltroChange("fechaInicio", e.target.value || null)}
+            <DatePicker
+              selected={filtros.fechaInicio ? new Date(filtros.fechaInicio) : null}
+              onChange={(date) => handleFiltroChange("fechaInicio", date ? date.toISOString().split("T")[0] : null)}
+              locale="es"
+              dateFormat="dd/MM/yyyy"
+              placeholderText="Seleccionar fecha"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin</label>
-            <input
-              type="date"
-              value={filtros.fechaFin || ""}
-              onChange={(e) => handleFiltroChange("fechaFin", e.target.value || null)}
+            <DatePicker
+              selected={filtros.fechaFin ? new Date(filtros.fechaFin) : null}
+              onChange={(date) => handleFiltroChange("fechaFin", date ? date.toISOString().split("T")[0] : null)}
+              locale="es"
+              dateFormat="dd/MM/yyyy"
+              placeholderText="Seleccionar fecha"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
-
-          <div className="flex items-end">
-            <button
-              onClick={aplicarFiltros}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Filtrar
-            </button>
           </div>
         </div>
       </div>
@@ -234,7 +225,9 @@ const PaginaGastos: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{gasto.idGasto}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{gasto.tipoGasto}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">{gasto.descripcion}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(gasto.monto)}</td> 
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatCurrency(gasto.monto)}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{gasto.usuario}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatearFecha(gasto.fechaHora)}
@@ -243,9 +236,7 @@ const PaginaGastos: React.FC = () => {
                         {formatearHora(gasto.fechaHora)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button
-                          onClick={() => abrirModalEditar(gasto)}
-                          className="text-black">
+                        <button onClick={() => abrirModalEditar(gasto)} className="text-black">
                           <Pencil size={18} />
                         </button>
                       </td>
@@ -340,4 +331,4 @@ const PaginaGastos: React.FC = () => {
   )
 }
 
-export default PaginaGastos;
+export default PaginaGastos

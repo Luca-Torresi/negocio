@@ -2,7 +2,7 @@
 export interface Categoria {
   idCategoria: number
   nombre: string
-  color: string
+  descripcion: string
   estado: boolean
   idCategoriaPadre: number | null
   productos: { 
@@ -15,14 +15,14 @@ export interface Categoria {
 // Para el POST /categoria/nueva
 export interface CrearCategoriaDTO {
   nombre: string
-  color: string
+  descripcion: string
   idCategoriaPadre: number | null
 }
 
 // Para el PUT /categoria/modificar/{id}
 export interface ModificarCategoriaDTO {
   nombre: string
-  color: string
+  descripcion: string
   idCategoriaPadre: number | null
 }
 

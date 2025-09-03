@@ -71,7 +71,7 @@ export const PaginaPromociones: React.FC = () => {
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Gift className="text-purple-600" size={32} />
+          <Gift className="text-blue-600" size={32} />
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Promociones</h1>
             <p className="text-gray-600">Gestiona las promociones del negocio</p>
@@ -79,7 +79,7 @@ export const PaginaPromociones: React.FC = () => {
         </div>
         <button
           onClick={abrirModalNueva}
-          className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 flex items-center gap-2"
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2"
         >
           <Plus size={20} />
           Nueva Promoción

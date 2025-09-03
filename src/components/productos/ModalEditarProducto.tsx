@@ -3,11 +3,12 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { X } from "lucide-react"
-import type { ProductoDTO, ProductoAbm, CategoriaLista, MarcaLista, ProveedorLista } from "../../types/dto/Producto"
+import type { ProductoDTO, ProductoAbm, MarcaLista, ProveedorLista } from "../../types/dto/Producto"
 import { modificarProducto } from "../../api/productoApi"
-import { obtenerListaCategorias } from "../../api/categoriaApi"
+import { useCategoriaStore } from "../../store/categoriaStore"
 import { obtenerListaMarcas } from "../../api/marcaApi"
 import { obtenerListaProveedores } from "../../api/proveedorApi"
+import { SelectJerarquicoCategorias } from "../categorias/SelectJerarquicoCategorias"
 
 interface Props {
   estaAbierto: boolean
@@ -18,7 +19,10 @@ interface Props {
 
 export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, alCerrar, alConfirmar }) => {
   const [cargando, setCargando] = useState(false)
-  const [categorias, setCategorias] = useState<CategoriaLista[]>([])
+
+  // Obtiene las categorías del store de Zustand
+  const { categoriasArbol, cargarCategorias } = useCategoriaStore()
+
   const [marcas, setMarcas] = useState<MarcaLista[]>([])
   const [proveedores, setProveedores] = useState<ProveedorLista[]>([])
   const [formulario, setFormulario] = useState<ProductoDTO>({
@@ -32,52 +36,41 @@ export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, al
     idProveedor: 0,
   })
 
+  // Carga los datos de los selects y rellena el formulario cuando el modal se abre
   useEffect(() => {
-    if (estaAbierto && producto) {
-      cargarDatosSelect()
-      setFormulario({
-        nombre: producto.nombre,
-        precio: producto.precio,
-        costo: producto.costo,
-        stock: producto.stock,
-        stockMinimo: producto.stockMinimo,
-        idMarca: 0, // Se asignará cuando se carguen las listas
-        idCategoria: 0,
-        idProveedor: 0,
-      })
+    const inicializarModal = async () => {
+      if (estaAbierto && producto) {
+        try {
+          // Carga los datos de los selects
+          await cargarCategorias()
+          const [marcasData, proveedoresData] = await Promise.all([
+            obtenerListaMarcas(),
+            obtenerListaProveedores(),
+          ])
+          setMarcas(marcasData)
+          setProveedores(proveedoresData)
+
+          // Rellena el formulario con los datos del producto
+          // (Asumiendo que ProductoAbm ahora incluye los IDs)
+          setFormulario({
+            nombre: producto.nombre,
+            precio: producto.precio,
+            costo: producto.costo,
+            stock: producto.stock,
+            stockMinimo: producto.stockMinimo,
+            idMarca: marcasData.find(m => m.nombre === producto.marca)?.idMarca ?? 0,
+            idCategoria: producto.idCategoria, // <-- Obtenido directamente
+            idProveedor: proveedoresData.find(p => p.nombre === producto.proveedor)?.idProveedor ?? 0,
+          })
+        } catch (error) {
+          console.error("Error al inicializar modal de edición:", error)
+        }
+      }
     }
+    inicializarModal()
   }, [estaAbierto, producto])
 
-  const cargarDatosSelect = async (): Promise<void> => {
-    try {
-      const [categoriasData, marcasData, proveedoresData] = await Promise.all([
-        obtenerListaCategorias(),
-        obtenerListaMarcas(),
-        obtenerListaProveedores(),
-      ])
-      setCategorias(categoriasData)
-      setMarcas(marcasData)
-      setProveedores(proveedoresData)
-
-      // Buscar los IDs correspondientes
-      if (producto) {
-        const categoriaEncontrada = categoriasData.find((c) => c.nombre === producto.categoria)
-        const marcaEncontrada = marcasData.find((m) => m.nombre === producto.marca)
-        const proveedorEncontrado = proveedoresData.find((p) => p.nombre === producto.proveedor)
-
-        setFormulario((prev) => ({
-          ...prev,
-          idCategoria: categoriaEncontrada?.idCategoria || 0,
-          idMarca: marcaEncontrada?.idMarca || 0,
-          idProveedor: proveedorEncontrado?.idProveedor || 0,
-        }))
-      }
-    } catch (error) {
-      console.error("Error al cargar datos de los select:", error)
-    }
-  }
-
-  const manejarCambio = (campo: keyof ProductoDTO, valor: string | number): void => {
+  const manejarCambio = (campo: keyof ProductoDTO, valor: string | number | null): void => {
     setFormulario((prev) => ({
       ...prev,
       [campo]: valor,
@@ -89,7 +82,6 @@ export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, al
     if (!producto) return
 
     setCargando(true)
-
     try {
       await modificarProducto(producto.idProducto, formulario)
       alConfirmar()
@@ -113,6 +105,7 @@ export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, al
         </div>
 
         <form onSubmit={manejarEnvio} className="space-y-4">
+          {/* ... otros campos del formulario (nombre, precio, etc.) ... */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
             <input
@@ -123,7 +116,6 @@ export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, al
               required
             />
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Precio *</label>
@@ -149,7 +141,6 @@ export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, al
               />
             </div>
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Stock *</label>
@@ -161,7 +152,6 @@ export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, al
                 required
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo *</label>
               <input
@@ -176,19 +166,12 @@ export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, al
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
-            <select
-              value={formulario.idCategoria}
-              onChange={(e) => manejarCambio("idCategoria", Number.parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value={0}>Seleccionar categoría</option>
-              {categorias.map((categoria) => (
-                <option key={categoria.idCategoria} value={categoria.idCategoria}>
-                  {categoria.nombre}
-                </option>
-              ))}
-            </select>
+            <SelectJerarquicoCategorias
+              categorias={categoriasArbol}
+              selectedValue={formulario.idCategoria === 0 ? null : formulario.idCategoria}
+              onSelect={(id) => manejarCambio("idCategoria", id ?? 0)}
+              placeholder="Seleccionar categoría"
+            />
           </div>
 
           <div>

@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Eye, Search, Pencil } from "lucide-react"
+import { Eye, Search, Plus, TrendingUp } from "lucide-react"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import type { PaginaDeVentas, FiltrosVenta, VentaHistorial } from "../types/dto/Venta"
@@ -89,11 +89,6 @@ const PaginaHistorialVentas: React.FC = () => {
     setMostrarModalDetalles(true)
   }
 
-  // Editar venta
-  const editarVenta = (idVenta: number): void => {
-    navigate(`/ventas/editar/${idVenta}`)
-  }
-
   // Cambiar página
   const cambiarPagina = (nuevaPagina: number): void => {
     buscarVentas(nuevaPagina)
@@ -104,9 +99,16 @@ const PaginaHistorialVentas: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Encabezado */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Historial de Ventas</h1>
-          {error && <div className="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{error}</div>}
+        <div className="flex items-center gap-3">
+          <TrendingUp className="text-blue-600" size={32} />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Ventas</h1>
+            <p className="text-gray-600">Gestiona las ventas del negocio</p>
+          </div>
         </div>
+      </div>
+
+        {error && <div className="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{error}</div>}
 
         {/* Panel de filtros */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -184,6 +186,13 @@ const PaginaHistorialVentas: React.FC = () => {
             <button onClick={limpiarFiltros} className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
               Limpiar Filtros
             </button>
+            <button
+              onClick={() => navigate("/ventas")}
+              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+            >
+              <Plus size={16} />
+              Nueva Venta
+            </button>
           </div>
         </div>
 
@@ -227,29 +236,24 @@ const PaginaHistorialVentas: React.FC = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {ventas.content.map((venta) => (
                       <tr key={venta.idVenta} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{venta.idVenta}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          #{venta.idVenta}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
                           {formatCurrency(venta.total)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{venta.metodoDePago}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{venta.usuario}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatearFecha(venta.fechaHora)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatearHora(venta.fechaHora)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {formatearFecha(venta.fechaHora)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {formatearHora(venta.fechaHora)}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                           <div className="flex justify-center space-x-2">
-                            <button
-                              onClick={() => mostrarDetalles(venta)}
-                              className="text-black"
-                              title="Ver detalles"
-                            >
+                            <button onClick={() => mostrarDetalles(venta)} className="text-black" title="Ver detalles">
                               <Eye size={18} />
-                            </button>
-                            <button
-                              onClick={() => editarVenta(venta.idVenta)}
-                              className="text-black"
-                              title="Editar venta"
-                            >
-                              <Pencil size={18} />
                             </button>
                           </div>
                         </td>
@@ -282,9 +286,7 @@ const PaginaHistorialVentas: React.FC = () => {
                     <div>
                       <p className="text-sm text-gray-700">
                         Mostrando <span className="font-medium">{paginaActual * size + 1}</span> a{" "}
-                        <span className="font-medium">
-                          {Math.min((paginaActual + 1) * size, ventas.totalElements)}
-                        </span>{" "}
+                        <span className="font-medium">{Math.min((paginaActual + 1) * size, ventas.totalElements)}</span>{" "}
                         de <span className="font-medium">{ventas.totalElements}</span> resultados
                       </p>
                     </div>
@@ -334,7 +336,9 @@ const PaginaHistorialVentas: React.FC = () => {
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
               <div className="mt-3">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Detalles de Venta #{ventaSeleccionada.idVenta}</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Detalles de Venta #{ventaSeleccionada.idVenta}
+                </h3>
 
                 <div className="mb-4 grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -351,7 +355,7 @@ const PaginaHistorialVentas: React.FC = () => {
                   </div>
                   <div>
                     <span className="font-medium">Hora:</span> {formatearHora(ventaSeleccionada.fechaHora)}
-                  </div>                  
+                  </div>
                 </div>
 
                 <div className="mb-4">
@@ -367,16 +371,18 @@ const PaginaHistorialVentas: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {ventaSeleccionada.detalles.map((detalle) => (
-                          <tr className="border-b border-gray-100">                            
+                        {ventaSeleccionada.detalles.map((detalle, index) => (
+                          <tr key={index} className="border-b border-gray-100">
                             <td className="py-2">{detalle.nombre}</td>
                             <td className="py-2 text-center">{detalle.cantidad}</td>
                             <td className="py-2 text-right">{formatCurrency(detalle.precioUnitario)}</td>
-                            <td className="py-2 text-right font-semibold">{formatCurrency(detalle.precioUnitario * detalle.cantidad)}</td>
+                            <td className="py-2 text-right font-semibold">
+                              {formatCurrency(detalle.precioUnitario * detalle.cantidad)}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
-                    </table>                    
+                    </table>
                   </div>
                 </div>
 

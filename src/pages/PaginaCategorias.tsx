@@ -3,18 +3,17 @@
 import React, { useState, useEffect } from "react"
 import type { Categoria, CrearCategoriaDTO, ModificarCategoriaDTO, CategoriaArbol } from "../types/dto/Categoria"
 import { obtenerCategorias, crearCategoria, modificarCategoria, cambiarEstadoCategoria } from "../api/categoriaApi"
-import { transformarAArbol } from "../utils/categoriaUtils"
+import { construirArbolCategorias } from "../utils/categoriaUtils"
 import { ModalNuevaCategoria } from "../components/categorias/ModalNuevaCategoria"
 import { ModalEditarCategoria } from "../components/categorias/ModalEditarCategoria"
 import { ModalDetallesCategoria } from "../components/categorias/ModalDetallesCategoria"
-import { ChevronDown, ChevronRight, Eye, Pencil } from "lucide-react"
+import { ChevronDown, ChevronRight, Eye, Pencil, Tag } from "lucide-react"
 
 type FiltroEstado = "todas" | "activas" | "inactivas"
 
 const PaginaCategorias: React.FC = () => {
   // Estados principales
   const [categorias, setCategorias] = useState<Categoria[]>([])
-  const [categoriasArbol, setCategoriasArbol] = useState<CategoriaArbol[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -38,9 +37,6 @@ const PaginaCategorias: React.FC = () => {
 
   // Transformar a árbol cuando cambian las categorías
   useEffect(() => {
-    const arbol = transformarAArbol(categorias)
-    setCategoriasArbol(arbol)
-
     // Expandir todas las categorías por defecto
     const expandidas: Record<number, boolean> = {}
     categorias.forEach((cat) => {
@@ -134,13 +130,9 @@ const PaginaCategorias: React.FC = () => {
               {categoria.nombre}
             </div>
           </td>
+          <td className="px-4 py-3">{categoria.descripcion}</td>
+          <td className="px-4 py-3 text-center">{categoria.productos.length}</td>
           <td className="px-4 py-3">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded border" style={{ backgroundColor: categoria.color }}></div>
-              <span className="text-sm text-gray-600">{categoria.color}</span>
-            </div>
-          </td>
-          <td className="px-4 py-3">  
             <div className="flex space-x-2">
               <button
                 onClick={() => {
@@ -196,12 +188,12 @@ const PaginaCategorias: React.FC = () => {
   return (
     <div className="p-6">
       {/* Encabezado */}
-      <div className="mb-6">
-        <div className="flex items-center mb-2">
-          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">📁</div>
-          <h1 className="text-2xl font-bold text-gray-900">Categorías</h1>
+      <div className="flex items-center gap-3">
+        <Tag className="text-blue-600" size={32} />
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">Categorías</h1>
+          <p className="text-gray-600">Gestiona las categorías del negocio</p>
         </div>
-        <p className="text-gray-600">Gestiona las categorías de los productos</p>
       </div>
 
       {/* Botón Nueva Categoría */}
@@ -252,11 +244,12 @@ const PaginaCategorias: React.FC = () => {
             <tr>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">ID</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Nombre</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Color</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Descripción</th>
+              <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Cant. Productos</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Acciones</th>
             </tr>
           </thead>
-          <tbody>{transformarAArbol(categoriasFiltradas).map((categoria) => renderizarCategoria(categoria))}</tbody>
+          <tbody>{construirArbolCategorias(categoriasFiltradas).map((categoria) => renderizarCategoria(categoria))}</tbody>
         </table>
 
         {categoriasFiltradas.length === 0 && (
@@ -271,7 +264,6 @@ const PaginaCategorias: React.FC = () => {
         isOpen={modalNueva}
         onClose={() => setModalNueva(false)}
         onConfirmar={handleCrearCategoria}
-        categorias={categoriasArbol}
       />
 
       <ModalEditarCategoria
@@ -282,7 +274,6 @@ const PaginaCategorias: React.FC = () => {
         }}
         onConfirmar={handleModificarCategoria}
         categoria={categoriaSeleccionada}
-        categorias={categoriasArbol}
       />
 
       <ModalDetallesCategoria

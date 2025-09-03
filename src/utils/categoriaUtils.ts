@@ -1,54 +1,48 @@
-import type { Categoria, CategoriaArbol } from "../types/dto/Categoria"
+// src/utils/categoriaUtils.ts
 
-// Transformar lista plana de categorías en estructura de árbol
-export const transformarAArbol = (categorias: Categoria[]): CategoriaArbol[] => {
-  const mapa = new Map<number, CategoriaArbol>()
-  const raices: CategoriaArbol[] = []
+import type { Categoria, CategoriaArbol } from "../types/dto/Categoria";
 
-  // Crear mapa de categorías con estructura de árbol
+/**
+ * Transforma una lista plana de categorías en una estructura de árbol jerárquico.
+ * @param categorias La lista plana de categorías obtenida de la API.
+ * @returns Un array de categorías raíz, donde cada una contiene a sus hijos anidados.
+ */
+export const construirArbolCategorias = (categorias: Categoria[]): CategoriaArbol[] => {
+  // Usamos un Map para un acceso súper rápido a cada categoría por su ID.
+  const mapa = new Map<number, CategoriaArbol>();
+  const raices: CategoriaArbol[] = [];
+
+  // 1. Primer paso: Inicializamos el mapa con todas las categorías.
+  // Cada categoría se convierte en un nodo de árbol con una lista de hijos vacía.
   categorias.forEach((categoria) => {
     mapa.set(categoria.idCategoria, {
       ...categoria,
       hijos: [],
-      nivel: 0,
-    })
-  })
+      nivel: 0, // El nivel se calculará correctamente en el siguiente paso.
+    });
+  });
 
-  // Construir la jerarquía
-  categorias.forEach((categoria) => {
-    const nodoActual = mapa.get(categoria.idCategoria)!
-
-    if (categoria.idCategoriaPadre === null) {
-      // Es una categoría raíz
-      raices.push(nodoActual)
+  // 2. Segundo paso: Conectamos los hijos con sus padres para construir el árbol.
+  mapa.forEach((nodo) => {
+    if (nodo.idCategoriaPadre !== null && mapa.has(nodo.idCategoriaPadre)) {
+      // Si el nodo tiene un padre, lo añadimos a la lista de hijos de ese padre.
+      const padre = mapa.get(nodo.idCategoriaPadre)!;
+      padre.hijos.push(nodo);
     } else {
-      // Es una subcategoría
-      const padre = mapa.get(categoria.idCategoriaPadre)
-      if (padre) {
-        nodoActual.nivel = padre.nivel + 1
-        padre.hijos.push(nodoActual)
-      }
+      // Si el nodo no tiene padre, es una categoría raíz.
+      raices.push(nodo);
     }
-  })
+  });
 
-  return raices
-}
+  // 3. (Opcional pero recomendado) Hacemos una pasada final para asignar el nivel de profundidad.
+  const asignarNivel = (nodos: CategoriaArbol[], nivel: number) => {
+    nodos.forEach(nodo => {
+      nodo.nivel = nivel;
+      asignarNivel(nodo.hijos, nivel + 1);
+    });
+  };
 
-// Generar opciones para select con indentación visual
-export const generarOpcionesSelect = (categorias: CategoriaArbol[]): { value: number; label: string }[] => {
-  const opciones: { value: number; label: string }[] = []
+  asignarNivel(raices, 0);
 
-  const procesarNodo = (nodo: CategoriaArbol) => {
-    const indentacion = "  ".repeat(nodo.nivel)
-    const prefijo = nodo.nivel > 0 ? "└ " : ""
-    opciones.push({
-      value: nodo.idCategoria,
-      label: `${indentacion}${prefijo}${nodo.nombre}`,
-    })
-
-    nodo.hijos.forEach((hijo) => procesarNodo(hijo))
-  }
-
-  categorias.forEach((raiz) => procesarNodo(raiz))
-  return opciones
-}
+  return raices;
+};

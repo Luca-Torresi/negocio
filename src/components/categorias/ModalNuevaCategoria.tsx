@@ -2,35 +2,34 @@
 
 import type React from "react"
 import { useState } from "react"
-import type { CrearCategoriaDTO, CategoriaArbol } from "../../types/dto/Categoria"
-import { generarOpcionesSelect } from "../../utils/categoriaUtils"
+import type { CrearCategoriaDTO } from "../../types/dto/Categoria"
+import { useCategoriaStore } from "../../store/categoriaStore"
+import { SelectJerarquicoCategorias } from "./SelectJerarquicoCategorias"
 
 interface ModalNuevaCategoriaProps {
   isOpen: boolean
   onClose: () => void
   onConfirmar: (data: CrearCategoriaDTO) => void
-  categorias: CategoriaArbol[]
 }
 
 export const ModalNuevaCategoria: React.FC<ModalNuevaCategoriaProps> = ({
   isOpen,
   onClose,
-  onConfirmar,
-  categorias,
+  onConfirmar
 }) => {
+  const { categoriasArbol } = useCategoriaStore()
+
   const [formData, setFormData] = useState<CrearCategoriaDTO>({
     nombre: "",
-    color: "#3B82F6",
+    descripcion: "",
     idCategoriaPadre: null,
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onConfirmar(formData)
-    setFormData({ nombre: "", color: "#3B82F6", idCategoriaPadre: null })
+    setFormData({ nombre: "", descripcion: "", idCategoriaPadre: null })
   }
-
-  const opcionesSelect = generarOpcionesSelect(categorias)
 
   if (!isOpen) return null
 
@@ -52,42 +51,24 @@ export const ModalNuevaCategoria: React.FC<ModalNuevaCategoriaProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Color</label>
-            <div className="flex items-center space-x-2">
-              <input
-                type="color"
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
-              />
-              <input
-                type="text"
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+            <label className="block text-sm font-medium mb-1">Descripción</label>
+            <input
+              type="text"
+              value={formData.descripcion}
+              onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">Categoría Padre</label>
-            <select
-              value={formData.idCategoriaPadre || ""}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  idCategoriaPadre: e.target.value ? Number(e.target.value) : null,
-                })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Sin categoría padre</option>
-              {opcionesSelect.map((opcion) => (
-                <option key={opcion.value} value={opcion.value}>
-                  {opcion.label}
-                </option>
-              ))}
-            </select>
+            <SelectJerarquicoCategorias
+              categorias={categoriasArbol}
+              selectedValue={formData.idCategoriaPadre}
+              onSelect={(id) => setFormData({ ...formData, idCategoriaPadre: id })}
+              placeholder="Sin categoría padre"
+            />
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
