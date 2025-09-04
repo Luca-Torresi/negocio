@@ -10,3 +10,7 @@ En los mapper que utilizan Detalle...Mapper.class, se conserva esto o no? para m
 Antes de empaquetar la aplicación, eliminar todos los imports que no se esten utilizando
 
 Añadir botón para limpiar filtros
+
+Añadir en las páginas que falte, la barra de paginación
+
+El modal detallesVenta debe ser un componente aparte
