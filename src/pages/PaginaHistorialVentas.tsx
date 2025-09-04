@@ -95,18 +95,25 @@ const PaginaHistorialVentas: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         {/* Encabezado */}
-        <div className="mb-6">
-        <div className="flex items-center gap-3">
-          <TrendingUp className="text-blue-600" size={32} />
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Ventas</h1>
-            <p className="text-gray-600">Gestiona las ventas del negocio</p>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <TrendingUp className="text-blue-600" size={32} />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">Ventas</h1>
+              <p className="text-gray-600">Gestiona las ventas del negocio</p>
+            </div>
           </div>
+          <button
+            onClick={() => navigate("/ventas")}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            <Plus size={16} />
+            <span>Nueva Venta</span>
+          </button>
         </div>
-      </div>
 
         {error && <div className="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{error}</div>}
 
@@ -185,13 +192,6 @@ const PaginaHistorialVentas: React.FC = () => {
             </button>
             <button onClick={limpiarFiltros} className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
               Limpiar Filtros
-            </button>
-            <button
-              onClick={() => navigate("/ventas")}
-              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-            >
-              <Plus size={16} />
-              Nueva Venta
             </button>
           </div>
         </div>
@@ -307,8 +307,8 @@ const PaginaHistorialVentas: React.FC = () => {
                               key={pagina}
                               onClick={() => cambiarPagina(pagina)}
                               className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${pagina === paginaActual
-                                  ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
-                                  : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                                ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+                                : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
                                 }`}
                             >
                               {pagina + 1}
@@ -342,7 +342,7 @@ const PaginaHistorialVentas: React.FC = () => {
 
                 <div className="mb-4 grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="font-medium">Total:</span> {ventaSeleccionada.total}
+                    <span className="font-medium">Total:</span> {formatCurrency(ventaSeleccionada.total)}
                   </div>
                   <div>
                     <span className="font-medium">Método de Pago:</span> {ventaSeleccionada.metodoDePago}

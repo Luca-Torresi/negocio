@@ -3,6 +3,7 @@
 import type React from "react"
 import { X } from "lucide-react"
 import type { Promocion } from "../../types/dto/Promocion"
+import { formatCurrency } from "../../utils/numberFormatUtils"
 
 interface Props {
   isOpen: boolean
@@ -34,7 +35,7 @@ export const ModalDetallesPromocion: React.FC<Props> = ({ isOpen, onClose, promo
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Precio:</label>
-            <p className="text-gray-900">${promocion.precio.toFixed(2)}</p>
+            <p className="text-gray-900">{formatCurrency(promocion.precio)}</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Estado:</label>

@@ -7,7 +7,7 @@ import { construirArbolCategorias } from "../utils/categoriaUtils"
 import { ModalNuevaCategoria } from "../components/categorias/ModalNuevaCategoria"
 import { ModalEditarCategoria } from "../components/categorias/ModalEditarCategoria"
 import { ModalDetallesCategoria } from "../components/categorias/ModalDetallesCategoria"
-import { ChevronDown, ChevronRight, Eye, Pencil, Tag } from "lucide-react"
+import { ChevronDown, ChevronRight, Eye, Pencil, Tag, Plus } from "lucide-react"
 
 type FiltroEstado = "todas" | "activas" | "inactivas"
 
@@ -188,21 +188,20 @@ const PaginaCategorias: React.FC = () => {
   return (
     <div className="p-6">
       {/* Encabezado */}
-      <div className="flex items-center gap-3">
-        <Tag className="text-blue-600" size={32} />
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">Categorías</h1>
-          <p className="text-gray-600">Gestiona las categorías del negocio</p>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Tag className="text-blue-600" size={32} />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Categorías</h1>
+            <p className="text-gray-600">Gestiona las categorías del negocio</p>
+          </div>
         </div>
-      </div>
-
-      {/* Botón Nueva Categoría */}
-      <div className="flex justify-end mb-4">
         <button
           onClick={() => setModalNueva(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
-          + Nueva Categoría
+          <Plus size={20} />
+          <span>Nueva Categoría</span>
         </button>
       </div>
 
@@ -284,7 +283,7 @@ const PaginaCategorias: React.FC = () => {
         }}
         categoria={categoriaSeleccionada}
       />
-    </div>
+    </div >
   )
 }
 

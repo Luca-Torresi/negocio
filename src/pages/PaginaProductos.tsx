@@ -305,31 +305,7 @@ export const PaginaProductos: React.FC = () => {
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.stockSuma}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-
-                        {/* <span
-                          className={`inline-flex items-center px-3 py-1 text-sm font-bold rounded-full ${producto.stock <= producto.stockMinimo
-                            ? "bg-red-100 text-red-800"
-                            : "bg-green-100 text-green-800"
-                            }`}
-                        >
-                          {producto.stock}
-                        </span> */}
-
-                        {/* <div
-                          className={`inline-flex items-center space-x-1 font-semibold ${producto.stock <= producto.stockMinimo
-                            ? "text-red-600" 
-                            : "text-green-600"
-                            }`}
-                        >
-                          {producto.stock <= producto.stockMinimo ? (
-                            <AlertTriangle size={16} />
-                          ) : (
-                            <CheckCircle2 size={16} />
-                          )}
-                          <span>{producto.stock}</span>
-                        </div> */}
-
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">                       
                         <span
                           className={`inline-flex items-center px-3 py-1 text-sm font-bold rounded-full ${producto.stock <= producto.stockMinimo
                             ? "bg-red-100 text-red-800"
@@ -341,7 +317,6 @@ export const PaginaProductos: React.FC = () => {
                           )}
                           {producto.stock}
                         </span>
-
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.marca}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Gift, Plus, Eye, Pencil } from "lucide-react"
+import { ShoppingBag, Plus, Eye, Pencil } from "lucide-react"
 import { obtenerPromociones, cambiarEstadoPromocion } from "../api/promocionApi"
 import { ModalGestionarPromocion } from "../components/promociones/ModalGestionarPromocion"
 import { ModalDetallesPromocion } from "../components/promociones/ModalDetallesPromocion"
@@ -71,7 +71,7 @@ export const PaginaPromociones: React.FC = () => {
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Gift className="text-blue-600" size={32} />
+          <ShoppingBag className="text-blue-600" size={32} />
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Promociones</h1>
             <p className="text-gray-600">Gestiona las promociones del negocio</p>

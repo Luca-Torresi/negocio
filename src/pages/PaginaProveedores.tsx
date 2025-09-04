@@ -95,12 +95,21 @@ const PaginaProveedores: React.FC = () => {
   return (
     <div className="p-6">
       {/* Encabezado */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <Users className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-800">Proveedores</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Users className="text-blue-600" size={32} />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Proveedores</h1>
+            <p className="text-gray-600">Gestiona los proveedores del negocio</p>
+          </div>
         </div>
-        <p className="text-gray-600">Gestiona los proveedores del negocio</p>
+        <button
+          onClick={() => setModalNuevoAbierto(true)}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          <Plus size={20} />
+          Nuevo Proveedor
+        </button>
       </div>
 
       {/* Panel de filtros y botón de creación */}
@@ -131,15 +140,6 @@ const PaginaProveedores: React.FC = () => {
               <option value="inactivos">Inactivos</option>
             </select>
           </div>
-
-          {/* Botón nuevo proveedor */}
-          <button
-            onClick={() => setModalNuevoAbierto(true)}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-          >
-            <Plus size={20} />
-            Nuevo Proveedor
-          </button>
         </div>
       </div>
 

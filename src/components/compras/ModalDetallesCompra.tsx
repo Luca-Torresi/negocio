@@ -4,6 +4,7 @@ import type React from "react"
 import { X } from "lucide-react"
 import type { Compra } from "../../types/dto/Compra"
 import { formatearFecha, formatearHora } from "../../utils/fechaUtils"
+import { formatCurrency } from "../../utils/numberFormatUtils"
 
 interface Props {
   isOpen: boolean
@@ -73,7 +74,7 @@ export const ModalDetallesCompra: React.FC<Props> = ({ isOpen, onClose, compra }
                 <div className="border-t pt-2 mt-2">
                   <div className="flex justify-between">
                     <span className="text-lg font-semibold text-gray-800">Total:</span>
-                    <span className="text-2xl font-bold text-blue-600">${compra.total.toFixed(2)}</span>
+                    <span className="text-2xl font-bold text-blue-600">{formatCurrency(compra.total)}</span>
                   </div>
                 </div>
               </div>
@@ -98,9 +99,9 @@ export const ModalDetallesCompra: React.FC<Props> = ({ isOpen, onClose, compra }
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm text-gray-900 font-medium">{detalle.producto}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">{detalle.cantidad}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">${detalle.costoUnitario.toFixed(2)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{formatCurrency(detalle.costoUnitario)}</td>
                       <td className="px-6 py-4 text-sm text-gray-900 font-semibold">
-                        ${calcularSubtotal(detalle.cantidad, detalle.costoUnitario).toFixed(2)}
+                        {formatCurrency(calcularSubtotal(detalle.cantidad, detalle.costoUnitario))}
                       </td>
                     </tr>
                   ))}
@@ -110,7 +111,7 @@ export const ModalDetallesCompra: React.FC<Props> = ({ isOpen, onClose, compra }
                     <td colSpan={3} className="px-6 py-4 text-sm font-semibold text-gray-800 text-right">
                       Total General:
                     </td>
-                    <td className="px-6 py-4 text-sm font-bold text-blue-600">${compra.total.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-sm font-bold text-blue-600">{formatCurrency(compra.total)}</td>
                   </tr>
                 </tfoot>
               </table>

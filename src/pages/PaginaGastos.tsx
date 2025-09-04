@@ -111,9 +111,9 @@ const PaginaGastos: React.FC = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 min-h-screen">
       {/* Encabezado */}
-      <div className="mb-6">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <ReceiptText className="text-blue-600" size={32} />
           <div>
@@ -121,6 +121,13 @@ const PaginaGastos: React.FC = () => {
             <p className="text-gray-600">Gestiona los gastos del negocio</p>
           </div>
         </div>
+        <button
+          onClick={() => setIsModalNuevoOpen(true)}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          <Plus size={20} />
+          <span>Nuevo Gasto</span>
+        </button>
       </div>
 
       {/* Panel de Filtros */}
@@ -166,17 +173,6 @@ const PaginaGastos: React.FC = () => {
             />
           </div>
         </div>
-      </div>
-
-      {/* Botón Nuevo Gasto */}
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={() => setIsModalNuevoOpen(true)}
-          className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-        >
-          <Plus size={20} className="mr-2" />
-          Nuevo Gasto
-        </button>
       </div>
 
       {/* Tabla de Gastos */}

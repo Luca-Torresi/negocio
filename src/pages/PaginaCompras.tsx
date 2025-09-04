@@ -111,9 +111,9 @@ const PaginaCompras: React.FC = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 min-h-screen">
       {/* Encabezado */}
-      <div className="mb-6">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <ShoppingCart className="text-blue-600" size={32} />
           <div>
@@ -121,6 +121,13 @@ const PaginaCompras: React.FC = () => {
             <p className="text-gray-600">Gestiona las compras a proveedores</p>
           </div>
         </div>
+          <button
+            onClick={() => setModalNuevoAbierto(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            <Plus size={20} />
+            <span>Nueva Compra</span>
+          </button>
       </div>
 
       {/* Panel de Filtros */}
@@ -166,17 +173,6 @@ const PaginaCompras: React.FC = () => {
             />
           </div>
         </div>
-      </div>
-
-      {/* Botón Nueva Compra */}
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={() => setModalNuevoAbierto(true)}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-        >
-          <Plus size={20} className="mr-2" />
-          Nueva Compra
-        </button>
       </div>
 
       {/* Tabla de Compras */}
