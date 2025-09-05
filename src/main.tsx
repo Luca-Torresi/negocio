@@ -11,6 +11,7 @@ import  PaginaCompras from './pages/PaginaCompras.tsx';
 import { PaginaPromociones } from './pages/PaginaPromociones.tsx';
 import PaginaVentas from './pages/PaginaVentas.tsx';
 import PaginaHistorialVentas from './pages/PaginaHistorialVentas.tsx';
+import PaginaEstadisticas from './pages/PaginaEstadisticas.tsx';
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: 'ventas/historial',
         element: <PaginaHistorialVentas />,
+      }, 
+      {
+        path: 'reportes',
+        element: <PaginaEstadisticas />,
       }, 
     ],
   },

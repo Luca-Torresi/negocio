@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Eye, Search, Plus, TrendingUp } from "lucide-react"
+import { Eye, Search, Plus, ScrollText } from "lucide-react"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import type { PaginaDeVentas, FiltrosVenta, VentaHistorial } from "../types/dto/Venta"
@@ -100,7 +100,7 @@ const PaginaHistorialVentas: React.FC = () => {
         {/* Encabezado */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <TrendingUp className="text-blue-600" size={32} />
+            <ScrollText className="text-blue-600" size={32} />
             <div>
               <h1 className="text-3xl font-bold text-gray-800">Ventas</h1>
               <p className="text-gray-600">Gestiona las ventas del negocio</p>
