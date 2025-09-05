@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Data @Builder @AllArgsConstructor @NoArgsConstructor
-public class GananciasVsGastosDTO {
+public class ResultadoMensualDTO {
     private String mes;
-    private BigDecimal ganancias;
-    private BigDecimal gastos;
+    private BigDecimal total;
 }

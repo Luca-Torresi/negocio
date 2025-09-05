@@ -9,7 +9,7 @@ BEGIN
     DECLARE finCursor INT DEFAULT 0;
 
     DECLARE nuevoCursor CURSOR FOR
-        SELECT DISTINCT idPromocion, estado
+        SELECT DISTINCT promocion.idPromocion, estado
         FROM promocion
                  INNER JOIN detallePromocion ON detallePromocion.idPromocion = promocion.idPromocion
         WHERE idProducto = _idProducto;
@@ -18,7 +18,7 @@ BEGIN
 
     OPEN nuevoCursor;
     bucle: LOOP
-        FETCH nuevoCursor INTO _idPromocion;
+        FETCH nuevoCursor INTO _idPromocion, _estado;
         IF finCursor = 1 THEN
             LEAVE bucle;
         END IF;
