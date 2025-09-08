@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { ShoppingCart, Plus, Eye, ChevronLeft, ChevronRight } from "lucide-react"
+import { ShoppingCart, Plus, Eye, ChevronLeft, ChevronRight, BrushCleaning } from "lucide-react"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import type { PaginaDeCompras, Compra } from "../types/dto/Compra"
@@ -76,8 +76,18 @@ const PaginaCompras: React.FC = () => {
     setFiltros((prev) => ({
       ...prev,
       [campo]: valor,
-      pagina: 0, // Resetear a primera página cuando cambian filtros
+      pagina: 0,
     }))
+  }
+
+  const limpiarFiltros = () => {
+    setFiltros({
+      pagina: 0,
+      tamaño: 10,
+      idProveedor: null,
+      fechaInicio: null,
+      fechaFin: null,
+    })
   }
 
   const cambiarPagina = (nuevaPagina: number) => {
@@ -132,7 +142,7 @@ const PaginaCompras: React.FC = () => {
 
       {/* Panel de Filtros */}
       <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="flex gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
             <select
@@ -172,6 +182,16 @@ const PaginaCompras: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
+          <div className="flex self-end mb-1">
+          <button
+            onClick={limpiarFiltros}
+            className="p-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+            title="Limpiar filtros"
+          >
+            <BrushCleaning size={20} />
+          </button>
+        </div>
         </div>
       </div>
 

@@ -237,7 +237,7 @@ const PaginaVentas: React.FC = () => {
 
               {/* Sugerencias */}
               {mostrarSugerencias && busquedaItem && itemsFiltrados.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
                   {itemsFiltrados.slice(0, 10).map((item) => (
                     <div
                       key={`${item.tipo}-${item.id}`}

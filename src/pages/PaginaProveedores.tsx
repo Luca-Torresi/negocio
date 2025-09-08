@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useMemo } from "react"
-import { Users, Plus, Pencil, Search } from "lucide-react"
+import { Plus, Pencil, Truck } from "lucide-react"
 import type { Proveedor, ProveedorDTO } from "../types/dto/Proveedor"
 import { obtenerProveedores, crearProveedor, modificarProveedor, cambiarEstadoProveedor } from "../api/proveedorApi"
 import { ModalNuevoProveedor } from "../components/proveedores/ModalNuevoProveedor"
@@ -97,7 +97,7 @@ const PaginaProveedores: React.FC = () => {
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Users className="text-blue-600" size={32} />
+          <Truck className="text-blue-600" size={32} />
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Proveedores</h1>
             <p className="text-gray-600">Gestiona los proveedores del negocio</p>
@@ -112,24 +112,24 @@ const PaginaProveedores: React.FC = () => {
         </button>
       </div>
 
-      {/* Panel de filtros y botón de creación */}
+      {/* Panel de filtros */}
       <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          {/* Filtros */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Búsqueda por nombre */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <input
-                type="text"
-                placeholder="Buscar por nombre..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64"
-              />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Búsqueda por nombre */}
+          <div className="relative">
+            <label className="block text-sm font-medium mb-1">Buscar por nombre</label>
+            <input
+              type="text"
+              placeholder="Buscar por nombre..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-            {/* Filtro por estado */}
+          {/* Filtro por estado */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Filtrar por estado</label>
             <select
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value as "todos" | "activos" | "inactivos")}

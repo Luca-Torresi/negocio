@@ -1,22 +1,23 @@
 import type React from "react"
 import { NavLink } from "react-router-dom"
-import { Package, ShoppingCart, ShoppingBag, Users, ReceiptText, BarChart3, Tag, ScrollText } from "lucide-react"
+import { Package, ShoppingCart, ShoppingBag, Truck, ReceiptText, ChartNoAxesCombined, Tag, ScrollText, ListPlus } from "lucide-react"
 
 interface ItemNavegacion {
   label: string
   path: string
-  icon: React.ReactElement // Changed from JSX.Element to React.ReactElement
+  icon: React.ReactElement 
 }
 
 const Sidebar: React.FC = () => {
   const itemsNavegacion: ItemNavegacion[] = [
+    { label: "Nueva Venta", path: "/ventas", icon: <ListPlus size={20} />},
+    { label: "Historial", path: "/historial", icon: <ScrollText size={20} /> },
     { label: "Categorías", path: "/categorias", icon: <Tag size={20} /> },
     { label: "Productos", path: "/productos", icon: <Package size={20} /> },
-    { label: "Ventas", path: "/ventas/historial", icon: <ScrollText size={20} /> },
     { label: "Compras", path: "/compras", icon: <ShoppingCart size={20} /> },
-    { label: "Proveedores", path: "/proveedores", icon: <Users size={20} /> },
+    { label: "Proveedores", path: "/proveedores", icon: <Truck size={20} /> },
     { label: "Gastos", path: "/gastos", icon: <ReceiptText size={20} /> },
-    { label: "Reportes", path: "/reportes", icon: <BarChart3 size={20} /> },
+    { label: "Reportes", path: "/reportes", icon: <ChartNoAxesCombined size={20} /> },
     { label: "Promociones", path: "/promociones", icon: <ShoppingBag size={20} /> },
   ]
 

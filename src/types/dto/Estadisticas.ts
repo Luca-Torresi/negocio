@@ -4,9 +4,20 @@ export interface KpiDTO {
   valor: string | number
 }
 
-// El tipo genérico que devuelven los endpoints de gráficos
-export type DatoGrafico = (string | number)[]
-export type DatosParaGrafico = DatoGrafico[]
+
+// Una "Celda" individual puede ser un valor simple o un objeto de formato especial
+export type CeldaGrafico = 
+  | string 
+  | number 
+  | Date 
+  | { type?: string; label?: string } // Para encabezados
+  | { v?: number | Date; f?: string }; // Para valores formateados (moneda, etc.)
+
+// Una "Fila" es un array de celdas
+export type FilaGrafico = CeldaGrafico[];
+
+// Los datos completos para un gráfico son un array de filas
+export type DatosParaGrafico = FilaGrafico[];
 
 // Para los filtros de fecha en el dashboard
 export interface FiltrosFecha {

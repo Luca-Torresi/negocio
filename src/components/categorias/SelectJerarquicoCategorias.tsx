@@ -1,7 +1,8 @@
 // src/components/SelectJerarquicoCategorias.tsx
 
 import React, { useState, useEffect, useRef } from 'react';
-import type { CategoriaArbol } from '../../types/dto/Categoria'; 
+import type { CategoriaArbol } from '../../types/dto/Categoria';
+import { CornerDownRight } from 'lucide-react';
 
 // --- Interfaz para las props del componente ---
 interface Props {
@@ -18,14 +19,13 @@ const OpcionRecursiva: React.FC<{ categoria: CategoriaArbol; nivel: number; onSe
       {/* Renderiza la opción actual */}
       <div
         onClick={() => onSelect(categoria.idCategoria, categoria.nombre)}
-        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-        style={{ paddingLeft: `${16 + nivel * 20}px` }} // 16px base + 20px por cada nivel de anidación
+        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+        style={{ paddingLeft: `${16 + nivel * 20}px` }}
       >
-        {nivel > 0 && <span className="mr-2">└─</span>}
-        {categoria.nombre}
+        {nivel > 0 && <CornerDownRight size={14} className="mr-2 flex-shrink-0" />}
+        <span className="truncate">{categoria.nombre}</span>
       </div>
 
-      {/* Renderiza los hijos de forma recursiva */}
       {categoria.hijos.map((hijo) => (
         <OpcionRecursiva key={hijo.idCategoria} categoria={hijo} nivel={nivel + 1} onSelect={onSelect} />
       ))}

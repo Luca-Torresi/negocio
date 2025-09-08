@@ -3,13 +3,14 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Eye, Search, Plus, ScrollText } from "lucide-react"
+import { Eye, Search, Plus, BrushCleaning, ChevronLeft, ChevronRight, ScrollText } from "lucide-react"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import type { PaginaDeVentas, FiltrosVenta, VentaHistorial } from "../types/dto/Venta"
 import { obtenerVentas, obtenerMetodosDePago } from "../api/ventaApi"
 import { formatCurrency } from "../utils/numberFormatUtils"
 import { formatearFecha, formatearHora } from "../utils/fechaUtils"
+import { ModalDetallesVenta } from "../components/ventas/ModalDetallesVenta"
 
 const PaginaHistorialVentas: React.FC = () => {
   const navigate = useNavigate()
@@ -26,12 +27,11 @@ const PaginaHistorialVentas: React.FC = () => {
   const [metodoPagoFiltro, setMetodoPagoFiltro] = useState<string>("")
   const [usuarioFiltro, setUsuarioFiltro] = useState<string>("")
   const [paginaActual, setPaginaActual] = useState<number>(0)
+  const [tamañoPagina, setTamañoPagina] = useState<number>(10)
 
   // Estados de carga y error
   const [cargando, setCargando] = useState<boolean>(true)
   const [error, setError] = useState<string>("")
-
-  const size = 10
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -56,7 +56,7 @@ const PaginaHistorialVentas: React.FC = () => {
 
       const filtros: FiltrosVenta = {
         number,
-        size,
+        size: tamañoPagina,
         ...(fechaDesde && { fechaDesde: fechaDesde.toISOString().split("T")[0] }),
         ...(fechaHasta && { fechaHasta: fechaHasta.toISOString().split("T")[0] }),
         ...(metodoPagoFiltro && { metodoDePago: metodoPagoFiltro }),
@@ -94,28 +94,34 @@ const PaginaHistorialVentas: React.FC = () => {
     buscarVentas(nuevaPagina)
   }
 
+  const cambiarTamañoPagina = (nuevoTamaño: number): void => {
+    setTamañoPagina(nuevoTamaño)
+    setPaginaActual(0)
+    buscarVentas(0)
+  }
+
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Encabezado */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <ScrollText className="text-blue-600" size={32} />
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">Ventas</h1>
-              <p className="text-gray-600">Gestiona las ventas del negocio</p>
+              <h1 className="text-3xl font-bold text-gray-800">Historial de Ventas</h1>
+              <p className="text-gray-600">Gestiona los ventas del negocio</p>
             </div>
           </div>
           <button
             onClick={() => navigate("/ventas")}
             className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
-            <Plus size={16} />
+            <Plus size={20} />
             <span>Nueva Venta</span>
           </button>
         </div>
 
-        {error && <div className="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{error}</div>}
+        {error && <div className="mt-2 mb-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{error}</div>}
 
         {/* Panel de filtros */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -124,7 +130,7 @@ const PaginaHistorialVentas: React.FC = () => {
             Filtros de Búsqueda
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
             {/* Fecha desde */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Desde</label>
@@ -179,21 +185,19 @@ const PaginaHistorialVentas: React.FC = () => {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
+
+            {/* Botones de acción */}
+            <div className="flex self-end mb-2">
+              <button
+                onClick={limpiarFiltros}
+                className="p-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+                title="Limpiar filtros"
+              >
+                <BrushCleaning size={20} />
+              </button>
+            </div>
           </div>
 
-          {/* Botones de acción */}
-          <div className="flex gap-3">
-            <button
-              onClick={() => buscarVentas(0)}
-              disabled={cargando}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
-            >
-              {cargando ? "Buscando..." : "Buscar"}
-            </button>
-            <button onClick={limpiarFiltros} className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
-              Limpiar Filtros
-            </button>
-          </div>
         </div>
 
         {/* Tabla de ventas */}
@@ -263,64 +267,61 @@ const PaginaHistorialVentas: React.FC = () => {
                 </table>
               </div>
 
-              {/* Paginación */}
-              {ventas.totalPages > 1 && (
+              {ventas && (
                 <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
                   <div className="flex-1 flex justify-between sm:hidden">
                     <button
                       onClick={() => cambiarPagina(paginaActual - 1)}
                       disabled={paginaActual === 0}
-                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
                     >
                       Anterior
                     </button>
                     <button
                       onClick={() => cambiarPagina(paginaActual + 1)}
                       disabled={paginaActual >= ventas.totalPages - 1}
-                      className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
                     >
                       Siguiente
                     </button>
                   </div>
                   <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                    <div>
+                    <div className="flex items-center space-x-4">
                       <p className="text-sm text-gray-700">
-                        Mostrando <span className="font-medium">{paginaActual * size + 1}</span> a{" "}
-                        <span className="font-medium">{Math.min((paginaActual + 1) * size, ventas.totalElements)}</span>{" "}
+                        Mostrando <span className="font-medium">{paginaActual * tamañoPagina + 1}</span> a{" "}
+                        <span className="font-medium">
+                          {Math.min((paginaActual + 1) * tamañoPagina, ventas.totalElements)}
+                        </span>{" "}
                         de <span className="font-medium">{ventas.totalElements}</span> resultados
                       </p>
+                      <select
+                        value={tamañoPagina}
+                        onChange={(e) => cambiarTamañoPagina(Number.parseInt(e.target.value))}
+                        className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+                      >
+                        <option value={10}>10 por página</option>
+                        <option value={25}>25 por página</option>
+                        <option value={50}>50 por página</option>
+                      </select>
                     </div>
                     <div>
                       <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
                         <button
                           onClick={() => cambiarPagina(paginaActual - 1)}
                           disabled={paginaActual === 0}
-                          className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                         >
-                          Anterior
+                          <ChevronLeft size={20} />
                         </button>
-                        {Array.from({ length: Math.min(5, ventas.totalPages) }, (_, i) => {
-                          const pagina = i + Math.max(0, paginaActual - 2)
-                          if (pagina >= ventas.totalPages) return null
-                          return (
-                            <button
-                              key={pagina}
-                              onClick={() => cambiarPagina(pagina)}
-                              className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${pagina === paginaActual
-                                ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
-                                : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
-                                }`}
-                            >
-                              {pagina + 1}
-                            </button>
-                          )
-                        })}
+                        <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                          Página {paginaActual + 1} de {ventas.totalPages}
+                        </span>
                         <button
                           onClick={() => cambiarPagina(paginaActual + 1)}
                           disabled={paginaActual >= ventas.totalPages - 1}
-                          className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                         >
-                          Siguiente
+                          <ChevronRight size={20} />
                         </button>
                       </nav>
                     </div>
@@ -332,72 +333,11 @@ const PaginaHistorialVentas: React.FC = () => {
         </div>
 
         {/* Modal de detalles */}
-        {mostrarModalDetalles && ventaSeleccionada && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-              <div className="mt-3">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Detalles de Venta #{ventaSeleccionada.idVenta}
-                </h3>
-
-                <div className="mb-4 grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Total:</span> {formatCurrency(ventaSeleccionada.total)}
-                  </div>
-                  <div>
-                    <span className="font-medium">Método de Pago:</span> {ventaSeleccionada.metodoDePago}
-                  </div>
-                  <div>
-                    <span className="font-medium">Usuario:</span> {ventaSeleccionada.usuario}
-                  </div>
-                  <div>
-                    <span className="font-medium">Fecha:</span> {formatearFecha(ventaSeleccionada.fechaHora)}
-                  </div>
-                  <div>
-                    <span className="font-medium">Hora:</span> {formatearHora(ventaSeleccionada.fechaHora)}
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <h4 className="font-medium text-gray-900 mb-2">Items de la Venta:</h4>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="text-left py-2">Item</th>
-                          <th className="text-center py-2">Cantidad</th>
-                          <th className="text-right py-2">Precio Unit.</th>
-                          <th className="text-right py-2">Subtotal</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {ventaSeleccionada.detalles.map((detalle, index) => (
-                          <tr key={index} className="border-b border-gray-100">
-                            <td className="py-2">{detalle.nombre}</td>
-                            <td className="py-2 text-center">{detalle.cantidad}</td>
-                            <td className="py-2 text-right">{formatCurrency(detalle.precioUnitario)}</td>
-                            <td className="py-2 text-right font-semibold">
-                              {formatCurrency(detalle.precioUnitario * detalle.cantidad)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div className="flex justify-end">
-                  <button
-                    onClick={() => setMostrarModalDetalles(false)}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-                  >
-                    Cerrar
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <ModalDetallesVenta
+          isOpen={mostrarModalDetalles}
+          onClose={() => setMostrarModalDetalles(false)}
+          venta={ventaSeleccionada}
+        />
       </div>
     </div>
   )

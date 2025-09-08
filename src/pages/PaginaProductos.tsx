@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Package, Plus, Eye, Pencil, Percent, Gift, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react"
+import { Package, Plus, Eye, Pencil, Percent, Gift, ChevronLeft, ChevronRight, AlertTriangle, BrushCleaning } from "lucide-react"
 import type { PaginaDeProductos, ProductoAbm, MarcaLista, ProveedorLista } from "../types/dto/Producto"
 import { obtenerProductos, cambiarEstadoProducto } from "../api/productoApi"
 import { useCategoriaStore } from "../store/categoriaStore"
@@ -93,8 +93,19 @@ export const PaginaProductos: React.FC = () => {
     setFiltros((prev) => ({
       ...prev,
       [campo]: valor,
-      page: 0, // Resetear a la primera página cuando cambian los filtros
+      page: 0,
     }))
+  }
+
+  const limpiarFiltros = (): void => {
+    setFiltros({
+      nombre: "",
+      idCategoria: 0,
+      idMarca: 0,
+      idProveedor: 0,
+      page: 0,
+      size: 10,
+    })
   }
 
   const manejarCambioPagina = (nuevaPagina: number): void => {
@@ -190,7 +201,7 @@ export const PaginaProductos: React.FC = () => {
 
       {/* Panel de Filtros */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Buscar por nombre</label>
             <input
@@ -242,6 +253,15 @@ export const PaginaProductos: React.FC = () => {
                 </option>
               ))}
             </select>
+          </div>
+          <div className="flex mt-5">
+            <button
+              onClick={limpiarFiltros}
+              className="p-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+              title="Limpiar filtros"
+            >
+              <BrushCleaning size={20} />
+            </button>
           </div>
         </div>
       </div>
@@ -305,7 +325,7 @@ export const PaginaProductos: React.FC = () => {
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.stockSuma}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">                       
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <span
                           className={`inline-flex items-center px-3 py-1 text-sm font-bold rounded-full ${producto.stock <= producto.stockMinimo
                             ? "bg-red-100 text-red-800"

@@ -1,12 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
-import { BarChart3, TrendingUp, Activity, RefreshCw, ClipboardList, TrendingDown, AlertTriangle } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { ChartNoAxesCombined, TrendingUp, Activity, RefreshCw, ClipboardList, TrendingDown, AlertTriangle } from "lucide-react"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import { Chart } from "react-google-charts"
-import type { KpiDTO, DatosParaGrafico } from "../types/dto/Estadisticas"
+import type { KpiDTO, DatosParaGrafico, FilaGrafico } from "../types/dto/Estadisticas"
 import {
   obtenerKpis,
   obtenerIngresosVsEgresos,
@@ -19,7 +19,7 @@ import type { ProductoVenta } from "../types/dto/Producto"
 import { formatCurrency } from "../utils/numberFormatUtils"
 
 const PaginaEstadisticas: React.FC = () => {
-  // Estados principales
+  // Estados principales (sin cambios)
   const [kpis, setKpis] = useState<KpiDTO[]>([])
   const [datosIngresosVsEgresos, setDatosIngresosVsEgresos] = useState<DatosParaGrafico | null>(null)
   const [datosProductosRentables, setDatosProductosRentables] = useState<DatosParaGrafico | null>(null)
@@ -27,197 +27,295 @@ const PaginaEstadisticas: React.FC = () => {
   const [datosVentasPorHora, setDatosVentasPorHora] = useState<DatosParaGrafico | null>(null)
   const [productosVenta, setProductosVenta] = useState<ProductoVenta[]>([])
 
-  // Estados de filtros
-  const [fechaInicio, setFechaInicio] = useState<Date | null>(null)
-  const [fechaFin, setFechaFin] = useState<Date | null>(null)
-  const [productoSeleccionado, setProductoSeleccionado] = useState<number | null>(null)
-
-  // Estados de carga
-  const [cargando, setCargando] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [cargandoGraficos, setCargandoGraficos] = useState({
-    ingresos: false,
-    productos: false,
-    volumen: false,
-    horas: false,
+  // Estados de filtros (sin cambios)
+  const [fechaInicio, setFechaInicio] = useState<Date | null>(() => {
+    const haceUnAno = new Date()
+    haceUnAno.setFullYear(haceUnAno.getFullYear() - 1)
+    haceUnAno.setDate(1)
+    return haceUnAno
   })
 
-  // Establecer rango de fechas inicial (hace un año hasta hoy)
-  useEffect(() => {
-    const hoy = new Date()
-    const haceUnAno = new Date()
-    haceUnAno.setFullYear(hoy.getFullYear() - 1)
+  const [fechaFin, setFechaFin] = useState<Date | null>(() => {
+    const hoy = new Date();
+    // Inicializa con el último día del mes actual
+    return new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+  });
 
-    setFechaInicio(haceUnAno)
-    setFechaFin(hoy)
-  }, [])
+  const [productoSeleccionado, setProductoSeleccionado] = useState<number | null>(null)
 
-  // Cargar lista de productos para el filtro
+  // Estados de carga (sin cambios)
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const manejarCambioFechaFin = (date: Date | null) => {
+    if (date) {
+      // Truco de JavaScript: al pedir el día 0 del mes SIGUIENTE,
+      // nos devuelve el último día del mes actual.
+      const ultimoDiaDelMes = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+      setFechaFin(ultimoDiaDelMes);
+    } else {
+      setFechaFin(null);
+    }
+  };
+
+  // Rellena los meses faltantes en un set de datos para asegurar consistencia.
+  const rellenarYFormatearDatosMensuales = (
+    datosApi: DatosParaGrafico,
+    fechaInicio: Date,
+    fechaFin: Date,
+    config: { tipoEje: 'date' | 'string'; formatoMoneda?: number[] }
+  ): DatosParaGrafico => {
+    if (!datosApi || datosApi.length <= 1) return [["Mes", "Valor"]];
+
+    const encabezados = datosApi[0];
+    const datosMapa = new Map(
+      datosApi.slice(1).map(fila => [fila[0] as string, fila.slice(1)])
+    );
+
+    const resultadoFinal: FilaGrafico[] = [];
+    let fechaActual = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), 1);
+
+    while (fechaActual <= fechaFin) {
+      const mesString = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth() + 1).padStart(2, '0')}`;
+      const valores = datosMapa.get(mesString) || Array(encabezados.length - 1).fill(0);
+
+      let ejeX;
+      if (config.tipoEje === 'date') {
+        ejeX = new Date(`${mesString}-02`);
+      } else {
+        ejeX = new Date(`${mesString}-02`).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      }
+
+      const valoresFormateados = valores.map((valor, index) => {
+        if (config.formatoMoneda?.includes(index + 1)) {
+          return { v: valor as number, f: formatCurrency(valor as number) };
+        }
+        return valor;
+      });
+
+      resultadoFinal.push([ejeX, ...valoresFormateados]);
+      fechaActual.setMonth(fechaActual.getMonth() + 1);
+    }
+
+    // Modificamos el encabezado para el tipo 'date' si es necesario
+    if (config.tipoEje === 'date') {
+      encabezados[0] = { type: 'date', label: 'Mes' };
+    }
+
+    return [encabezados, ...resultadoFinal];
+  };
+
+  // --- 2. useEffect PRINCIPAL SIMPLIFICADO ---
   useEffect(() => {
-    const cargarProductos = async () => {
+    if (!fechaInicio || !fechaFin) return;
+
+    const cargarTodosLosDatos = async () => {
+      setCargando(true);
+      setError(null);
+
       try {
-        const productos = await obtenerListaProductosVenta()
-        setProductosVenta(productos)
-      } catch (error) {
-        console.error("Error al cargar productos:", error)
+        const fechasParams = {
+          fechaInicio: fechaInicio.toISOString().split("T")[0],
+          fechaFin: fechaFin.toISOString().split("T")[0],
+        };
+
+        const [
+          kpisData,
+          ingresosData,
+          productosData,
+          volumenData,
+          ventasHoraData,
+          productosListaData,
+        ] = await Promise.all([
+          obtenerKpis(),
+          obtenerIngresosVsEgresos(fechasParams),
+          obtenerProductosRentables(fechasParams),
+          obtenerVolumenVentas(fechasParams, productoSeleccionado),
+          obtenerVentasPorHora(fechasParams),
+          obtenerListaProductosVenta(),
+        ]);
+
+        // --- 3. APLICAMOS LAS TRANSFORMACIONES ---
+        setDatosIngresosVsEgresos(
+          rellenarYFormatearDatosMensuales(ingresosData, fechaInicio, fechaFin, { tipoEje: 'date', formatoMoneda: [1, 2] })
+        );
+        setDatosVolumenVentas(
+          rellenarYFormatearDatosMensuales(volumenData, fechaInicio, fechaFin, { tipoEje: 'string' })
+        );
+
+        // Transformaciones que no necesitan rellenar meses
+        if (productosData && productosData.length > 1) {
+          const encabezados = productosData[0];
+          const filas = productosData.slice(1).map(fila => {
+            const [producto, ganancia] = fila as [string, number];
+            return [producto, { v: ganancia, f: formatCurrency(ganancia) }];
+          });
+          setDatosProductosRentables([encabezados, ...filas]);
+        } else {
+          setDatosProductosRentables(productosData);
+        }
+
+        // 4. Transformación para "Ventas por Hora" (en un rango específico)
+        if (ventasHoraData && ventasHoraData.length > 1) {
+          const encabezados = ventasHoraData[0];
+
+          const datosMapa = new Map(
+            ventasHoraData.slice(1).map(fila => [fila[0] as number, fila[1] as number])
+          );
+
+          const horaInicio = 9;
+          const horaFin = 21;
+          const numeroDeHoras = horaFin - horaInicio + 1;
+
+          const filasCompletas = Array.from({ length: numeroDeHoras }, (_, i) => {
+            const hora = horaInicio + i;
+            const cantidad = datosMapa.get(hora) || 0;
+            return [`${hora}hs`, cantidad];
+          });
+
+          setDatosVentasPorHora([encabezados, ...filasCompletas]);
+        } else {
+          // Si no hay datos, creamos un gráfico vacío en el rango deseado
+          const encabezados = ["Hora", "Cantidad"];
+          const horaInicio = 9;
+          const horaFin = 21;
+          const numeroDeHoras = horaFin - horaInicio + 1;
+          const filasVacias = Array.from({ length: numeroDeHoras }, (_, i) => [`${horaInicio + i}hs`, 0]);
+          setDatosVentasPorHora([encabezados, ...filasVacias]);
+        }
+        setKpis(kpisData);
+        setProductosVenta(productosListaData);
+
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error al cargar estadísticas");
+      } finally {
+        setCargando(false);
       }
-    }
-    cargarProductos()
-  }, [])
+    };
 
-  // Cargar datos cuando cambien las fechas
-  useEffect(() => {
-    if (fechaInicio && fechaFin) {
-      cargarDatos()
-    }
-  }, [fechaInicio, fechaFin])
+    cargarTodosLosDatos();
+  }, [fechaInicio, fechaFin, productoSeleccionado]);
 
-  // Cargar datos de volumen de ventas cuando cambie el producto seleccionado
-  useEffect(() => {
-    if (fechaInicio && fechaFin) {
-      cargarVolumenVentas()
-    }
-  }, [productoSeleccionado, fechaInicio, fechaFin])
-
-  const cargarDatos = async () => {
-    if (!fechaInicio || !fechaFin) return
-
-    try {
-      setCargando(true)
-      setError(null)
-
-      setCargandoGraficos({
-        ingresos: true,
-        productos: true,
-        volumen: true,
-        horas: true,
-      })
-
-      const fechas = {
-        fechaInicio: fechaInicio.toISOString().split("T")[0],
-        fechaFin: fechaFin.toISOString().split("T")[0],
-      }
-
-      const [kpisData, ingresosData, productosData, ventasHoraData] = await Promise.all([
-        obtenerKpis(),
-        obtenerIngresosVsEgresos(fechas),
-        obtenerProductosRentables(fechas),
-        obtenerVentasPorHora(fechas),
-      ])
-
-      setKpis(kpisData)
-      setDatosIngresosVsEgresos(ingresosData)
-      setDatosProductosRentables(productosData)
-      setDatosVentasPorHora(ventasHoraData)
-
-      setCargandoGraficos((prev) => ({
-        ...prev,
-        ingresos: false,
-        productos: false,
-        horas: false,
-      }))
-
-      await cargarVolumenVentas()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al cargar estadísticas")
-      setCargandoGraficos({
-        ingresos: false,
-        productos: false,
-        volumen: false,
-        horas: false,
-      })
-    } finally {
-      setCargando(false)
-    }
-  }
-
-  const cargarVolumenVentas = async () => {
-    if (!fechaInicio || !fechaFin) return
-
-    try {
-      setCargandoGraficos((prev) => ({ ...prev, volumen: true }))
-
-      const fechas = {
-        fechaInicio: fechaInicio.toISOString().split("T")[0],
-        fechaFin: fechaFin.toISOString().split("T")[0],
-      }
-
-      const volumenData = await obtenerVolumenVentas(fechas, productoSeleccionado)
-      setDatosVolumenVentas(volumenData)
-    } catch (err) {
-      console.error("Error al cargar volumen de ventas:", err)
-    } finally {
-      setCargandoGraficos((prev) => ({ ...prev, volumen: false }))
-    }
-  }
-
-  const aplicarFiltros = () => {
-    cargarDatos()
+  let ticksIngresosVsEgresos: Date[] = [];
+  if (datosIngresosVsEgresos && datosIngresosVsEgresos.length > 1) {
+    // Extraemos la primera columna (las fechas) de cada fila de datos.
+    ticksIngresosVsEgresos = datosIngresosVsEgresos
+      .slice(1) // Omitimos el encabezado
+      .map(fila => fila[0] as Date); // Extraemos solo la fecha de cada fila
   }
 
   const opcionesIngresosVsEgresos = {
-    title: "Ingresos vs Egresos",
     hAxis: {
-      title: "Período",
-      titleTextStyle: { color: "#374151", fontSize: 12 },
-    },    
+      format: 'MMM y',
+      slantedText: true,
+      slantedTextAngle: 60,
+      ticks: ticksIngresosVsEgresos,
+    },
     vAxis: {
-      title: "Monto ($)",
-      titleTextStyle: { color: "#374151", fontSize: 12 },
-      format: "currency",
+      format: '$ #,##0'
     },
     colors: ["#10B981", "#EF4444"],
     backgroundColor: "transparent",
-    legend: { position: "top", alignment: "center" },
-    chartArea: { left: 60, top: 60, width: "80%", height: "70%" },
+    legend: { 
+      position: "top", 
+      alignment: "center", 
+      textStyle: {
+        fontSize: 13
+      }           
+    },
+    chartArea: { left: 65, top: 30, right: 10, width: "80%", height: "70%" },
   }
 
   const opcionesProductosRentables = {
-    title: "Top 5 Productos Más Rentables",
     hAxis: {
-      title: "Rentabilidad ($)",
-      titleTextStyle: { color: "#374151", fontSize: 12 },
-      format: "currency",
+      format: '$ #,##0'
     },
-    vAxis: {
-      title: "Productos",
-      titleTextStyle: { color: "#374151", fontSize: 12 },
+    legend: {
+      position: 'none'
     },
-    colors: ["#3B82F6"],
+    colors: ["#5E94EB"],
     backgroundColor: "transparent",
-    chartArea: { left: 120, top: 60, width: "70%", height: "70%" },
+    chartArea: { left: 100, top: 15, right: 35, width: "70%", height: "80%" },
   }
 
-  const opcionesVolumenVentas = {
-    title: productoSeleccionado
-      ? `Volumen de Ventas - ${productosVenta.find((p) => p.idProducto === productoSeleccionado)?.nombre || "Producto"}`
-      : "Volumen de Ventas Mensual",
-    hAxis: {
-      title: "Mes",
-      titleTextStyle: { color: "#374151", fontSize: 12 },
-    },
-    vAxis: {
-      title: "Cantidad Vendida",
-      titleTextStyle: { color: "#374151", fontSize: 12 },
-    },
-    colors: ["#F59E0B"],
-    backgroundColor: "transparent",
-    chartArea: { left: 60, top: 60, width: "80%", height: "70%" },
-  }
+  // const opcionesVolumenVentas = {
+  //   hAxis: {
+  //     format: 'MMM y',
+  //     slantedText: true,
+  //     slantedTextAngle: 60,
+  //     ticks: ticksIngresosVsEgresos,
+  //   },
+  //   vAxis: {
+  //     title: "Cantidad Vendida",
+  //     titleTextStyle: { color: "#374151", fontSize: 12 },
+  //   },
+  //   bar: { groupWidth: "30px" },
+  //   legend: {
+  //     position: 'none'
+  //   },
+  //   colors: ["#de9922"],
+  //   backgroundColor: "transparent",
+  //   chartArea: { left: 60, top: 30, right: 40, width: "80%", height: "70%" },
+  // }
+
+  // 2. Usamos useMemo para que las opciones se recalculen solo cuando los datos cambien
+  const opcionesVolumenVentas = useMemo(() => {
+    let maxValor = 0;
+    // Buscamos el valor más alto en los datos actuales
+    if (datosVolumenVentas && datosVolumenVentas.length > 1) {
+      // Usamos .slice(1) para ignorar la fila de encabezados
+      maxValor = Math.max(...datosVolumenVentas.slice(1).map(fila => fila[1] as number));
+    }
+
+    // Calculamos el nuevo techo, añadiendo un 20% de margen y redondeando hacia arriba
+    const techoGrafico = Math.ceil(maxValor * 1.2);
+
+    return {
+      bar: {
+        groupWidth: "40px"
+      },
+      legend: {
+        position: 'none'
+      },
+      hAxis: {
+        format: 'MMM y',
+        slantedText: true,
+        slantedTextAngle: 60,
+        ticks: ticksIngresosVsEgresos,
+      },
+      vAxis: {
+        title: "Cantidad Vendida",
+        titleTextStyle: { color: "#374151", fontSize: 12 },
+        viewWindow: {
+          min: 0,
+          max: techoGrafico,
+        },
+        format: '#'
+      },
+      colors: ["#de9922"],
+      backgroundColor: "transparent",
+      chartArea: { left: 60, top: 30, right: 40, width: "80%", height: "70%" },
+    };
+  }, [datosVolumenVentas, productoSeleccionado, productosVenta]);
 
   const opcionesVentasPorHora = {
-    title: "Ventas por Hora del Día",
     hAxis: {
-      title: "Hora",
-      titleTextStyle: { color: "#374151", fontSize: 12 },
+      showTextEvery: 1,
+      slantedText: true,
+      slantedTextAngle: 60,
+      format: '#hs'
     },
     vAxis: {
       title: "Cantidad de Ventas",
       titleTextStyle: { color: "#374151", fontSize: 12 },
+      format: '#'
     },
-    colors: ["#8B5CF6"],
+    legend: {
+      position: 'none'
+    },
+    colors: ["#8c6dd2"],
     backgroundColor: "transparent",
-    chartArea: { left: 60, top: 60, width: "80%", height: "70%" },
+    chartArea: { left: 60, top: 60, bottom: 35, right: 30, width: "80%", height: "70%" },
   }
 
   return (
@@ -225,7 +323,7 @@ const PaginaEstadisticas: React.FC = () => {
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <BarChart3 className="text-blue-600" size={32} />
+          <ChartNoAxesCombined className="text-blue-600" size={32} />
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Estadísticas</h1>
             <p className="text-gray-600">Panel de indicadores y análisis del negocio</p>
@@ -235,7 +333,7 @@ const PaginaEstadisticas: React.FC = () => {
 
       {/* Panel de Filtros */}
       <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="flex gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
             <DatePicker
@@ -252,29 +350,12 @@ const PaginaEstadisticas: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin</label>
             <DatePicker
               selected={fechaFin}
-              onChange={(date) => setFechaFin(date)}
+              onChange={manejarCambioFechaFin}
               showMonthYearPicker
               dateFormat="MM/yyyy"
               placeholderText="Seleccionar mes/año"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
-
-          <div className="flex items-end">
-            <button
-              onClick={aplicarFiltros}
-              disabled={!fechaInicio || !fechaFin || cargando}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 flex items-center justify-center"
-            >
-              {cargando ? (
-                <>
-                  <RefreshCw className="animate-spin mr-2" size={16} />
-                  Cargando...
-                </>
-              ) : (
-                "Aplicar Filtros"
-              )}
-            </button>
           </div>
         </div>
       </div>
@@ -283,37 +364,37 @@ const PaginaEstadisticas: React.FC = () => {
       {error && <div className="p-4 bg-red-100 border-l-4 border-red-500 text-red-700 mb-6">{error}</div>}
 
       {/* Sección de KPIs */}
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
-  {kpis.map((kpi, index) => (
-    <div key={index} className="bg-white rounded-lg shadow-sm p-6">
-      <div className="flex items-center">
-        <div className="flex-shrink-0">
-          {/* Lógica de íconos (sin cambios) */}
-          {index === 0 && <TrendingUp className="h-8 w-8 text-green-600" />}
-          {index === 1 && <TrendingDown className="h-8 w-8 text-red-600" />}
-          {index === 2 && <ClipboardList className="h-8 w-8 text-gray-600" />}
-          {index === 3 && <Activity className="h-8 w-8 text-gray-600" />}
-          {index === 4 && <AlertTriangle className="h-8 w-8 text-yellow-500" />}
-        </div>
-        <div className="ml-3">
-          <p className="text-sm font-medium text-gray-600">{kpi.titulo}</p>
-          <p className="text-2xl font-semibold text-gray-900">
-            {index === 0 || index === 1 || index === 3
-              ? formatCurrency(kpi.valor as number)
-              : kpi.valor.toString()} 
-          </p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+        {kpis.map((kpi, index) => (
+          <div key={index} className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                {/* Lógica de íconos (sin cambios) */}
+                {index === 0 && <TrendingUp className="h-8 w-8 text-green-600" />}
+                {index === 1 && <TrendingDown className="h-8 w-8 text-red-600" />}
+                {index === 2 && <ClipboardList className="h-8 w-8 text-gray-600" />}
+                {index === 3 && <Activity className="h-8 w-8 text-gray-600" />}
+                {index === 4 && <AlertTriangle className="h-8 w-8 text-yellow-500" />}
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-600">{kpi.titulo}</p>
+                <p className="text-2xl font-semibold text-center text-gray-900">
+                  {index === 0 || index === 1 || index === 3
+                    ? formatCurrency(kpi.valor as number)
+                    : kpi.valor.toString()}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
-    </div>
-  ))}
-</div>
 
       {/* Sección de Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Gráfico 1: Ingresos vs Egresos */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Ingresos vs. Egresos</h3>
-          {cargandoGraficos.ingresos || !datosIngresosVsEgresos ? (
+          {cargando || !datosIngresosVsEgresos ? (
             <div className="h-64 flex items-center justify-center text-gray-500">
               <div className="flex items-center">
                 <RefreshCw className="animate-spin mr-2" size={20} />
@@ -333,8 +414,8 @@ const PaginaEstadisticas: React.FC = () => {
 
         {/* Gráfico 2: Top 5 Productos Rentables */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Top 5 Productos Rentables</h3>
-          {cargandoGraficos.productos || !datosProductosRentables ? (
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Top 7 Productos Más Rentables</h3>
+          {cargando || !datosProductosRentables ? (
             <div className="h-64 flex items-center justify-center text-gray-500">
               <div className="flex items-center">
                 <RefreshCw className="animate-spin mr-2" size={20} />
@@ -360,7 +441,7 @@ const PaginaEstadisticas: React.FC = () => {
               value={productoSeleccionado || ""}
               onChange={(e) => setProductoSeleccionado(e.target.value ? Number(e.target.value) : null)}
               className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={cargandoGraficos.volumen}
+              disabled={cargando}
             >
               <option value="">Todos los productos</option>
               {productosVenta.map((producto) => (
@@ -370,7 +451,7 @@ const PaginaEstadisticas: React.FC = () => {
               ))}
             </select>
           </div>
-          {cargandoGraficos.volumen || !datosVolumenVentas ? (
+          {cargando || !datosVolumenVentas ? (
             <div className="h-64 flex items-center justify-center text-gray-500">
               <div className="flex items-center">
                 <RefreshCw className="animate-spin mr-2" size={20} />
@@ -391,7 +472,7 @@ const PaginaEstadisticas: React.FC = () => {
         {/* Gráfico 4: Ventas por Hora */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Ventas por Hora</h3>
-          {cargandoGraficos.horas || !datosVentasPorHora ? (
+          {cargando || !datosVentasPorHora ? (
             <div className="h-64 flex items-center justify-center text-gray-500">
               <div className="flex items-center">
                 <RefreshCw className="animate-spin mr-2" size={20} />

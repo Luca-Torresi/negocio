@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Plus, Pencil, ChevronLeft, ChevronRight, ReceiptText } from "lucide-react"
+import { Plus, Pencil, ChevronLeft, ChevronRight, ReceiptText, BrushCleaning } from "lucide-react"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import type { Gasto, PaginaDeGastos } from "../types/dto/Gasto"
@@ -75,6 +75,16 @@ const PaginaGastos: React.FC = () => {
     }))
   }
 
+  const limpiarFiltros = () => {
+    setFiltros({
+      page: 0,
+      size: 10,
+      tipoGasto: null,
+      fechaInicio: null,
+      fechaFin: null,
+    })
+  }
+
   // Manejar paginación
   const cambiarPagina = (nuevaPagina: number) => {
     setFiltros((prev) => ({
@@ -132,7 +142,7 @@ const PaginaGastos: React.FC = () => {
 
       {/* Panel de Filtros */}
       <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="flex gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Gasto</label>
             <select
@@ -171,6 +181,16 @@ const PaginaGastos: React.FC = () => {
               placeholderText="Seleccionar fecha"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          <div className="flex self-end mb-1">
+            <button
+              onClick={limpiarFiltros}
+              className="p-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+              title="Limpiar filtros"
+            >
+              <BrushCleaning size={20} />
+            </button>
           </div>
         </div>
       </div>
