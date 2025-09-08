@@ -59,10 +59,10 @@ public class EstadisticaService {
         LocalDateTime inicio = fechaInicio.atStartOfDay();
         LocalDateTime fin = fechaFin.plusDays(1).atStartOfDay();
 
-        List<GraficoGeneralDTO> datos = detalleVentaRepository.findTop5ProductosMasRentables(inicio, fin);
+        List<GraficoGeneralDTO> datos = detalleVentaRepository.findTopProductosMasRentables(inicio, fin);
 
         List<List<Object>> resultadoParaGrafico = new ArrayList<>();
-        resultadoParaGrafico.add(List.of("Producto", "Ganancia Total"));
+        resultadoParaGrafico.add(List.of("Producto", "Ganancia"));
 
         datos.forEach(dato -> {
             resultadoParaGrafico.add(List.of(dato.getEtiqueta(), dato.getValor()));
@@ -125,7 +125,7 @@ public class EstadisticaService {
         kpis.add(new KpiDTO("Gastos de este Mes", totalEgresos));
         kpis.add(new KpiDTO("Ventas de este Mes", cantidadVentas));
         kpis.add(new KpiDTO("Ticket Promedio", ticketPromedio));
-        kpis.add(new KpiDTO("Productos con Stock Bajo", productosStockBajo));
+        kpis.add(new KpiDTO("Productos con Bajo Stock           ", productosStockBajo));
 
         return kpis;
     }

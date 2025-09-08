@@ -28,10 +28,10 @@ public interface DetalleVentaRepository extends JpaRepository<DetalleVenta, Long
                     "    p.idProducto, p.nombre " +
                     "ORDER BY " +
                     "    valor DESC " +
-                    "LIMIT 5",
+                    "LIMIT 7",
             nativeQuery = true
     )
-    List<GraficoGeneralDTO> findTop5ProductosMasRentables(
+    List<GraficoGeneralDTO> findTopProductosMasRentables(
             @Param("fechaInicio") LocalDateTime fechaInicio,
             @Param("fechaFin") LocalDateTime fechaFin
     );
