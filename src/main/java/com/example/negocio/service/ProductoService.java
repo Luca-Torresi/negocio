@@ -1,27 +1,23 @@
 package com.example.negocio.service;
 
 import com.example.negocio.dto.producto.*;
-import com.example.negocio.entity.Categoria;
-import com.example.negocio.entity.Marca;
-import com.example.negocio.entity.Producto;
-import com.example.negocio.entity.Proveedor;
-import com.example.negocio.exception.CategoriaNoEncontradaException;
-import com.example.negocio.exception.MarcaNoEncontradaException;
-import com.example.negocio.exception.ProductoNoEncontradoException;
-import com.example.negocio.exception.ProveedorNoEncontradoException;
+import com.example.negocio.entity.*;
+import com.example.negocio.exception.*;
 import com.example.negocio.mapper.ProductoMapper;
-import com.example.negocio.repository.CategoriaRepository;
-import com.example.negocio.repository.MarcaRepository;
-import com.example.negocio.repository.ProductoRepository;
-import com.example.negocio.repository.ProveedorRepository;
+import com.example.negocio.repository.*;
 import com.example.negocio.specification.ProductoSpecification;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +28,8 @@ public class ProductoService {
     private final CategoriaRepository categoriaRepository;
     private final ProveedorRepository proveedorRepository;
     private final ProductoMapper productoMapper;
+    private final DetalleVentaRepository detalleVentaRepository;
+    private final DetalleCompraRepository detalleCompraRepository;
 
     public Producto nuevoProducto(ProductoDTO dto) {
         Producto producto = productoMapper.toEntity(dto);
@@ -67,15 +65,39 @@ public class ProductoService {
         return productoRepository.save(producto);
     }
 
-    public Page<ProductoAbmDTO> obtenerProductos(Integer page, Integer size, String nombre, Long idCategoria, Long idMarca, Long idProveedor) {
+    public Page<ProductoAbmDTO> obtenerProductos(Integer page, Integer size, String nombre, Long idCategoria, Long idMarca, Long idProveedor, Boolean bajoStock) {
+        LocalDate hoy = LocalDate.now();
+        LocalDate primerDiaMesActual = hoy.withDayOfMonth(1);
+        LocalDate primerDiaMesPasado = primerDiaMesActual.minusMonths(1);
+
+        LocalDateTime inicioMesActual = primerDiaMesActual.atStartOfDay();
+        LocalDateTime inicioMesPasado = primerDiaMesPasado.atStartOfDay();
+
+        List<MesAnteriorDTO> cantVendida = detalleVentaRepository.findCantidadVendidaMesAnterior(inicioMesPasado, inicioMesActual);
+        Map<Long, Integer> mapaDeVentas = cantVendida.stream()
+                .collect(Collectors.toMap(MesAnteriorDTO::getIdProducto, MesAnteriorDTO::getTotal));
+
+        List<MesAnteriorDTO> cantComprada = detalleCompraRepository.findCantidadCompradaMesAnterior(inicioMesPasado, inicioMesActual);
+        Map<Long, Integer> mapaDeCompras = cantComprada.stream()
+                .collect(Collectors.toMap(MesAnteriorDTO::getIdProducto, MesAnteriorDTO::getTotal));
+
         Pageable pageable = PageRequest.of(page, size);
         Specification<Producto> spec = ProductoSpecification.conNombre(nombre)
                 .and(ProductoSpecification.conCategoria(idCategoria))
                 .and(ProductoSpecification.conMarca(idMarca))
-                .and(ProductoSpecification.conProveedor(idProveedor));
+                .and(ProductoSpecification.conProveedor(idProveedor))
+                .and(ProductoSpecification.conBajoStock(bajoStock));
 
-        return productoRepository.findAll(spec, pageable)
-                .map(productoMapper::toAbmDto);
+        Page<Producto> productos = productoRepository.findAll(spec, pageable);
+
+        return productos.map(producto -> {
+            ProductoAbmDTO dto = productoMapper.toAbmDto(producto);
+            Integer totalVendido = mapaDeVentas.getOrDefault(producto.getIdProducto(), 0);
+            dto.setCantVendida(totalVendido);
+            Integer totalComprado = mapaDeCompras.getOrDefault(producto.getIdProducto(), 0);
+            dto.setCantComprada(totalComprado);
+            return dto;
+        });
     }
 
     public List<ProductoCompraDTO> listarProductosCompra(Long idProveedor){
@@ -98,6 +120,21 @@ public class ProductoService {
         Producto producto = productoRepository.findById(idProducto).orElseThrow(() -> new ProductoNoEncontradoException());
 
         producto.setEstado(!producto.getEstado());
+        productoRepository.save(producto);
+    }
+
+    @Transactional
+    public void descontarStock(Long idProducto, Integer cantidadADescontar) {
+        Producto producto = productoRepository.findById(idProducto)
+                .orElseThrow(() -> new ProductoNoEncontradoException());
+
+        if (producto.getStock() < cantidadADescontar) {
+            throw new StockInsuficienteException("No hay stock suficiente para el producto: " + producto.getNombre());
+        }
+
+        int nuevoStock = producto.getStock() - cantidadADescontar;
+        producto.setStock(nuevoStock);
+
         productoRepository.save(producto);
     }
 }

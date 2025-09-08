@@ -5,6 +5,7 @@ import com.example.negocio.entity.Marca;
 import com.example.negocio.entity.Producto;
 import com.example.negocio.entity.Proveedor;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
 public class ProductoSpecification {
@@ -15,6 +16,19 @@ public class ProductoSpecification {
                 return cb.conjunction();
             }
             return cb.like(cb.lower(root.get("nombre")), "%" + nombre.toLowerCase() + "%");
+        };
+    }
+
+    public static Specification<Producto> conBajoStock(Boolean soloStockBajo) {
+        if (soloStockBajo == null || !soloStockBajo) {
+            return null;
+        }
+
+        return (root, query, criteriaBuilder) -> {
+            Predicate stockBajo = criteriaBuilder.lessThanOrEqualTo(root.get("stock"), root.get("stockMinimo"));
+            Predicate estaActivo = criteriaBuilder.isTrue(root.get("estado"));
+
+            return criteriaBuilder.and(stockBajo, estaActivo);
         };
     }
 

@@ -32,8 +32,9 @@ public class ProductoController {
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) Long idCategoria,
             @RequestParam(required = false) Long idMarca,
-            @RequestParam(required = false) Long idProveedor) {
-        return productoService.obtenerProductos(page, size, nombre, idCategoria, idMarca, idProveedor);
+            @RequestParam(required = false) Long idProveedor,
+            @RequestParam(required = false) Boolean bajoStock) {
+        return productoService.obtenerProductos(page, size, nombre, idCategoria, idMarca, idProveedor, bajoStock);
     }
 
     @GetMapping("/listaCompra/{idProveedor}")

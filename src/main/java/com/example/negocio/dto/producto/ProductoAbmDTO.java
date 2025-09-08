@@ -18,7 +18,8 @@ public class ProductoAbmDTO {
     private Integer cantidadMinima;
     private BigDecimal nuevoPrecio;
     private Integer stock;
-    private Integer stockSuma;
+    private Integer cantVendida;
+    private Integer cantComprada;
     private Integer stockMinimo;
     private Boolean estado;
     private String marca;

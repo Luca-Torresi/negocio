@@ -15,6 +15,7 @@ import com.example.negocio.repository.ProductoRepository;
 import com.example.negocio.repository.PromocionRepository;
 import com.example.negocio.repository.VentaRepository;
 import com.example.negocio.specification.VentaSpecification;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,7 +40,9 @@ public class VentaService {
     private final ProductoRepository productoRepository;
     private final PromocionRepository promocionRepository;
     private final ProductoMapper productoMapper;
+    private final ProductoService productoService;
 
+    @Transactional
     public Venta nuevaVenta(VentaDTO dto) {
         Venta venta = ventaMapper.toEntity(dto);
         venta.setFechaHora(LocalDateTime.now());
@@ -54,7 +57,29 @@ public class VentaService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         venta.setTotal(total);
 
-        return ventaRepository.save(venta);
+        Venta ventaGuardada = ventaRepository.save(venta);
+
+        for (DetalleVenta detalle : ventaGuardada.getDetalles()) {
+
+            if (detalle.getProducto() != null) {
+                productoService.descontarStock(
+                        detalle.getProducto().getIdProducto(),
+                        detalle.getCantidad()
+                );
+            } else if (detalle.getPromocion() != null) {
+                for (DetallePromocion detallePromo : detalle.getPromocion().getDetalles()) {
+
+                    int cantidadTotalADescontar = detalle.getCantidad() * detallePromo.getCantidad();
+
+                    productoService.descontarStock(
+                            detallePromo.getProducto().getIdProducto(),
+                            cantidadTotalADescontar
+                    );
+                }
+            }
+        }
+
+        return ventaGuardada;
     }
 
     private DetalleVenta procesarDetalle(DetalleVentaDTO dto, Venta venta) {

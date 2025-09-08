@@ -58,6 +58,9 @@ public class CompraService {
             detalle.setCostoUnitario(producto.getCosto());
             detalle.setCompra(compra);
 
+            producto.setStock(producto.getStock() + detalle.getCantidad());
+            productoRepository.save(producto);
+
             BigDecimal cantidad = new BigDecimal(detalle.getCantidad());
             BigDecimal subtotal = detalle.getCostoUnitario().multiply(cantidad);
             total = total.add(subtotal);

@@ -2,6 +2,7 @@ package com.example.negocio.repository;
 
 import com.example.negocio.dto.estadisticas.GraficoGeneralDTO;
 import com.example.negocio.dto.estadisticas.VolumenVentasDTO;
+import com.example.negocio.dto.producto.MesAnteriorDTO;
 import com.example.negocio.entity.DetalleVenta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,38 @@ import java.util.List;
 
 @Repository
 public interface DetalleVentaRepository extends JpaRepository<DetalleVenta, Long> {
+
+    @Query(
+            value = "SELECT " +
+                    "    t.idProducto, " +
+                    "    SUM(t.cantidad) AS total " +
+                    "FROM ( " +
+                    "    SELECT " +
+                    "        dv.idProducto, " +
+                    "        dv.cantidad " +
+                    "    FROM detalleVenta dv " +
+                    "    JOIN venta v ON dv.idVenta = v.idVenta " +
+                    "    WHERE dv.idProducto IS NOT NULL " +
+                    "      AND v.fechaHora >= :inicioMesPasado AND v.fechaHora < :inicioMesActual " +
+                    " " +
+                    "    UNION ALL " +
+                    " " +
+                    "    SELECT " +
+                    "        dp.idProducto, " +
+                    "        dv.cantidad * dp.cantidad AS cantidad " +
+                    "    FROM detalleVenta dv " +
+                    "    JOIN venta v ON dv.idVenta = v.idVenta " +
+                    "    JOIN detallePromocion dp ON dv.idPromocion = dp.idPromocion " +
+                    "    WHERE dv.idPromocion IS NOT NULL " +
+                    "      AND v.fechaHora >= :inicioMesPasado AND v.fechaHora < :inicioMesActual " +
+                    ") AS t " +
+                    "GROUP BY t.idProducto",
+            nativeQuery = true
+    )
+    List<MesAnteriorDTO> findCantidadVendidaMesAnterior (
+            @Param("inicioMesPasado") LocalDateTime inicioMesPasado,
+            @Param("inicioMesActual") LocalDateTime inicioMesActual
+    );
 
     @Query(
             value = "SELECT " +
