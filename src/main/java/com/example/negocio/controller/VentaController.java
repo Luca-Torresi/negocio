@@ -33,8 +33,9 @@ public class VentaController {
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) LocalDate fechaInicio,
-            @RequestParam(required = false) LocalDate fechaFin) {
-        return ventaService.obtenerVentas(page, size, fechaInicio, fechaFin);
+            @RequestParam(required = false) LocalDate fechaFin,
+            @RequestParam(required = false) Long idUsuario) {
+        return ventaService.obtenerVentas(page, size, fechaInicio, fechaFin, idUsuario);
     }
 
     @GetMapping("/metodosDePago")

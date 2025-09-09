@@ -35,8 +35,9 @@ public class CompraController {
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) LocalDate fechaInicio,
             @RequestParam(required = false) LocalDate fechaFin,
-            @RequestParam(required = false) Long idProveedor) {
-        return compraService.obtenerCompras(page, size, fechaInicio, fechaFin, idProveedor);
+            @RequestParam(required = false) Long idProveedor,
+            @RequestParam(required = false) Long idUsuario) {
+        return compraService.obtenerCompras(page, size, fechaInicio, fechaFin, idProveedor, idUsuario);
     }
 
 }

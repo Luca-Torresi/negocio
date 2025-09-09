@@ -131,10 +131,11 @@ public class VentaService {
         return catalogo;
     }
 
-    public Page<VentaListaDTO> obtenerVentas(Integer page, Integer size, LocalDate fechaInicio, LocalDate fechaFin){
+    public Page<VentaListaDTO> obtenerVentas(Integer page, Integer size, LocalDate fechaInicio, LocalDate fechaFin, Long idUsuario){
         Pageable pageable = PageRequest.of(page, size);
         Specification<Venta> spec = VentaSpecification.porFechaInicio(fechaInicio)
-                .and(VentaSpecification.porFechaFin(fechaFin));
+                .and(VentaSpecification.porFechaFin(fechaFin))
+                .and(VentaSpecification.conUsuario(idUsuario));
 
         return ventaRepository.findAll(spec, pageable)
                 .map(ventaMapper::toDto);

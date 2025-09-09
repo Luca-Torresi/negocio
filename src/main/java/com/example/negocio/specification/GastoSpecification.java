@@ -1,7 +1,10 @@
 package com.example.negocio.specification;
 
+import com.example.negocio.entity.Compra;
 import com.example.negocio.entity.Gasto;
+import com.example.negocio.entity.Usuario;
 import com.example.negocio.enums.TipoGasto;
+import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -31,6 +34,16 @@ public class GastoSpecification {
                 return cb.conjunction();
             }
             return cb.lessThanOrEqualTo(root.get("fechaHora"), fechaFin.atTime(LocalTime.MAX));
+        };
+    }
+
+    public static Specification<Gasto> conUsuario(Long idUsuario) {
+        return (root, query, cb) -> {
+            if (idUsuario == null) {
+                return cb.conjunction();
+            }
+            Join<Gasto, Usuario> usuarioJoin = root.join("usuario");
+            return cb.equal(usuarioJoin.get("idUsuario"), idUsuario);
         };
     }
 }

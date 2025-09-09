@@ -35,9 +35,9 @@ public class GastoController {
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) TipoGasto tipoGasto,
             @RequestParam(required = false) LocalDate fechaInicio,
-            @RequestParam(required = false) LocalDate fechaFin
-            ){
-        return ResponseEntity.ok(gastoService.listarGastos(page, size, tipoGasto, fechaInicio, fechaFin));
+            @RequestParam(required = false) LocalDate fechaFin,
+            @RequestParam(required = false) Long idUsuario){
+        return ResponseEntity.ok(gastoService.listarGastos(page, size, tipoGasto, fechaInicio, fechaFin, idUsuario));
     }
 
     @GetMapping("/tipos")

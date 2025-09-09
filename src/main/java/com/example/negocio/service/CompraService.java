@@ -101,11 +101,12 @@ public class CompraService {
         return compraRepository.save(compra);
     }
 
-    public Page<CompraFullDTO> obtenerCompras(Integer page, Integer size, LocalDate fechaInicio, LocalDate fechaFin, Long idProveedor){
+    public Page<CompraFullDTO> obtenerCompras(Integer page, Integer size, LocalDate fechaInicio, LocalDate fechaFin, Long idProveedor, Long idUsuario){
         Pageable pageable = PageRequest.of(page, size);
         Specification<Compra> spec = CompraSpecification.porFechaInicio(fechaInicio)
                 .and(CompraSpecification.porFechaFin(fechaFin))
-                .and(CompraSpecification.porProveedor(idProveedor));
+                .and(CompraSpecification.porProveedor(idProveedor))
+                .and(CompraSpecification.conUsuario(idUsuario));
 
         return compraRepository.findAll(spec, pageable)
                 .map(compraMapper::toFullDto);

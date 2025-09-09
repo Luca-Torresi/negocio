@@ -41,11 +41,12 @@ public class GastoService {
         return gastoRepository.save(gasto);
     }
 
-    public Page<GastoListaDTO> listarGastos(Integer page, Integer size, TipoGasto tipoGasto, LocalDate fechaInicio, LocalDate fechaFin) {
+    public Page<GastoListaDTO> listarGastos(Integer page, Integer size, TipoGasto tipoGasto, LocalDate fechaInicio, LocalDate fechaFin, Long idUsuario) {
         Pageable pageable = PageRequest.of(page, size);
         Specification<Gasto> spec = GastoSpecification.conTipoGasto(tipoGasto)
                 .and(GastoSpecification.porFechaInicio(fechaInicio))
-                .and(GastoSpecification.porFechaFin(fechaFin));
+                .and(GastoSpecification.porFechaFin(fechaFin))
+                .and(GastoSpecification.conUsuario(idUsuario));
 
         return gastoRepository.findAll(spec, pageable)
                 .map(gastoMapper::toDto);
