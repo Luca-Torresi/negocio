@@ -1,54 +1,26 @@
-import axios from "axios"
+import apiClient from "./interceptors/apiClient"
 import type { Categoria, CrearCategoriaDTO, ModificarCategoriaDTO } from "../types/dto/Categoria"
-
-// Configuración base de axios (ajustar según tu configuración)
-const api = axios.create({
-  baseURL: "http://localhost:8080", 
-  headers: {
-    "Content-Type": "application/json",
-  },
-})
 
 // Obtener todas las categorías
 export const obtenerCategorias = async (): Promise<Categoria[]> => {
-  try {
-    const response = await api.get<Categoria[]>("/categoria/abm")
-    return response.data
-  } catch (error) {
-    console.error("Error al obtener categorías:", error)
-    throw new Error("No se pudieron cargar las categorías")
-  }
+  const response = await apiClient.get<Categoria[]>("/categoria/abm")
+  return response.data
 }
 
 // Crear nueva categoría
 export const crearCategoria = async (data: CrearCategoriaDTO): Promise<any> => {
-  try {
-    const response = await api.post("/categoria/nueva", data)
-    return response.data
-  } catch (error) {
-    console.error("Error al crear categoría:", error)
-    throw new Error("No se pudo crear la categoría")
-  }
+  const response = await apiClient.post("/categoria/nueva", data)
+  return response.data
 }
 
 // Modificar categoría existente
 export const modificarCategoria = async (id: number, data: ModificarCategoriaDTO): Promise<any> => {
-  try {
-    const response = await api.put(`/categoria/modificar/${id}`, data)
-    return response.data
-  } catch (error) {
-    console.error("Error al modificar categoría:", error)
-    throw new Error("No se pudo modificar la categoría")
-  }
+  const response = await apiClient.put(`/categoria/modificar/${id}`, data)
+  return response.data
 }
 
 // Cambiar estado de categoría (activar/desactivar)
 export const cambiarEstadoCategoria = async (id: number): Promise<any> => {
-  try {
-    const response = await api.patch(`/categoria/cambiarEstado/${id}`)
-    return response.data
-  } catch (error) {
-    console.error("Error al cambiar estado de categoría:", error)
-    throw new Error("No se pudo cambiar el estado de la categoría")
-  }
+  const response = await apiClient.patch(`/categoria/cambiarEstado/${id}`)
+  return response.data
 }

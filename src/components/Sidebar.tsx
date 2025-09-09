@@ -1,16 +1,40 @@
+"use client"
+
 import type React from "react"
-import { NavLink } from "react-router-dom"
-import { Package, ShoppingCart, ShoppingBag, Truck, ReceiptText, ChartNoAxesCombined, Tag, ScrollText, ListPlus } from "lucide-react"
+import { NavLink, useNavigate } from "react-router-dom"
+import {
+  Package,
+  ShoppingCart,
+  ShoppingBag,
+  Truck,
+  ReceiptText,
+  ChartNoAxesCombined,
+  Tag,
+  ScrollText,
+  ListPlus,
+  CircleUserRound,
+  LogOut,
+} from "lucide-react"
+import { useUsuarioStore } from "../store/usuarioStore"
 
 interface ItemNavegacion {
   label: string
   path: string
-  icon: React.ReactElement 
+  icon: React.ReactElement
 }
 
 const Sidebar: React.FC = () => {
+  const navigate = useNavigate()
+  const usuario = useUsuarioStore((state) => state.usuario)
+  const clearUsuario = useUsuarioStore((state) => state.clearUsuario)
+
+  const handleLogout = () => {
+    clearUsuario()
+    navigate("/seleccionar-usuario")
+  }
+
   const itemsNavegacion: ItemNavegacion[] = [
-    { label: "Nueva Venta", path: "/ventas", icon: <ListPlus size={20} />},
+    { label: "Nueva Venta", path: "/ventas", icon: <ListPlus size={20} /> },
     { label: "Historial", path: "/historial", icon: <ScrollText size={20} /> },
     { label: "Categorías", path: "/categorias", icon: <Tag size={20} /> },
     { label: "Productos", path: "/productos", icon: <Package size={20} /> },
@@ -27,6 +51,19 @@ const Sidebar: React.FC = () => {
       <div className="p-6 border-b border-gray-700">
         <h1 className="text-xl font-bold text-white">Sistema de Gestión</h1>
       </div>
+
+      {/* User profile section */}
+      {usuario && (
+        <div className="p-4 border-b border-gray-700">
+          <div className="flex items-center space-x-3">
+            <CircleUserRound size={32} className="text-gray-300" />
+            <div>
+              <p className="text-sm font-medium text-white">{usuario.nombre}</p>
+              <p className="text-xs text-gray-400">Usuario activo</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navegación */}
       <nav className="flex-1 py-4">
@@ -49,9 +86,18 @@ const Sidebar: React.FC = () => {
         </ul>
       </nav>
 
-      {/* Pie del sidebar */}
-      <div className="p-4 border-t border-gray-700">
-        <p className="text-xs text-gray-400 text-center">© 2024 Sistema de Gestión</p>
+      {/* Footer with logout button */}
+      <div className="border-t border-gray-700">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center px-6 py-3 text-sm font-medium text-red-500 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+        >
+          <LogOut size={20} className="mr-2" />
+          Cerrar Sesión
+        </button>
+        <div className="p-4">
+          <p className="text-xs text-gray-400 text-center">© 2024 Sistema de Gestión</p>
+        </div>
       </div>
     </div>
   )

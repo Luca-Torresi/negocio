@@ -7,6 +7,8 @@ import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import type { Gasto, PaginaDeGastos } from "../types/dto/Gasto"
 import { obtenerTiposGasto, obtenerGastos } from "../api/gastoApi"
+import { obtenerUsuarios } from "../api/usuarioApi"
+import type { Usuario } from "../types/dto/Usuario"
 import { formatearFecha, formatearHora } from "../utils/fechaUtils"
 import { ModalNuevoGasto } from "../components/gastos/ModalNuevoGasto"
 import { ModalEditarGasto } from "../components/gastos/ModalEditarGasto"
@@ -16,8 +18,12 @@ const PaginaGastos: React.FC = () => {
   // Estados principales
   const [paginaDeGastos, setPaginaDeGastos] = useState<PaginaDeGastos | null>(null)
   const [tiposDeGasto, setTiposDeGasto] = useState<string[]>([])
+  const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isModalNuevoOpen, setIsModalNuevoOpen] = useState(false)
+  const [isModalEditarOpen, setIsModalEditarOpen] = useState(false)
+  const [gastoSeleccionado, setGastoSeleccionado] = useState<Gasto | null>(null)
 
   // Estados de filtros
   const [filtros, setFiltros] = useState({
@@ -26,12 +32,8 @@ const PaginaGastos: React.FC = () => {
     tipoGasto: null as string | null,
     fechaInicio: null as string | null,
     fechaFin: null as string | null,
+    usuarioId: null as number | null,
   })
-
-  // Estados de modales
-  const [isModalNuevoOpen, setIsModalNuevoOpen] = useState(false)
-  const [isModalEditarOpen, setIsModalEditarOpen] = useState(false)
-  const [gastoSeleccionado, setGastoSeleccionado] = useState<Gasto | null>(null)
 
   // Cargar tipos de gasto al montar el componente
   useEffect(() => {
@@ -44,7 +46,17 @@ const PaginaGastos: React.FC = () => {
       }
     }
 
+    const cargarUsuarios = async () => {
+      try {
+        const data = await obtenerUsuarios()
+        setUsuarios(data)
+      } catch (error) {
+        console.error("Error al cargar usuarios:", error)
+      }
+    }
+
     cargarTiposDeGasto()
+    cargarUsuarios()
   }, [])
 
   // Cargar gastos cuando cambien los filtros
@@ -82,6 +94,7 @@ const PaginaGastos: React.FC = () => {
       tipoGasto: null,
       fechaInicio: null,
       fechaFin: null,
+      usuarioId: null,
     })
   }
 
@@ -181,6 +194,22 @@ const PaginaGastos: React.FC = () => {
               placeholderText="Seleccionar fecha"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+            <select
+              value={filtros.usuarioId || ""}
+              onChange={(e) => handleFiltroChange("usuarioId", e.target.value ? Number(e.target.value) : null)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Todos los usuarios</option>
+              {usuarios.map((usuario) => (
+                <option key={usuario.id} value={usuario.id}>
+                  {usuario.nombre}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex self-end mb-1">

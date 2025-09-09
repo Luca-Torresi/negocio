@@ -12,6 +12,7 @@ import { PaginaPromociones } from './pages/PaginaPromociones.tsx';
 import PaginaVentas from './pages/PaginaVentas.tsx';
 import PaginaHistorial from './pages/PaginaHistorial.tsx';
 import PaginaEstadisticas from './pages/PaginaEstadisticas.tsx';
+import PaginaInicioSesion from './pages/PaginaInicioSesion.tsx';
 
 const router = createBrowserRouter([
   {
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
         element: <PaginaEstadisticas />,
       }, 
     ],
+  },
+  {
+    path: '/seleccionar-usuario',
+    element: <PaginaInicioSesion />
   },
 ]);
 

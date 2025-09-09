@@ -12,11 +12,14 @@ import { formatearFecha, formatearHora } from "../utils/fechaUtils"
 import { ModalGestionarCompra } from "../components/compras/ModalGestionarCompra"
 import { ModalDetallesCompra } from "../components/compras/ModalDetallesCompra"
 import { formatCurrency } from "../utils/numberFormatUtils"
+import type { Usuario } from "../types/dto/Usuario"
+import { obtenerUsuarios } from "../api/usuarioApi"
 
 const PaginaCompras: React.FC = () => {
   // Estados principales
   const [paginaDeCompras, setPaginaDeCompras] = useState<PaginaDeCompras | null>(null)
   const [proveedores, setProveedores] = useState<{ idProveedor: number; nombre: string }[]>([])
+  const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -27,6 +30,7 @@ const PaginaCompras: React.FC = () => {
     idProveedor: null as number | null,
     fechaInicio: null as Date | null,
     fechaFin: null as Date | null,
+    idUsuario: null as number | null,
   })
 
   // Estados de modales
@@ -37,6 +41,7 @@ const PaginaCompras: React.FC = () => {
   // Cargar proveedores al montar el componente
   useEffect(() => {
     cargarProveedores()
+    cargarUsuarios()
   }, [])
 
   // Cargar compras cuando cambien los filtros
@@ -50,6 +55,15 @@ const PaginaCompras: React.FC = () => {
       setProveedores(data)
     } catch (error) {
       console.error("Error al cargar proveedores:", error)
+    }
+  }
+
+  const cargarUsuarios = async () => {
+    try {
+      const data = await obtenerUsuarios()
+      setUsuarios(data)
+    } catch (error) {
+      console.error("Error al cargar usuarios:", error)
     }
   }
 
@@ -87,6 +101,7 @@ const PaginaCompras: React.FC = () => {
       idProveedor: null,
       fechaInicio: null,
       fechaFin: null,
+      idUsuario: null,
     })
   }
 
@@ -131,13 +146,13 @@ const PaginaCompras: React.FC = () => {
             <p className="text-gray-600">Gestiona las compras a proveedores</p>
           </div>
         </div>
-          <button
-            onClick={() => setModalNuevoAbierto(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            <Plus size={20} />
-            <span>Nueva Compra</span>
-          </button>
+        <button
+          onClick={() => setModalNuevoAbierto(true)}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          <Plus size={20} />
+          <span>Nueva Compra</span>
+        </button>
       </div>
 
       {/* Panel de Filtros */}
@@ -183,15 +198,31 @@ const PaginaCompras: React.FC = () => {
             />
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+            <select
+              value={filtros.idUsuario || ""}
+              onChange={(e) => manejarCambioFiltro("idUsuario", e.target.value ? Number(e.target.value) : null)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Todos los usuarios</option>
+              {usuarios.map((usuario) => (
+                <option key={usuario.id} value={usuario.id}>
+                  {usuario.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex self-end mb-1">
-          <button
-            onClick={limpiarFiltros}
-            className="p-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 flex items-center justify-center"
-            title="Limpiar filtros"
-          >
-            <BrushCleaning size={20} />
-          </button>
-        </div>
+            <button
+              onClick={limpiarFiltros}
+              className="p-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+              title="Limpiar filtros"
+            >
+              <BrushCleaning size={20} />
+            </button>
+          </div>
         </div>
       </div>
 

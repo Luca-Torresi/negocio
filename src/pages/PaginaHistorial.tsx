@@ -8,6 +8,8 @@ import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import type { PaginaDeVentas, FiltrosVenta, VentaHistorial } from "../types/dto/Venta"
 import { obtenerVentas, obtenerMetodosDePago } from "../api/ventaApi"
+import { obtenerUsuarios } from "../api/usuarioApi"
+import type { Usuario } from "../types/dto/Usuario"
 import { formatCurrency } from "../utils/numberFormatUtils"
 import { formatearFecha, formatearHora } from "../utils/fechaUtils"
 import { ModalDetallesVenta } from "../components/ventas/ModalDetallesVenta"
@@ -18,6 +20,7 @@ const PaginaHistorialVentas: React.FC = () => {
   // Estados principales
   const [ventas, setVentas] = useState<PaginaDeVentas | null>(null)
   const [metodosDePago, setMetodosDePago] = useState<string[]>([])
+  const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [ventaSeleccionada, setVentaSeleccionada] = useState<VentaHistorial | null>(null)
   const [mostrarModalDetalles, setMostrarModalDetalles] = useState<boolean>(false)
 
@@ -25,7 +28,7 @@ const PaginaHistorialVentas: React.FC = () => {
   const [fechaDesde, setFechaDesde] = useState<Date | null>(null)
   const [fechaHasta, setFechaHasta] = useState<Date | null>(null)
   const [metodoPagoFiltro, setMetodoPagoFiltro] = useState<string>("")
-  const [usuarioFiltro, setUsuarioFiltro] = useState<string>("")
+  const [usuarioFiltro, setUsuarioFiltro] = useState<number | null>(null)
   const [paginaActual, setPaginaActual] = useState<number>(0)
   const [tamañoPagina, setTamañoPagina] = useState<number>(10)
 
@@ -39,6 +42,8 @@ const PaginaHistorialVentas: React.FC = () => {
       try {
         const metodosData = await obtenerMetodosDePago()
         setMetodosDePago(metodosData)
+        const usuariosData = await obtenerUsuarios()
+        setUsuarios(usuariosData)
         await buscarVentas()
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error al cargar datos")
@@ -60,7 +65,7 @@ const PaginaHistorialVentas: React.FC = () => {
         ...(fechaDesde && { fechaDesde: fechaDesde.toISOString().split("T")[0] }),
         ...(fechaHasta && { fechaHasta: fechaHasta.toISOString().split("T")[0] }),
         ...(metodoPagoFiltro && { metodoDePago: metodoPagoFiltro }),
-        ...(usuarioFiltro && { usuario: usuarioFiltro }),
+        ...(usuarioFiltro && { usuarioId: usuarioFiltro }),
       }
 
       const resultado = await obtenerVentas(filtros)
@@ -78,7 +83,7 @@ const PaginaHistorialVentas: React.FC = () => {
     setFechaDesde(null)
     setFechaHasta(null)
     setMetodoPagoFiltro("")
-    setUsuarioFiltro("")
+    setUsuarioFiltro(null)
     setPaginaActual(0)
     buscarVentas(0)
   }
@@ -177,13 +182,18 @@ const PaginaHistorialVentas: React.FC = () => {
             {/* Usuario */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
-              <input
-                type="text"
-                value={usuarioFiltro}
-                onChange={(e) => setUsuarioFiltro(e.target.value)}
-                placeholder="Filtrar por usuario"
+              <select
+                value={usuarioFiltro || ""}
+                onChange={(e) => setUsuarioFiltro(e.target.value ? Number(e.target.value) : null)}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              >
+                <option value="">Todos los usuarios</option>
+                {usuarios.map((usuario) => (
+                  <option key={usuario.id} value={usuario.id}>
+                    {usuario.nombre}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Botones de acción */}
@@ -197,7 +207,6 @@ const PaginaHistorialVentas: React.FC = () => {
               </button>
             </div>
           </div>
-
         </div>
 
         {/* Tabla de ventas */}
