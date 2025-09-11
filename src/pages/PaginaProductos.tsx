@@ -204,7 +204,7 @@ export const PaginaProductos: React.FC = () => {
 
       {/* Panel de Filtros */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-        <div className="inline-grid grid-cols-[1.1fr_0.9fr_0.9fr_0.9fr_0.7fr_auto] gap-4 mb-2">
+        <div className="inline-grid grid-cols-[1.1fr_0.9fr_0.9fr_0.9fr_0.8fr_auto] gap-4 mb-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Buscar por nombre</label>
             <input

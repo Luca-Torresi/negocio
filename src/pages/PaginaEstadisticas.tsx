@@ -240,7 +240,7 @@ const PaginaEstadisticas: React.FC = () => {
     },
     colors: ["#5E94EB"],
     backgroundColor: "transparent",
-    chartArea: { left: 100, top: 15, right: 35, width: "70%", height: "80%" },
+    chartArea: { left: 120, top: 15, right: 35, width: "100%", height: "80%" },
   }
 
   // const opcionesVolumenVentas = {

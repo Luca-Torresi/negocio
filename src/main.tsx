@@ -1,13 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
 import PaginaCategorias from './pages/PaginaCategorias.tsx';
 import PaginaGastos from './pages/PaginaGastos.tsx';
 import PaginaProveedores from './pages/PaginaProveedores.tsx';
 import { PaginaProductos } from './pages/PaginaProductos.tsx';
-import  PaginaCompras from './pages/PaginaCompras.tsx';
+import PaginaCompras from './pages/PaginaCompras.tsx';
 import { PaginaPromociones } from './pages/PaginaPromociones.tsx';
 import PaginaVentas from './pages/PaginaVentas.tsx';
 import PaginaHistorial from './pages/PaginaHistorial.tsx';
@@ -21,24 +21,28 @@ registerLocale('es', es);
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />, 
+    element: <App />,
     children: [
       {
-        path: 'categorias', 
-        element: <PaginaCategorias />,
-      },      
+        index: true,
+        element: <Navigate to="/productos" replace /> 
+      },
       {
-        path: 'gastos', 
+        path: 'categorias',
+        element: <PaginaCategorias />,
+      },
+      {
+        path: 'gastos',
         element: <PaginaGastos />,
-      },  
+      },
       {
         path: 'proveedores',
         element: <PaginaProveedores />,
-      },    
+      },
       {
         path: 'productos',
         element: <PaginaProductos />,
-      },    
+      },
       {
         path: 'compras',
         element: <PaginaCompras />,
@@ -54,11 +58,11 @@ const router = createBrowserRouter([
       {
         path: 'historial',
         element: <PaginaHistorial />,
-      }, 
+      },
       {
         path: 'reportes',
         element: <PaginaEstadisticas />,
-      }, 
+      },
     ],
   },
   {
