@@ -54,12 +54,3 @@ export interface PaginaDeVentas {
   size: number
 }
 
-// Filtros para búsqueda de ventas
-export interface FiltrosVenta {
-  fechaDesde?: string
-  fechaHasta?: string
-  metodoDePago?: string
-  usuario?: string
-  number: number
-  size: number
-}

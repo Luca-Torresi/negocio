@@ -53,3 +53,16 @@ export const obtenerVentasPorHora = async (fechas: FiltrosFecha): Promise<DatosP
   const response = await apiClient.get(`/estadistica/ventasPorHora?${params.toString()}`)
   return response.data
 }
+
+// Obtener ventas por método de pago
+export const obtenerVentasPorMetodoDePago = async (fechas: {
+  fechaInicio: string
+  fechaFin: string
+}): Promise<DatosParaGrafico> => {
+  const params = new URLSearchParams()
+  params.append("fechaInicio", fechas.fechaInicio)
+  params.append("fechaFin", fechas.fechaFin)
+
+  const response = await apiClient.get(`/estadistica/ventasPorMetodoDePago?${params.toString()}`)
+  return response.data
+}

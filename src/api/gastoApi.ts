@@ -8,8 +8,7 @@ export const obtenerTiposGasto = async (): Promise<string[]> => {
 }
 
 // Obtener gastos con filtros y paginación
-export const obtenerGastos = async (filtros: any): Promise<PaginaDeGastos> => {
-  // Construir parámetros de URL dinámicamente, excluyendo valores null/undefined
+export const obtenerGastos = async (filtros: any): Promise<PaginaDeGastos> => {  
   const params = new URLSearchParams()
 
   Object.keys(filtros).forEach((key) => {

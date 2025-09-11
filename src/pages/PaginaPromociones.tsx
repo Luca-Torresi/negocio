@@ -2,16 +2,20 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { ShoppingBag, Plus, Eye, Pencil } from "lucide-react"
+import { ShoppingBag, Plus, Eye, Pencil, BrushCleaning } from "lucide-react"
 import { obtenerPromociones, cambiarEstadoPromocion } from "../api/promocionApi"
 import { ModalGestionarPromocion } from "../components/promociones/ModalGestionarPromocion"
 import { ModalDetallesPromocion } from "../components/promociones/ModalDetallesPromocion"
 import type { Promocion } from "../types/dto/Promocion"
 import { formatCurrency } from "../utils/numberFormatUtils"
 
+type FiltroEstado = "todas" | "activas" | "inactivas"
+
 export const PaginaPromociones: React.FC = () => {
   const [promociones, setPromociones] = useState<Promocion[]>([])
   const [cargando, setCargando] = useState(true)
+  const [filtroNombre, setFiltroNombre] = useState("")
+  const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>("todas")
   const [modalGestionAbierto, setModalGestionAbierto] = useState(false)
   const [modalDetallesAbierto, setModalDetallesAbierto] = useState(false)
   const [promocionParaEditar, setPromocionParaEditar] = useState<Promocion | null>(null)
@@ -66,6 +70,21 @@ export const PaginaPromociones: React.FC = () => {
     setPromocionDetalles(null)
   }
 
+  const limpiarFiltros = (): void => {
+    setFiltroNombre("")
+    setFiltroEstado("todas")
+  }
+
+  const promocionesFiltradas = promociones.filter((promocion) => {
+    const cumpleNombre = promocion.nombre.toLowerCase().includes(filtroNombre.toLowerCase())
+    const cumpleEstado =
+      filtroEstado === "todas" ||
+      (filtroEstado === "activas" && promocion.estado) ||
+      (filtroEstado === "inactivas" && !promocion.estado)
+
+    return cumpleNombre && cumpleEstado
+  })
+
   return (
     <div className="p-6">
       {/* Encabezado */}
@@ -86,15 +105,55 @@ export const PaginaPromociones: React.FC = () => {
         </button>
       </div>
 
+      {/* Panel de filtros */}
+      <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="grid grid-cols-6 gap-4 mb-2">
+          <div className="col-span-2">
+            <label className="block text-sm font-medium mb-1">Buscar por nombre</label>
+            <input
+              type="text"
+              value={filtroNombre}
+              onChange={(e) => setFiltroNombre(e.target.value)}
+              placeholder="Escriba el nombre de la promoción..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="col-span-1">
+            <label className="block text-sm font-medium mb-1">Filtrar por estado</label>
+            <select
+              value={filtroEstado}
+              onChange={(e) => setFiltroEstado(e.target.value as FiltroEstado)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="todas">Todas</option>
+              <option value="activas">Activas</option>
+              <option value="inactivas">Inactivas</option>
+            </select>
+          </div>
+          <div className="flex mt-6">
+            <button
+              onClick={limpiarFiltros}
+              className="p-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+            >
+              <BrushCleaning size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Tabla de promociones */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {cargando ? (
           <div className="p-8 text-center">
             <p className="text-gray-500">Cargando promociones...</p>
           </div>
-        ) : promociones.length === 0 ? (
+        ) : promocionesFiltradas.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-gray-500">No hay promociones registradas</p>
+            <p className="text-gray-500">
+              {promociones.length === 0
+                ? "No hay promociones registradas"
+                : "No se encontraron promociones que coincidan con los filtros"}
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -117,7 +176,7 @@ export const PaginaPromociones: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {promociones.map((promocion) => (
+                {promocionesFiltradas.map((promocion) => (
                   <tr key={promocion.idPromocion} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{promocion.idPromocion}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -128,9 +187,11 @@ export const PaginaPromociones: React.FC = () => {
                       {formatCurrency(promocion.precio)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="flex space-x-2">
+                      <div className="flex justify-center space-x-2">
                         <button
-                          onClick={() => { abrirModalDetalles(promocion) }}
+                          onClick={() => {
+                            abrirModalDetalles(promocion)
+                          }}
                           className="text-black"
                           title="Ver detalles"
                         >
@@ -138,7 +199,9 @@ export const PaginaPromociones: React.FC = () => {
                         </button>
 
                         <button
-                          onClick={() => { abrirModalEditar(promocion) }}
+                          onClick={() => {
+                            abrirModalEditar(promocion)
+                          }}
                           className="text-black"
                           title="Editar"
                         >
@@ -147,9 +210,7 @@ export const PaginaPromociones: React.FC = () => {
 
                         <button
                           onClick={() => manejarCambiarEstado(promocion.idPromocion)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${promocion.estado
-                            ? "bg-green-500 focus:ring-green-500"
-                            : "bg-red-400 focus:ring-red-400"
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${promocion.estado ? "bg-green-500 focus:ring-green-500" : "bg-red-400 focus:ring-red-400"
                             }`}
                           title={promocion.estado ? "Desactivar" : "Activar"}
                         >
@@ -175,12 +236,7 @@ export const PaginaPromociones: React.FC = () => {
         promocionParaEditar={promocionParaEditar}
       />
 
-      <ModalDetallesPromocion
-        isOpen={modalDetallesAbierto}
-        onClose={cerrarModales}
-        promocion={promocionDetalles}
-      />
-
+      <ModalDetallesPromocion isOpen={modalDetallesAbierto} onClose={cerrarModales} promocion={promocionDetalles} />
     </div>
   )
 }

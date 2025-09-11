@@ -7,7 +7,7 @@ import { construirArbolCategorias } from "../utils/categoriaUtils"
 import { ModalNuevaCategoria } from "../components/categorias/ModalNuevaCategoria"
 import { ModalEditarCategoria } from "../components/categorias/ModalEditarCategoria"
 import { ModalDetallesCategoria } from "../components/categorias/ModalDetallesCategoria"
-import { ChevronDown, ChevronRight, Eye, Pencil, Tag, Plus } from "lucide-react"
+import { ChevronDown, ChevronRight, Eye, Pencil, Tag, Plus, BrushCleaning } from "lucide-react"
 
 type FiltroEstado = "todas" | "activas" | "inactivas"
 
@@ -117,23 +117,25 @@ const PaginaCategorias: React.FC = () => {
       <React.Fragment key={categoria.idCategoria}>
         <tr className="border-b hover:bg-gray-50">
           <td className="px-4 py-3">{categoria.idCategoria}</td>
-          <td className="px-4 py-3" style={{ paddingLeft: `${16 + categoria.nivel * 24}px` }}>
+          <td className="px-4 py-3">
+            {tieneHijos && (
+              <button
+                onClick={() => toggleExpansion(categoria.idCategoria)}
+                className="mr-2 text-gray-500 hover:text-gray-700"
+              >
+                {estaExpandida ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+              </button>
+            )}
+          </td>
+          <td className="px-4 py-3" style={{ paddingLeft: `${16 + categoria.nivel * 40}px` }}>
             <div className="flex items-center">
-              {tieneHijos && (
-                <button
-                  onClick={() => toggleExpansion(categoria.idCategoria)}
-                  className="mr-2 text-gray-500 hover:text-gray-700"
-                >
-                  {estaExpandida ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                </button>
-              )}
               {categoria.nombre}
             </div>
           </td>
           <td className="px-4 py-3">{categoria.descripcion}</td>
           <td className="px-4 py-3 text-center">{categoria.productos.length}</td>
           <td className="px-4 py-3">
-            <div className="flex space-x-2">
+            <div className="flex justify-center space-x-2">
               <button
                 onClick={() => {
                   setCategoriaSeleccionada(categoria)
@@ -207,8 +209,9 @@ const PaginaCategorias: React.FC = () => {
 
       {/* Panel de Filtros */}
       <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
+        <div className="grid grid-cols-6 gap-4 mb-2">
+
+          <div className="col-span-2">
             <label className="block text-sm font-medium mb-1">Buscar por nombre</label>
             <input
               type="text"
@@ -218,7 +221,8 @@ const PaginaCategorias: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div>
+
+          <div className="col-span-1">
             <label className="block text-sm font-medium mb-1">Filtrar por estado</label>
             <select
               value={filtroEstado}
@@ -229,6 +233,18 @@ const PaginaCategorias: React.FC = () => {
               <option value="activas">Activas</option>
               <option value="inactivas">Inactivas</option>
             </select>
+          </div>
+
+          <div className="flex mt-6">
+            <button
+              onClick={() => {
+                setFiltroNombre("")
+                setFiltroEstado("todas")
+              }}
+              className="p-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+            >
+              <BrushCleaning size={20} />              
+            </button>
           </div>
         </div>
       </div>
@@ -242,10 +258,11 @@ const PaginaCategorias: React.FC = () => {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">ID</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700"></th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Nombre</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Descripción</th>
               <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Cant. Productos</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Acciones</th>
+              <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Acciones</th>
             </tr>
           </thead>
           <tbody>{construirArbolCategorias(categoriasFiltradas).map((categoria) => renderizarCategoria(categoria))}</tbody>

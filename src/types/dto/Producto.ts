@@ -2,6 +2,7 @@
 export interface ProductoAbm {
   idProducto: number
   nombre: string
+  codigoDeBarras: string
   precio: number
   porcentaje: number | null // El descuento puede no existir
   precioConDescuento: number | null
@@ -9,7 +10,8 @@ export interface ProductoAbm {
   nuevoPrecio: number | null 
   costo: number
   stock: number
-  stockSuma: number
+  cantVendida: number
+  cantComprada: number  
   stockMinimo: number
   estado: boolean  
   marca: string
@@ -32,6 +34,7 @@ export interface PaginaDeProductos {
 // Para POST /nuevo y PUT /modificar
 export interface ProductoDTO {
   nombre: string
+  codigoDeBarras: string
   precio: number
   costo: number
   stock: number

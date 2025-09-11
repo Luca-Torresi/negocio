@@ -49,7 +49,7 @@ const Sidebar: React.FC = () => {
     <div className="h-screen w-64 bg-gray-800 text-gray-200 fixed left-0 top-0 flex flex-col">
       {/* Logo/Nombre de la aplicación */}
       <div className="p-6 border-b border-gray-700">
-        <h1 className="text-xl font-bold text-white">Sistema de Gestión</h1>
+        <h1 className="text-xl font-medium italic text-white">"Pañalera Pepa"</h1>
       </div>
 
       {/* User profile section */}
@@ -90,7 +90,7 @@ const Sidebar: React.FC = () => {
       <div className="border-t border-gray-700">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center px-6 py-3 text-sm font-medium text-red-500 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+          className="w-full flex items-center px-6 py-3 text-base font-medium text-red-500 hover:underline decoration-2"
         >
           <LogOut size={20} className="mr-2" />
           Cerrar Sesión

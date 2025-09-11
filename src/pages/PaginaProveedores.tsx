@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useMemo } from "react"
-import { Plus, Pencil, Truck } from "lucide-react"
+import { Plus, Pencil, Truck, BrushCleaning } from "lucide-react"
 import type { Proveedor, ProveedorDTO } from "../types/dto/Proveedor"
 import { obtenerProveedores, crearProveedor, modificarProveedor, cambiarEstadoProveedor } from "../api/proveedorApi"
 import { ModalNuevoProveedor } from "../components/proveedores/ModalNuevoProveedor"
@@ -113,10 +113,10 @@ const PaginaProveedores: React.FC = () => {
       </div>
 
       {/* Panel de filtros */}
-      <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="grid grid-cols-6 gap-4 mb-2">
           {/* Búsqueda por nombre */}
-          <div className="relative">
+          <div className="col-span-2">
             <label className="block text-sm font-medium mb-1">Buscar por nombre</label>
             <input
               type="text"
@@ -128,18 +128,31 @@ const PaginaProveedores: React.FC = () => {
           </div>
 
           {/* Filtro por estado */}
-          <div>
+          <div className="col-span-1">
             <label className="block text-sm font-medium mb-1">Filtrar por estado</label>
             <select
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value as "todos" | "activos" | "inactivos")}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="todos">Todos</option>
               <option value="activos">Activos</option>
               <option value="inactivos">Inactivos</option>
             </select>
           </div>
+
+          <div className="flex mt-6">
+            <button
+              onClick={() => {
+                setBusqueda("")
+                setFiltroEstado("todos")
+              }}
+              className="p-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+            >
+              <BrushCleaning size={20} />
+            </button>
+          </div>
+
         </div>
       </div>
 
@@ -162,7 +175,7 @@ const PaginaProveedores: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -184,7 +197,7 @@ const PaginaProveedores: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{proveedor.telefono}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{proveedor.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center gap-4">
+                      <div className="flex justify-center items-center gap-4">
 
                         {/* Botón editar */}
                         <button

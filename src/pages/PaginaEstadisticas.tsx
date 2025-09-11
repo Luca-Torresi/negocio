@@ -13,6 +13,7 @@ import {
   obtenerProductosRentables,
   obtenerVolumenVentas,
   obtenerVentasPorHora,
+  obtenerVentasPorMetodoDePago,
 } from "../api/estadisticaApi"
 import { obtenerListaProductosVenta } from "../api/productoApi"
 import type { ProductoVenta } from "../types/dto/Producto"
@@ -26,6 +27,7 @@ const PaginaEstadisticas: React.FC = () => {
   const [datosVolumenVentas, setDatosVolumenVentas] = useState<DatosParaGrafico | null>(null)
   const [datosVentasPorHora, setDatosVentasPorHora] = useState<DatosParaGrafico | null>(null)
   const [productosVenta, setProductosVenta] = useState<ProductoVenta[]>([])
+  const [datosMetodosDePago, setDatosMetodosDePago] = useState<DatosParaGrafico | null>(null)
 
   // Estados de filtros (sin cambios)
   const [fechaInicio, setFechaInicio] = useState<Date | null>(() => {
@@ -126,6 +128,7 @@ const PaginaEstadisticas: React.FC = () => {
           volumenData,
           ventasHoraData,
           productosListaData,
+          metodosPagoData,
         ] = await Promise.all([
           obtenerKpis(),
           obtenerIngresosVsEgresos(fechasParams),
@@ -133,6 +136,7 @@ const PaginaEstadisticas: React.FC = () => {
           obtenerVolumenVentas(fechasParams, productoSeleccionado),
           obtenerVentasPorHora(fechasParams),
           obtenerListaProductosVenta(),
+          obtenerVentasPorMetodoDePago(fechasParams),
         ]);
 
         // --- 3. APLICAMOS LAS TRANSFORMACIONES ---
@@ -185,6 +189,7 @@ const PaginaEstadisticas: React.FC = () => {
         }
         setKpis(kpisData);
         setProductosVenta(productosListaData);
+        setDatosMetodosDePago(metodosPagoData);
 
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error al cargar estadísticas");
@@ -216,12 +221,12 @@ const PaginaEstadisticas: React.FC = () => {
     },
     colors: ["#10B981", "#EF4444"],
     backgroundColor: "transparent",
-    legend: { 
-      position: "top", 
-      alignment: "center", 
+    legend: {
+      position: "top",
+      alignment: "center",
       textStyle: {
         fontSize: 13
-      }           
+      }
     },
     chartArea: { left: 65, top: 30, right: 10, width: "80%", height: "70%" },
   }
@@ -292,7 +297,7 @@ const PaginaEstadisticas: React.FC = () => {
         },
         format: '#'
       },
-      colors: ["#de9922"],
+      colors: ["#816752"],
       backgroundColor: "transparent",
       chartArea: { left: 60, top: 30, right: 40, width: "80%", height: "70%" },
     };
@@ -313,9 +318,25 @@ const PaginaEstadisticas: React.FC = () => {
     legend: {
       position: 'none'
     },
-    colors: ["#8c6dd2"],
+    colors: ["#9A83CE"],
     backgroundColor: "transparent",
     chartArea: { left: 60, top: 60, bottom: 35, right: 30, width: "80%", height: "70%" },
+  }
+
+  const opcionesMetodosDePago = {
+    is3D: true,
+    backgroundColor: "transparent",
+    legend: {
+      position: "labeled",
+      alignment: "start",
+      textStyle: {
+        color: '#4B5563',
+        fontSize: 12,
+        bold: true,
+      }
+    },
+    colors: ["#7B987A", "#343D57", "#9F4A36", "#E5A156", "#ECCAB1"],
+    chartArea: { left: 30, top: 40, bottom: 30, right: 30, width: "80%", height: "70%" },
   }
 
   return (
@@ -364,10 +385,11 @@ const PaginaEstadisticas: React.FC = () => {
       {error && <div className="p-4 bg-red-100 border-l-4 border-red-500 text-red-700 mb-6">{error}</div>}
 
       {/* Sección de KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+      <div className="grid grid-cols-5 gap-6 mb-6">
         {kpis.map((kpi, index) => (
-          <div key={index} className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center">
+          <div key={index} className="bg-white rounded-lg shadow-sm px-6 py-5">
+            <p className="text-sm text-center font-medium text-gray-600 mb-3">{kpi.titulo}</p>
+            <div className="flex items-center justify-center">
               <div className="flex-shrink-0">
                 {/* Lógica de íconos (sin cambios) */}
                 {index === 0 && <TrendingUp className="h-8 w-8 text-green-600" />}
@@ -377,7 +399,7 @@ const PaginaEstadisticas: React.FC = () => {
                 {index === 4 && <AlertTriangle className="h-8 w-8 text-yellow-500" />}
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">{kpi.titulo}</p>
+
                 <p className="text-2xl font-semibold text-center text-gray-900">
                   {index === 0 || index === 1 || index === 3
                     ? formatCurrency(kpi.valor as number)
@@ -393,7 +415,7 @@ const PaginaEstadisticas: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Gráfico 1: Ingresos vs Egresos */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Ingresos vs. Egresos</h3>
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Ingresos vs. Egresos</h3>
           {cargando || !datosIngresosVsEgresos ? (
             <div className="h-64 flex items-center justify-center text-gray-500">
               <div className="flex items-center">
@@ -414,7 +436,7 @@ const PaginaEstadisticas: React.FC = () => {
 
         {/* Gráfico 2: Top 5 Productos Rentables */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Top 7 Productos Más Rentables</h3>
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Top 7 Productos Más Rentables</h3>
           {cargando || !datosProductosRentables ? (
             <div className="h-64 flex items-center justify-center text-gray-500">
               <div className="flex items-center">
@@ -433,10 +455,52 @@ const PaginaEstadisticas: React.FC = () => {
           )}
         </div>
 
+        {/* Gráfico 5: Ventas por Método de Pago */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Ventas por Método de Pago</h3>
+          {cargando || !datosMetodosDePago ? (
+            <div className="h-64 flex items-center justify-center text-gray-500">
+              <div className="flex items-center">
+                <RefreshCw className="animate-spin mr-2" size={20} />
+                Cargando datos...
+              </div>
+            </div>
+          ) : (
+            <Chart
+              chartType="PieChart"
+              width="100%"
+              height="300px"
+              data={datosMetodosDePago}
+              options={opcionesMetodosDePago}
+            />
+          )}
+        </div>
+
+        {/* Gráfico 4: Ventas por Hora */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Cantidad de Ventas por Hora</h3>
+          {cargando || !datosVentasPorHora ? (
+            <div className="h-64 flex items-center justify-center text-gray-500">
+              <div className="flex items-center">
+                <RefreshCw className="animate-spin mr-2" size={20} />
+                Cargando datos...
+              </div>
+            </div>
+          ) : (
+            <Chart
+              chartType="ColumnChart"
+              width="100%"
+              height="300px"
+              data={datosVentasPorHora}
+              options={opcionesVentasPorHora}
+            />
+          )}
+        </div>
+
         {/* Gráfico 3: Volumen de Ventas Mensual */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">Volumen de Ventas Mensual</h3>
+            <h3 className="text-xl font-semibold text-gray-800">Volumen de Ventas Mensual</h3>
             <select
               value={productoSeleccionado || ""}
               onChange={(e) => setProductoSeleccionado(e.target.value ? Number(e.target.value) : null)}
@@ -469,26 +533,6 @@ const PaginaEstadisticas: React.FC = () => {
           )}
         </div>
 
-        {/* Gráfico 4: Ventas por Hora */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Ventas por Hora</h3>
-          {cargando || !datosVentasPorHora ? (
-            <div className="h-64 flex items-center justify-center text-gray-500">
-              <div className="flex items-center">
-                <RefreshCw className="animate-spin mr-2" size={20} />
-                Cargando datos...
-              </div>
-            </div>
-          ) : (
-            <Chart
-              chartType="ColumnChart"
-              width="100%"
-              height="300px"
-              data={datosVentasPorHora}
-              options={opcionesVentasPorHora}
-            />
-          )}
-        </div>
       </div>
     </div>
   )

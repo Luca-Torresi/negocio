@@ -13,6 +13,10 @@ import PaginaVentas from './pages/PaginaVentas.tsx';
 import PaginaHistorial from './pages/PaginaHistorial.tsx';
 import PaginaEstadisticas from './pages/PaginaEstadisticas.tsx';
 import PaginaInicioSesion from './pages/PaginaInicioSesion.tsx';
+import { registerLocale } from 'react-datepicker';
+import { es } from 'date-fns/locale/es';
+
+registerLocale('es', es);
 
 const router = createBrowserRouter([
   {

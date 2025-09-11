@@ -32,7 +32,7 @@ const PaginaGastos: React.FC = () => {
     tipoGasto: null as string | null,
     fechaInicio: null as string | null,
     fechaFin: null as string | null,
-    usuarioId: null as number | null,
+    idUsuario: null as number | null,
   })
 
   // Cargar tipos de gasto al montar el componente
@@ -83,7 +83,7 @@ const PaginaGastos: React.FC = () => {
     setFiltros((prev) => ({
       ...prev,
       [campo]: valor,
-      page: 0, // Resetear a primera página cuando cambian filtros
+      page: 0,
     }))
   }
 
@@ -94,7 +94,7 @@ const PaginaGastos: React.FC = () => {
       tipoGasto: null,
       fechaInicio: null,
       fechaFin: null,
-      usuarioId: null,
+      idUsuario: null,
     })
   }
 
@@ -155,22 +155,7 @@ const PaginaGastos: React.FC = () => {
 
       {/* Panel de Filtros */}
       <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <div className="flex gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Gasto</label>
-            <select
-              value={filtros.tipoGasto || ""}
-              onChange={(e) => handleFiltroChange("tipoGasto", e.target.value || null)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Todos los tipos</option>
-              {tiposDeGasto.map((tipo) => (
-                <option key={tipo} value={tipo}>
-                  {tipo}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="inline-grid grid-cols-[0.9fr_0.9fr_1.1fr_1.1fr_auto] gap-4 mb-2">
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
@@ -197,15 +182,31 @@ const PaginaGastos: React.FC = () => {
           </div>
 
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Gasto</label>
+            <select
+              value={filtros.tipoGasto || ""}
+              onChange={(e) => handleFiltroChange("tipoGasto", e.target.value || null)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Todos los tipos</option>
+              {tiposDeGasto.map((tipo) => (
+                <option key={tipo} value={tipo}>
+                  {tipo}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
             <select
-              value={filtros.usuarioId || ""}
-              onChange={(e) => handleFiltroChange("usuarioId", e.target.value ? Number(e.target.value) : null)}
+              value={filtros.idUsuario || ""}
+              onChange={(e) => handleFiltroChange("idUsuario", e.target.value ? Number(e.target.value) : null)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Todos los usuarios</option>
               {usuarios.map((usuario) => (
-                <option key={usuario.id} value={usuario.id}>
+                <option key={usuario.idUsuario} value={usuario.idUsuario}>
                   {usuario.nombre}
                 </option>
               ))}
@@ -259,7 +260,7 @@ const PaginaGastos: React.FC = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Hora
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
                   </tr>
@@ -280,7 +281,7 @@ const PaginaGastos: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatearHora(gasto.fechaHora)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="flex justify-center px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <button onClick={() => abrirModalEditar(gasto)} className="text-black">
                           <Pencil size={18} />
                         </button>

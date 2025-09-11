@@ -27,6 +27,7 @@ export const PaginaProductos: React.FC = () => {
     idCategoria: 0,
     idMarca: 0,
     idProveedor: 0,
+    bajoStock: false,
     page: 0,
     size: 10,
   })
@@ -54,6 +55,7 @@ export const PaginaProductos: React.FC = () => {
     filtros.idCategoria,
     filtros.idMarca,
     filtros.idProveedor,
+    filtros.bajoStock,
     filtros.page,
     filtros.size
   ]);
@@ -89,7 +91,7 @@ export const PaginaProductos: React.FC = () => {
     }
   }
 
-  const manejarCambioFiltro = (campo: string, valor: string | number): void => {
+  const manejarCambioFiltro = (campo: string, valor: string | number | boolean): void => {
     setFiltros((prev) => ({
       ...prev,
       [campo]: valor,
@@ -103,6 +105,7 @@ export const PaginaProductos: React.FC = () => {
       idCategoria: 0,
       idMarca: 0,
       idProveedor: 0,
+      bajoStock: false,
       page: 0,
       size: 10,
     })
@@ -201,7 +204,7 @@ export const PaginaProductos: React.FC = () => {
 
       {/* Panel de Filtros */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+        <div className="inline-grid grid-cols-[1.1fr_0.9fr_0.9fr_0.9fr_0.7fr_auto] gap-4 mb-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Buscar por nombre</label>
             <input
@@ -254,6 +257,20 @@ export const PaginaProductos: React.FC = () => {
               ))}
             </select>
           </div>
+
+          <div className="flex items-end">
+            <button
+              onClick={() => manejarCambioFiltro("bajoStock", !filtros.bajoStock)}
+              className={`w-full flex items-center justify-center px-4 py-2 border rounded-md text-sm font-medium transition-colors ${filtros.bajoStock
+                  ? "bg-yellow-100 text-yellow-800 border-yellow-400"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                }`}
+            >
+              <AlertTriangle size={16} className="mr-2" />
+              Solo Bajo Stock
+            </button>
+          </div>
+
           <div className="flex mt-5">
             <button
               onClick={limpiarFiltros}
@@ -290,16 +307,16 @@ export const PaginaProductos: React.FC = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Precio
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Stock Suma
-                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Mes anterior
+                    </th>                    
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Stock
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Marca
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
                   </tr>
@@ -324,7 +341,7 @@ export const PaginaProductos: React.FC = () => {
                           <div className="font-semibold">{formatCurrency(producto.precio)}</div>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.stockSuma}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">Compra: {producto.cantComprada} - Venta: {producto.cantVendida}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <span
                           className={`inline-flex items-center px-3 py-1 text-sm font-bold rounded-full ${producto.stock <= producto.stockMinimo
@@ -340,7 +357,7 @@ export const PaginaProductos: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.marca}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
+                        <div className="flex justify-center space-x-2">
                           <button
                             onClick={() => abrirModalDetalles(producto)}
                             className="text-black"
@@ -395,7 +412,7 @@ export const PaginaProductos: React.FC = () => {
             </div>
 
             {/* Paginación */}
-            {datosProductos && datosProductos.totalPages > 1 && (
+            {datosProductos && (
               <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
                 <div className="flex-1 flex justify-between sm:hidden">
                   <button
@@ -414,7 +431,7 @@ export const PaginaProductos: React.FC = () => {
                   </button>
                 </div>
                 <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-4">
                     <p className="text-sm text-gray-700">
                       Mostrando <span className="font-medium">{datosProductos.number * datosProductos.size + 1}</span> a{" "}
                       <span className="font-medium">
@@ -425,9 +442,8 @@ export const PaginaProductos: React.FC = () => {
                     <select
                       value={filtros.size}
                       onChange={(e) => manejarCambioTamano(Number.parseInt(e.target.value))}
-                      className="ml-4 px-2 py-1 border border-gray-300 rounded-md text-sm"
+                      className="px-3 py-1 border border-gray-300 rounded-md text-sm"
                     >
-                      <option value={5}>5 por página</option>
                       <option value={10}>10 por página</option>
                       <option value={25}>25 por página</option>
                       <option value={50}>50 por página</option>
@@ -443,18 +459,9 @@ export const PaginaProductos: React.FC = () => {
                         <ChevronLeft size={20} />
                       </button>
 
-                      {Array.from({ length: datosProductos.totalPages }, (_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => manejarCambioPagina(i)}
-                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${i === datosProductos.number
-                            ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
-                            : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
-                            }`}
-                        >
-                          {i + 1}
-                        </button>
-                      ))}
+                      <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                        Página {datosProductos.number + 1} de {datosProductos.totalPages}
+                      </span>
 
                       <button
                         onClick={() => manejarCambioPagina(datosProductos.number + 1)}

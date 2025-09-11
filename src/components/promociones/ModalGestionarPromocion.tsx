@@ -7,6 +7,7 @@ import { crearPromocion, modificarPromocion } from "../../api/promocionApi"
 import { obtenerListaProductosVenta } from "../../api/productoApi"
 import type { PromocionDTO, Promocion } from "../../types/dto/Promocion"
 import type { ProductoVenta } from "../../types/dto/Producto"
+import { InputMoneda } from "../InputMoneda"
 
 interface Props {
   isOpen: boolean
@@ -25,7 +26,7 @@ interface DetalleFormulario {
 export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSuccess, promocionParaEditar }) => {
   const [nombre, setNombre] = useState("")
   const [descripcion, setDescripcion] = useState("")
-  const [precio, setPrecio] = useState("")
+  const [precio, setPrecio] = useState<number | null>(null)
   const [productosDisponibles, setProductosDisponibles] = useState<ProductoVenta[]>([])
   const [detalles, setDetalles] = useState<DetalleFormulario[]>([])
 
@@ -49,7 +50,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
     if (promocionParaEditar) {
       setNombre(promocionParaEditar.nombre)
       setDescripcion(promocionParaEditar.descripcion)
-      setPrecio(promocionParaEditar.precio.toString())
+      setPrecio(promocionParaEditar.precio)
 
       // Convertir detalles de la promoción a formato del formulario
       const detallesFormulario = promocionParaEditar.detalles.map((detalle) => ({
@@ -86,7 +87,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
   const limpiarFormulario = (): void => {
     setNombre("")
     setDescripcion("")
-    setPrecio("")
+    setPrecio(0)
     setDetalles([])
     setBusquedaProducto("")
     setProductoSeleccionado(null)
@@ -140,7 +141,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
       const promocionDTO: PromocionDTO = {
         nombre: nombre.trim(),
         descripcion: descripcion.trim(),
-        precio: Number.parseFloat(precio),
+        precio: precio,
         detalles: detalles.map((d) => ({
           idProducto: d.idProducto,
           cantidad: d.cantidad,
@@ -194,15 +195,13 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Precio *</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
+              <InputMoneda
                 value={precio}
-                onChange={(e) => setPrecio(e.target.value)}
+                onValueChange={(nuevoValor) => setPrecio(nuevoValor || 0)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="$ 0"
                 required
-              />
+              />              
             </div>
           </div>
 
