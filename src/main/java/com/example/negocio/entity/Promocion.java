@@ -1,5 +1,6 @@
 package com.example.negocio.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,7 @@ public class Promocion {
     private Boolean estado;
 
     @OneToMany(mappedBy = "promocion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<DetallePromocion> detalles;
 
 }

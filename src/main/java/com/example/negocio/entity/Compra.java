@@ -1,5 +1,6 @@
 package com.example.negocio.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class Compra {
     private Proveedor proveedor;
 
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<DetalleCompra> detalles;
 
     @ManyToOne @JoinColumn(name = "idUsuario")

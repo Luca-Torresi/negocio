@@ -1,16 +1,13 @@
 
-En los endpoint de nuevaCompra, nuevaVenta y nuevoGasto.. se debe obtener el idUsuario del header
-
-Las compras, ventas y gastos se deben poder filtrar por usuario
-
 falta agregar la lógica para el stockSuma
 
 En los mapper que utilizan Detalle...Mapper.class, se conserva esto o no? para mapear los detalles
 
 Antes de empaquetar la aplicación, eliminar todos los imports que no se esten utilizando
 
-Añadir botón para limpiar filtros
+Las marcas las dejamos o las sacamos
 
-Añadir en las páginas que falte, la barra de paginación
+Modificar los input numéricos para que sean más cómodos
+Y también modificar los modales que están medio rari
 
-El modal detallesVenta debe ser un componente aparte
+

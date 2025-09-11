@@ -16,8 +16,8 @@ public interface DetalleVentaRepository extends JpaRepository<DetalleVenta, Long
 
     @Query(
             value = "SELECT " +
-                    "    t.idProducto, " +
-                    "    SUM(t.cantidad) AS total " +
+                    "    CAST(t.idProducto AS SIGNED) AS idProducto, " +
+                    "    CAST(SUM(t.cantidad) AS SIGNED) AS total " +
                     "FROM ( " +
                     "    SELECT " +
                     "        dv.idProducto, " +

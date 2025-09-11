@@ -1,9 +1,11 @@
 package com.example.negocio.service;
 
 import com.example.negocio.dto.producto.*;
+import com.example.negocio.dto.venta.CatalogoDTO;
 import com.example.negocio.entity.*;
 import com.example.negocio.exception.*;
 import com.example.negocio.mapper.ProductoMapper;
+import com.example.negocio.mapper.VentaMapper;
 import com.example.negocio.repository.*;
 import com.example.negocio.specification.ProductoSpecification;
 import jakarta.transaction.Transactional;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +33,7 @@ public class ProductoService {
     private final ProductoMapper productoMapper;
     private final DetalleVentaRepository detalleVentaRepository;
     private final DetalleCompraRepository detalleCompraRepository;
+    private final VentaMapper ventaMapper;
 
     public Producto nuevoProducto(ProductoDTO dto) {
         Producto producto = productoMapper.toEntity(dto);
@@ -73,12 +77,14 @@ public class ProductoService {
         LocalDateTime inicioMesActual = primerDiaMesActual.atStartOfDay();
         LocalDateTime inicioMesPasado = primerDiaMesPasado.atStartOfDay();
 
+        System.out.println("ANTES");
         List<MesAnteriorDTO> cantVendida = detalleVentaRepository.findCantidadVendidaMesAnterior(inicioMesPasado, inicioMesActual);
-        Map<Long, Integer> mapaDeVentas = cantVendida.stream()
+        System.out.println("DESPUÉS");
+        Map<Long, Long> mapaDeVentas = cantVendida.stream()
                 .collect(Collectors.toMap(MesAnteriorDTO::getIdProducto, MesAnteriorDTO::getTotal));
 
         List<MesAnteriorDTO> cantComprada = detalleCompraRepository.findCantidadCompradaMesAnterior(inicioMesPasado, inicioMesActual);
-        Map<Long, Integer> mapaDeCompras = cantComprada.stream()
+        Map<Long, Long> mapaDeCompras = cantComprada.stream()
                 .collect(Collectors.toMap(MesAnteriorDTO::getIdProducto, MesAnteriorDTO::getTotal));
 
         Pageable pageable = PageRequest.of(page, size);
@@ -92,9 +98,9 @@ public class ProductoService {
 
         return productos.map(producto -> {
             ProductoAbmDTO dto = productoMapper.toAbmDto(producto);
-            Integer totalVendido = mapaDeVentas.getOrDefault(producto.getIdProducto(), 0);
+            Long totalVendido = mapaDeVentas.getOrDefault(producto.getIdProducto(), 0L);
             dto.setCantVendida(totalVendido);
-            Integer totalComprado = mapaDeCompras.getOrDefault(producto.getIdProducto(), 0);
+            Long totalComprado = mapaDeCompras.getOrDefault(producto.getIdProducto(), 0L);
             dto.setCantComprada(totalComprado);
             return dto;
         });
@@ -125,17 +131,22 @@ public class ProductoService {
 
     @Transactional
     public void descontarStock(Long idProducto, Integer cantidadADescontar) {
-        Producto producto = productoRepository.findById(idProducto)
-                .orElseThrow(() -> new ProductoNoEncontradoException());
+        Producto producto = productoRepository.findById(idProducto).orElseThrow(() -> new ProductoNoEncontradoException());
 
         if (producto.getStock() < cantidadADescontar) {
-            throw new StockInsuficienteException("No hay stock suficiente para el producto: " + producto.getNombre());
+            throw new StockInsuficienteException(producto.getNombre());
         }
 
         int nuevoStock = producto.getStock() - cantidadADescontar;
         producto.setStock(nuevoStock);
 
         productoRepository.save(producto);
+    }
+
+    public CatalogoDTO buscarPorCodigo(String codigoDeBarras){
+        Producto producto = productoRepository.findByCodigoDeBarras(codigoDeBarras).orElseThrow(() -> new ProductoNoEncontradoException());
+
+        return ventaMapper.productoToCalalogoDto(producto);
     }
 }
 

@@ -24,6 +24,13 @@ public class EstadisticaController {
         return ResponseEntity.ok(estadisticaService.ingresosVsEgresos(fechaInicio, fechaFin));
     }
 
+    @GetMapping("/ventasPorMetodoDePago")
+    public ResponseEntity<List<List<Object>>> ventasPorMetodoDePago(
+            @RequestParam LocalDate fechaInicio,
+            @RequestParam LocalDate fechaFin){
+        return ResponseEntity.ok(estadisticaService.ventasPorMetodoDePago(fechaInicio, fechaFin));
+    }
+
     @GetMapping("/productosRentables")
     public ResponseEntity<List<List<Object>>> productosMasRentables(
             @RequestParam LocalDate fechaInicio,

@@ -1,8 +1,11 @@
 package com.example.negocio.specification;
 
 import com.example.negocio.entity.Compra;
+import com.example.negocio.entity.Gasto;
 import com.example.negocio.entity.Usuario;
 import com.example.negocio.entity.Venta;
+import com.example.negocio.enums.MetodoDePago;
+import com.example.negocio.enums.TipoGasto;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -36,6 +39,15 @@ public class VentaSpecification {
             }
             Join<Venta, Usuario> usuarioJoin = root.join("usuario");
             return cb.equal(usuarioJoin.get("idUsuario"), idUsuario);
+        };
+    }
+
+    public static Specification<Venta> conMetodoDePago(MetodoDePago metodoDePago) {
+        return (root, query, cb) -> {
+            if (metodoDePago == null) {
+                return cb.conjunction();
+            }
+            return cb.equal(root.get("metodoDePago"), metodoDePago);
         };
     }
 }

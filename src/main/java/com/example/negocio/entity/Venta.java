@@ -1,6 +1,7 @@
 package com.example.negocio.entity;
 
 import com.example.negocio.enums.MetodoDePago;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,7 @@ public class Venta {
     private MetodoDePago metodoDePago;
 
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<DetalleVenta> detalles;
 
     @ManyToOne @JoinColumn(name = "idUsuario")

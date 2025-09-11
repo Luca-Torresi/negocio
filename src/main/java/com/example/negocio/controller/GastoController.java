@@ -20,8 +20,10 @@ public class GastoController {
     private final GastoService gastoService;
 
     @PostMapping("/nuevo")
-    public ResponseEntity<Gasto> nuevoGasto(@RequestBody GastoDTO dto) {
-        return ResponseEntity.ok(gastoService.nuevoGasto(dto));
+    public ResponseEntity<Gasto> nuevoGasto(
+            @RequestHeader("X-Usuario-ID") Long idUsuario,
+            @RequestBody GastoDTO dto) {
+        return ResponseEntity.ok(gastoService.nuevoGasto(idUsuario, dto));
     }
 
     @PutMapping("/modificar/{idGasto}")

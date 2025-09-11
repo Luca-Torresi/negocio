@@ -1,3 +1,4 @@
+/*
 # Se descuente el stock correspondiente a la promoción dentro de una venta
 DROP PROCEDURE IF EXISTS recorrerDetallesPromocion;
 

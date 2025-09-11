@@ -1,3 +1,4 @@
+/*
 # Cuando se realiza una venta, se deben descontar los productos del stock
 DROP TRIGGER IF EXISTS nuevaVenta_ai;
 

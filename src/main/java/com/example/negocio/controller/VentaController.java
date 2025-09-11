@@ -4,6 +4,7 @@ import com.example.negocio.dto.venta.CatalogoDTO;
 import com.example.negocio.dto.venta.VentaDTO;
 import com.example.negocio.dto.venta.VentaListaDTO;
 import com.example.negocio.entity.Venta;
+import com.example.negocio.enums.MetodoDePago;
 import com.example.negocio.service.VentaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,8 +20,10 @@ public class VentaController {
     private final VentaService ventaService;
 
     @PostMapping("/nueva")
-    public ResponseEntity<Venta> nuevaVenta(@RequestBody VentaDTO dto) {
-        return ResponseEntity.ok(ventaService.nuevaVenta(dto));
+    public ResponseEntity<Venta> nuevaVenta(
+            @RequestHeader("X-Usuario-ID") Long idUsuario,
+            @RequestBody VentaDTO dto) {
+        return ResponseEntity.ok(ventaService.nuevaVenta(idUsuario, dto));
     }
 
     @GetMapping("/catalogo")
@@ -34,8 +37,9 @@ public class VentaController {
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) LocalDate fechaInicio,
             @RequestParam(required = false) LocalDate fechaFin,
-            @RequestParam(required = false) Long idUsuario) {
-        return ventaService.obtenerVentas(page, size, fechaInicio, fechaFin, idUsuario);
+            @RequestParam(required = false) Long idUsuario,
+            @RequestParam(required = false) MetodoDePago metodoDePago) {
+        return ventaService.obtenerVentas(page, size, fechaInicio, fechaFin, idUsuario, metodoDePago);
     }
 
     @GetMapping("/metodosDePago")

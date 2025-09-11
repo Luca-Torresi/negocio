@@ -20,8 +20,10 @@ public class CompraController {
     private final CompraService compraService;
 
     @PostMapping("/nueva")
-    public Compra nuevaCompra(@RequestBody CompraDTO dto) {
-        return compraService.nuevaCompra(dto);
+    public Compra nuevaCompra(
+            @RequestHeader("X-Usuario-ID") Long idUsuario,
+            @RequestBody CompraDTO dto) {
+        return compraService.nuevaCompra(idUsuario, dto);
     }
 
     @PutMapping("/modificar/{idCompra}")

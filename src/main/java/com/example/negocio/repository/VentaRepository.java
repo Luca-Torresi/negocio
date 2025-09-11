@@ -1,4 +1,6 @@
 package com.example.negocio.repository;
+import com.example.negocio.dto.estadisticas.GraficoDeConteoDTO;
+import com.example.negocio.dto.estadisticas.GraficoGeneralDTO;
 import com.example.negocio.dto.estadisticas.ResultadoMensualDTO;
 import com.example.negocio.dto.estadisticas.VentasPorHoraDTO;
 import com.example.negocio.entity.Venta;
@@ -40,6 +42,17 @@ public interface VentaRepository extends JpaRepository<Venta, Long>, JpaSpecific
             nativeQuery = true
     )
     List<VentasPorHoraDTO> findVentasPorHora(
+            @Param("fechaInicio") LocalDateTime fechaInicio,
+            @Param("fechaFin") LocalDateTime fechaFin
+    );
+
+    @Query(
+            value = "SELECT metodoDePago AS etiqueta, COUNT(*) AS valor FROM venta\n" +
+                    "WHERE fechaHora >= :fechaInicio AND fechaHora < :fechaFin\n" +
+                    "GROUP BY metodoDePago",
+            nativeQuery = true
+    )
+    List<GraficoDeConteoDTO> findVentasPorMetodoDePago(
             @Param("fechaInicio") LocalDateTime fechaInicio,
             @Param("fechaFin") LocalDateTime fechaFin
     );

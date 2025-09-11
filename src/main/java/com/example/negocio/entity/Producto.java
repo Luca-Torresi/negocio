@@ -21,6 +21,9 @@ public class Producto {
     private Integer stockMinimo;
     private Boolean estado;
 
+    @Column(unique = true)
+    private String codigoDeBarras;
+
     @ManyToOne @JoinColumn(name = "idMarca")
     private Marca marca;
 

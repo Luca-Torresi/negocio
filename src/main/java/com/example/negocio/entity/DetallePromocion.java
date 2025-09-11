@@ -1,5 +1,6 @@
 package com.example.negocio.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,7 @@ public class DetallePromocion {
     private Producto producto;
 
     @ManyToOne @JoinColumn(name = "idPromocion")
+    @JsonBackReference
     private Promocion promocion;
 
 }

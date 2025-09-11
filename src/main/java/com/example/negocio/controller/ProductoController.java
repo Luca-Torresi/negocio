@@ -1,6 +1,7 @@
 package com.example.negocio.controller;
 
 import com.example.negocio.dto.producto.*;
+import com.example.negocio.dto.venta.CatalogoDTO;
 import com.example.negocio.entity.Producto;
 import com.example.negocio.service.ProductoService;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +52,11 @@ public class ProductoController {
     public ResponseEntity<Void> cambiarEstadoProducto(@PathVariable Long idProducto){
         productoService.cambiarEstadoProducto(idProducto);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/buscarPorCodigo/{codigoDeBarras}")
+    public ResponseEntity<CatalogoDTO> buscarPorCodigo(@PathVariable String codigoDeBarras){
+        return ResponseEntity.ok(productoService.buscarPorCodigo(codigoDeBarras));
     }
 
 }

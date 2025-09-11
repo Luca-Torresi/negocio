@@ -19,6 +19,7 @@ public class GastoSpecification {
             return cb.equal(root.get("tipoGasto"), tipoGasto);
         };
     }
+
     public static Specification<Gasto> porFechaInicio(LocalDate fechaInicio) {
         return (root, query, cb) -> {
             if (fechaInicio == null) {

@@ -8,11 +8,13 @@ import com.example.negocio.entity.*;
 import com.example.negocio.enums.MetodoDePago;
 import com.example.negocio.exception.ProductoNoEncontradoException;
 import com.example.negocio.exception.PromocionNoEncontradaException;
+import com.example.negocio.exception.UsuarioNoEncontradoException;
 import com.example.negocio.mapper.DetalleVentaMapper;
 import com.example.negocio.mapper.ProductoMapper;
 import com.example.negocio.mapper.VentaMapper;
 import com.example.negocio.repository.ProductoRepository;
 import com.example.negocio.repository.PromocionRepository;
+import com.example.negocio.repository.UsuarioRepository;
 import com.example.negocio.repository.VentaRepository;
 import com.example.negocio.specification.VentaSpecification;
 import jakarta.transaction.Transactional;
@@ -20,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -41,11 +44,15 @@ public class VentaService {
     private final PromocionRepository promocionRepository;
     private final ProductoMapper productoMapper;
     private final ProductoService productoService;
+    private final UsuarioRepository usuarioRepository;
 
     @Transactional
-    public Venta nuevaVenta(VentaDTO dto) {
+    public Venta nuevaVenta(Long idUsuario, VentaDTO dto) {
+        Usuario usuario = usuarioRepository.findById(idUsuario).orElseThrow(() -> new UsuarioNoEncontradoException());
+
         Venta venta = ventaMapper.toEntity(dto);
         venta.setFechaHora(LocalDateTime.now());
+        venta.setUsuario(usuario);
 
         List<DetalleVenta> detalles = dto.getDetalles().stream()
                 .map(detalleDto -> procesarDetalle(detalleDto, venta))
@@ -131,11 +138,12 @@ public class VentaService {
         return catalogo;
     }
 
-    public Page<VentaListaDTO> obtenerVentas(Integer page, Integer size, LocalDate fechaInicio, LocalDate fechaFin, Long idUsuario){
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<VentaListaDTO> obtenerVentas(Integer page, Integer size, LocalDate fechaInicio, LocalDate fechaFin, Long idUsuario, MetodoDePago metodoDePago){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("fechaHora").descending());
         Specification<Venta> spec = VentaSpecification.porFechaInicio(fechaInicio)
                 .and(VentaSpecification.porFechaFin(fechaFin))
-                .and(VentaSpecification.conUsuario(idUsuario));
+                .and(VentaSpecification.conUsuario(idUsuario))
+                .and(VentaSpecification.conMetodoDePago(metodoDePago));
 
         return ventaRepository.findAll(spec, pageable)
                 .map(ventaMapper::toDto);

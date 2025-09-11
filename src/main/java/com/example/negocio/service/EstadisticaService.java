@@ -55,6 +55,21 @@ public class EstadisticaService {
         return resultadoFinal;
     }
 
+    public List<List<Object>> ventasPorMetodoDePago(LocalDate fechaInicio, LocalDate fechaFin) {
+        LocalDateTime inicio = fechaInicio.atStartOfDay();
+        LocalDateTime fin = fechaFin.plusDays(1).atStartOfDay();
+
+        List<GraficoDeConteoDTO> datos = ventaRepository.findVentasPorMetodoDePago(inicio, fin);
+
+        List<List<Object>> resultados = new ArrayList<>();
+        resultados.add(List.of("Metodo de Pago", "Ventas"));
+        datos.forEach(dato -> {
+            resultados.add(List.of(dato.getEtiqueta(),dato.getValor()));
+        });
+
+        return resultados;
+    }
+
     public List<List<Object>> productosMasRentables(LocalDate fechaInicio, LocalDate fechaFin) {
         LocalDateTime inicio = fechaInicio.atStartOfDay();
         LocalDateTime fin = fechaFin.plusDays(1).atStartOfDay();

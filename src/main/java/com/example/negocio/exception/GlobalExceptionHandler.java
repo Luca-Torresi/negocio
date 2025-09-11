@@ -61,6 +61,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
+    @ExceptionHandler(UsuarioNoEncontradoException.class)
+    public ResponseEntity<String> handleUsuarioNoEncontradaException(UsuarioNoEncontradoException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
     @ExceptionHandler(StockInsuficienteException.class)
     public ResponseEntity<String> handleStockInsuficienteException(StockInsuficienteException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());

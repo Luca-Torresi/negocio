@@ -1,3 +1,4 @@
+/*
 # Cuando se realiza una compra a un proveedor, se debe cargar el stock ingresado
 DROP TRIGGER IF EXISTS nuevaCompra_ai;
 
