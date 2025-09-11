@@ -8,6 +8,8 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.List;
+
 public class ProductoSpecification {
 
     public static Specification<Producto> conNombre(String nombre) {
@@ -32,13 +34,13 @@ public class ProductoSpecification {
         };
     }
 
-    public static Specification<Producto> conCategoria(Long idCategoria) {
+    public static Specification<Producto> conCategoria(List<Long> idsCategorias) {
         return (root, query, cb) -> {
-            if (idCategoria == null) {
+            if (idsCategorias == null || idsCategorias.isEmpty()) {
                 return cb.conjunction();
             }
             Join<Producto, Categoria> categoriaJoin = root.join("categoria");
-            return cb.equal(categoriaJoin.get("idCategoria"), idCategoria);
+            return categoriaJoin.get("idCategoria").in(idsCategorias);
         };
     }
 

@@ -22,7 +22,6 @@ public class ProductoDTO {
     private Integer stock;
     private Integer stockMinimo;
     private String codigoDeBarras;
-    @NotNull
     private Long idMarca;
     @NotNull
     private Long idCategoria;

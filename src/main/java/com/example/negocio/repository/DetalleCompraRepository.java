@@ -14,13 +14,15 @@ import java.util.List;
 public interface DetalleCompraRepository extends JpaRepository<DetalleCompra, Long> {
 
     @Query(
-            value = "SELECT CAST(idProducto AS SIGNED) AS idProducto," +
-                    "CAST(IFNULL(SUM(cantidad), 0) AS SIGNED) AS total " +
-                    "FROM detalleCompra\n" +
-                    "INNER JOIN compra on compra.idCompra = detalleCompra.idCompra\n" +
-                    "WHERE fechaHora >= :inicioMesPasado " +
-                    "AND fechaHora < :inicioMesActual",
-            nativeQuery = true)
+            value = "SELECT " +
+                    "    CAST(dc.idProducto AS SIGNED) AS idProducto, " +
+                    "    CAST(IFNULL(SUM(dc.cantidad), 0) AS SIGNED) AS total " +
+                    "FROM detalleCompra dc " +
+                    "JOIN compra c ON dc.idCompra = c.idCompra " +
+                    "WHERE c.fechaHora >= :inicioMesPasado AND c.fechaHora < :inicioMesActual " +
+                    "GROUP BY dc.idProducto", // <-- AÑADE ESTA LÍNEA
+            nativeQuery = true
+    )
     List<MesAnteriorDTO> findCantidadCompradaMesAnterior(
             @Param("inicioMesPasado") LocalDateTime inicioMesPasado,
             @Param("inicioMesActual") LocalDateTime inicioMesActual

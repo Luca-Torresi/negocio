@@ -10,6 +10,7 @@ import com.example.negocio.repository.*;
 import com.example.negocio.specification.ProductoSpecification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +37,10 @@ public class ProductoService {
     private final DetalleCompraRepository detalleCompraRepository;
     private final VentaMapper ventaMapper;
 
+    @Transactional
     public Producto nuevoProducto(ProductoDTO dto) {
+        validarCodigoDeBarrasUnico(dto.getCodigoDeBarras(), null);
+
         Producto producto = productoMapper.toEntity(dto);
         producto.setEstado(true);
 
@@ -55,7 +60,10 @@ public class ProductoService {
         return productoRepository.save(producto);
     }
 
+    @Transactional
     public Producto modificarProducto(Long idProducto, ProductoDTO dto) {
+        validarCodigoDeBarrasUnico(dto.getCodigoDeBarras(), idProducto);
+
         Producto producto = productoRepository.findById(idProducto).orElseThrow(() -> new ProductoNoEncontradoException());
         Categoria categoria = categoriaRepository.findById(dto.getIdCategoria()).orElseThrow(() -> new CategoriaNoEncontradaException());
         Marca marca = marcaRepository.findById(dto.getIdMarca()).orElseThrow(() -> new MarcaNoEncontradaException());
@@ -87,9 +95,14 @@ public class ProductoService {
         Map<Long, Long> mapaDeCompras = cantComprada.stream()
                 .collect(Collectors.toMap(MesAnteriorDTO::getIdProducto, MesAnteriorDTO::getTotal));
 
+        List<Long> idsCategoriasFiltrar = null;
+        if (idCategoria != null && idCategoria != 0) {
+            idsCategoriasFiltrar = categoriaRepository.findSelfAndDescendantIds(idCategoria);
+        }
+
         Pageable pageable = PageRequest.of(page, size);
         Specification<Producto> spec = ProductoSpecification.conNombre(nombre)
-                .and(ProductoSpecification.conCategoria(idCategoria))
+                .and(ProductoSpecification.conCategoria(idsCategoriasFiltrar))
                 .and(ProductoSpecification.conMarca(idMarca))
                 .and(ProductoSpecification.conProveedor(idProveedor))
                 .and(ProductoSpecification.conBajoStock(bajoStock));
@@ -147,6 +160,23 @@ public class ProductoService {
         Producto producto = productoRepository.findByCodigoDeBarras(codigoDeBarras).orElseThrow(() -> new ProductoNoEncontradoException());
 
         return ventaMapper.productoToCalalogoDto(producto);
+    }
+
+    private void validarCodigoDeBarrasUnico(String codigoDeBarras, Long idProductoActual) {
+        // Si el código de barras es nulo o vacío, no hay nada que validar.
+        if (codigoDeBarras == null || codigoDeBarras.trim().isEmpty()) {
+            return;
+        }
+
+        Optional<Producto> productoExistente = productoRepository.findByCodigoDeBarras(codigoDeBarras);
+
+        if (productoExistente.isPresent()) {
+            // Si estamos modificando, debemos asegurarnos de que el código encontrado
+            // no pertenezca al mismo producto que estamos editando.
+            if (idProductoActual == null || !productoExistente.get().getIdProducto().equals(idProductoActual)) {
+                throw new DataIntegrityViolationException("El código de barras '" + codigoDeBarras + "' ya está en uso.");
+            }
+        }
     }
 }
 
