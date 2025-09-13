@@ -44,7 +44,7 @@ public class ProductoService {
         Producto producto = productoMapper.toEntity(dto);
         producto.setEstado(true);
 
-        if(dto.getIdMarca() != null){
+        if(dto.getIdMarca() != 0){
             Marca marca = marcaRepository.findById(dto.getIdMarca()).orElseThrow(() -> new MarcaNoEncontradaException());
             producto.setMarca(marca);
         } else{

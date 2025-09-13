@@ -5,9 +5,7 @@ En los mapper que utilizan Detalle...Mapper.class, se conserva esto o no? para m
 
 Antes de empaquetar la aplicación, eliminar todos los imports que no se esten utilizando
 
-Las marcas las dejamos o las sacamos
-
 Modificar los input numéricos para que sean más cómodos
 Y también modificar los modales que están medio rari
 
-
+Problemas al editar una promoción
