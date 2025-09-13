@@ -227,7 +227,7 @@ const PaginaVentas: React.FC = () => {
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <ListPlus className="text-blue-600" size={32} />
+          <ListPlus className="text-primary" size={32} />
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Nueva Venta</h1>
             <p className="text-gray-600">Registra una nueva venta en el sistema</p>
@@ -312,7 +312,7 @@ const PaginaVentas: React.FC = () => {
               <button
                 onClick={añadirManualmente}
                 disabled={!itemSeleccionado}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
               >
                 <Plus size={16} className="mr-1" />
                 Añadir
@@ -412,7 +412,7 @@ const PaginaVentas: React.FC = () => {
               <select
                 value={metodoPagoSeleccionado}
                 onChange={(e) => setMetodoPagoSeleccionado(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Seleccionar método de pago</option>
                 {metodosDePago.map((metodo) => (
@@ -425,16 +425,18 @@ const PaginaVentas: React.FC = () => {
 
             <div className="flex justify-between items-center mb-4">
               <span className="text-xl font-semibold">Total General:</span>
-              <span className="text-2xl font-bold text-green-600">${totalGeneral.toFixed(2)}</span>
+              <span className="text-2xl font-bold text-gray-700">${totalGeneral.toFixed(2)}</span>
             </div>
 
-            <button
-              onClick={finalizarVenta}
-              disabled={carrito.length === 0 || !metodoPagoSeleccionado || procesandoVenta}
-              className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold"
-            >
-              {procesandoVenta ? "Procesando..." : "Finalizar Venta"}
-            </button>
+            <div className="flex justify-end">
+              <button
+                onClick={finalizarVenta}
+                disabled={carrito.length === 0 || !metodoPagoSeleccionado || procesandoVenta}
+                className="w-64 py-3 bg-secondary text-white rounded-lg hover:bg-secondary-dark disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold"
+              >
+                {procesandoVenta ? "Procesando..." : "Finalizar Venta"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

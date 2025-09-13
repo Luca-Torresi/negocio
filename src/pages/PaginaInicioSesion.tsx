@@ -78,7 +78,7 @@ const PaginaInicioSesion: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {usuarios.map((usuario) => (
             <button
-              key={usuario.id}
+              key={usuario.idUsuario}
               onClick={() => handleSelectUsuario(usuario)}
               className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg hover:bg-blue-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >

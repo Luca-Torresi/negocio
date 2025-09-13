@@ -8,6 +8,7 @@ import { obtenerListaProductosVenta } from "../../api/productoApi"
 import type { PromocionDTO, Promocion } from "../../types/dto/Promocion"
 import type { ProductoVenta } from "../../types/dto/Producto"
 import { InputMoneda } from "../InputMoneda"
+import { formatCurrency } from "../../utils/numberFormatUtils"
 
 interface Props {
   isOpen: boolean
@@ -181,7 +182,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
 
         <form onSubmit={manejarSubmit} className="space-y-6">
           {/* Campos principales */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="inline-grid grid-cols-[2fr_0.7fr] gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Nombre *</label>
               <input
@@ -189,6 +190,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Escriba el nombre aquí"
                 required
               />
             </div>
@@ -220,8 +222,8 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
           <div className="border-t pt-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Productos del Combo</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-              <div className="md:col-span-2 relative">
+            <div className="inline-grid grid-cols-[2fr_0.5fr_0.9fr] gap-4 mb-4">
+              <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Producto</label>
                 <input
                   type="text"
@@ -251,7 +253,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
                       >
                         <div className="flex justify-between items-center">
                           <span className="font-medium">{producto.nombre}</span>
-                          <span className="font-semibold text-green-600">${producto.precio.toFixed(2)}</span>
+                          <span className="font-semibold text-green-600">{formatCurrency(producto.precio)}</span>
                         </div>
                       </div>
                     ))}
@@ -275,10 +277,10 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
                   type="button"
                   onClick={agregarProducto}
                   disabled={!productoSeleccionado}
-                  className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full bg-secondary text-white px-4 py-2 rounded-md hover:bg-secondary-dark disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <Plus size={16} />
-                  Añadir
+                  Añadir Producto
                 </button>
               </div>
             </div>
@@ -288,10 +290,10 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
               <div className="mb-4 p-4 bg-gray-50 rounded-lg">
                 <h4 className="font-medium text-gray-900">{productoSeleccionado.nombre}</h4>
                 <div className="text-sm text-gray-600 mt-1">
-                  Precio unitario: ${productoSeleccionado.precio.toFixed(2)}
+                  Precio unitario: {formatCurrency(productoSeleccionado.precio)}
                 </div>
                 <div className="font-semibold text-green-600 mt-1">
-                  Subtotal: ${(productoSeleccionado.precio * cantidad).toFixed(2)}
+                  Subtotal: {formatCurrency(productoSeleccionado.precio * cantidad)}
                 </div>
               </div>
             )}
@@ -303,9 +305,9 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
               </label>
               <input
                 type="text"
-                value={`$${precioSugerido.toFixed(2)}`}
+                value={`${formatCurrency(precioSugerido)}`}
                 readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600"
+                className="w-1/5 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600"
               />
             </div>
 
@@ -327,9 +329,9 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
                       <tr key={detalle.idProducto}>
                         <td className="border border-gray-300 px-4 py-2">{detalle.nombreProducto}</td>
                         <td className="border border-gray-300 px-4 py-2">{detalle.cantidad}</td>
-                        <td className="border border-gray-300 px-4 py-2">${detalle.precio.toFixed(2)}</td>
+                        <td className="border border-gray-300 px-4 py-2">{formatCurrency(detalle.precio)}</td>
                         <td className="border border-gray-300 px-4 py-2">
-                          ${(detalle.precio * detalle.cantidad).toFixed(2)}
+                          {formatCurrency(detalle.precio * detalle.cantidad)}
                         </td>
                         <td className="border border-gray-300 px-4 py-2 text-center">
                           <button
@@ -360,7 +362,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
             <button
               type="submit"
               disabled={cargando || detalles.length === 0}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {cargando ? "Guardando..." : "Guardar Promoción"}
             </button>

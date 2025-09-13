@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Package, Plus, Eye, Pencil, Percent, Gift, ChevronLeft, ChevronRight, AlertTriangle, BrushCleaning } from "lucide-react"
+import { Package, Plus, Eye, Pencil, Percent, Gift, ChevronLeft, ChevronRight, AlertTriangle, BrushCleaning, Settings } from "lucide-react"
 import type { PaginaDeProductos, ProductoAbm, MarcaLista, ProveedorLista } from "../types/dto/Producto"
 import { obtenerProductos, cambiarEstadoProducto } from "../api/productoApi"
 import { useCategoriaStore } from "../store/categoriaStore"
@@ -15,6 +15,7 @@ import { ModalDetallesProducto } from "../components/productos/ModalDetallesProd
 import { formatCurrency } from "../utils/numberFormatUtils"
 import { ModalGestionarDescuento } from "../components/productos/ModalGestionarDescuento"
 import { ModalGestionarOferta } from "../components/productos/ModalGestionarOferta"
+import { ModalGestionarMarcas } from "../components/marcas/ModalGestionarMarcas"
 
 export const PaginaProductos: React.FC = () => {
   const [datosProductos, setDatosProductos] = useState<PaginaDeProductos | null>(null)
@@ -45,6 +46,7 @@ export const PaginaProductos: React.FC = () => {
   const [modalDetallesAbierto, setModalDetallesAbierto] = useState(false)
   const [modalDescuentoAbierto, setModalDescuentoAbierto] = useState(false)
   const [modalOfertaAbierto, setModalOfertaAbierto] = useState(false)
+  const [modalMarcasAbierto, setModalMarcasAbierto] = useState(false)
   const [productoSeleccionado, setProductoSeleccionado] = useState<ProductoAbm | null>(null)
 
   // Cargar productos cada vez que cambien los filtros
@@ -161,12 +163,23 @@ export const PaginaProductos: React.FC = () => {
     setModalDetallesAbierto(false)
     setModalDescuentoAbierto(false)
     setModalOfertaAbierto(false)
+    setModalMarcasAbierto(false)
     setProductoSeleccionado(null)
   }
 
   const confirmarAccion = (): void => {
     cerrarModales()
     cargarProductos()
+  }
+
+  const recargarDatosSelect = async (): Promise<void> => {
+    try {
+      const [marcasData, proveedoresData] = await Promise.all([obtenerListaMarcas(), obtenerListaProveedores()])
+      setMarcas(marcasData)
+      setProveedores(proveedoresData)
+    } catch (error) {
+      console.error("Error al cargar datos de los select:", error)
+    }
   }
 
   if (error) {
@@ -187,20 +200,22 @@ export const PaginaProductos: React.FC = () => {
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Package className="text-blue-600" size={32} />
+          <Package className="text-primary" size={32} />
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Productos</h1>
             <p className="text-gray-600">Gestiona las productos del negocio</p>
           </div>
         </div>
+
         <button
           onClick={() => setModalNuevoAbierto(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
         >
           <Plus size={20} />
           <span>Nuevo Producto</span>
         </button>
       </div>
+
 
       {/* Panel de Filtros */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
@@ -258,12 +273,12 @@ export const PaginaProductos: React.FC = () => {
             </select>
           </div>
 
-          <div className="flex items-end">
+          <div className="flex items-end mb-1">
             <button
               onClick={() => manejarCambioFiltro("bajoStock", !filtros.bajoStock)}
               className={`w-full flex items-center justify-center px-4 py-2 border rounded-md text-sm font-medium transition-colors ${filtros.bajoStock
-                  ? "bg-yellow-100 text-yellow-800 border-yellow-400"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                ? "bg-yellow-100 text-yellow-800 border-yellow-400"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                 }`}
             >
               <AlertTriangle size={16} className="mr-2" />
@@ -309,12 +324,19 @@ export const PaginaProductos: React.FC = () => {
                     </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Mes anterior
-                    </th>                    
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Stock
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="flex px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Marca
+                      <button
+                        onClick={() => setModalMarcasAbierto(true)}
+                        className="pl-2 text-gray-700 hover:bg-gray-50"
+                        title="Administrar Marcas"
+                      >
+                        <Settings size={14} />
+                      </button>
                     </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
@@ -394,7 +416,7 @@ export const PaginaProductos: React.FC = () => {
                           </div>
                           <button
                             onClick={() => manejarCambiarEstado(producto.idProducto)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${producto.estado ? "bg-green-500 focus:ring-green-500" : "bg-red-400 focus:ring-red-400"
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${producto.estado ? "bg-toggleOn focus:ring-toggleOn" : "bg-toggleOff focus:ring-toggleOff"
                               }`}
                             title={producto.estado ? "Desactivar" : "Activar"}
                           >
@@ -507,6 +529,12 @@ export const PaginaProductos: React.FC = () => {
         producto={productoSeleccionado}
         alCerrar={cerrarModales}
         alConfirmar={confirmarAccion}
+      />
+
+      <ModalGestionarMarcas
+        isOpen={modalMarcasAbierto}
+        onClose={() => setModalMarcasAbierto(false)}
+        onDataChange={recargarDatosSelect}
       />
     </div>
   )

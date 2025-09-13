@@ -79,7 +79,7 @@ export const ModalNuevaCategoria: React.FC<ModalNuevaCategoriaProps> = ({
             >
               Cancelar
             </button>
-            <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            <button type="submit" className="px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary-dark">
               Confirmar
             </button>
           </div>

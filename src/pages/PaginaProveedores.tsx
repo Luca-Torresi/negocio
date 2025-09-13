@@ -97,7 +97,7 @@ const PaginaProveedores: React.FC = () => {
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Truck className="text-blue-600" size={32} />
+          <Truck className="text-primary" size={32} />
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Proveedores</h1>
             <p className="text-gray-600">Gestiona los proveedores del negocio</p>
@@ -105,10 +105,10 @@ const PaginaProveedores: React.FC = () => {
         </div>
         <button
           onClick={() => setModalNuevoAbierto(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
         >
           <Plus size={20} />
-          Nuevo Proveedor
+          <span>Nuevo Proveedor</span>
         </button>
       </div>
 
@@ -212,8 +212,8 @@ const PaginaProveedores: React.FC = () => {
                         <button
                           onClick={() => handleCambiarEstado(proveedor.idProveedor)}
                           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${proveedor.estado
-                            ? "bg-green-500 focus:ring-green-500"
-                            : "bg-red-400 focus:ring-red-400"
+                            ? "bg-toggleOn focus:ring-toggleOn"
+                            : "bg-toggleOff focus:ring-toggleOff"
                             }`}
                           title={proveedor.estado ? "Desactivar" : "Activar"}
                         >

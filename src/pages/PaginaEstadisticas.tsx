@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useMemo } from "react"
-import { ChartNoAxesCombined, TrendingUp, Activity, RefreshCw, ClipboardList, TrendingDown, AlertTriangle } from "lucide-react"
+import { ChartNoAxesCombined, Activity, RefreshCw, ClipboardList, AlertTriangle, PiggyBank, Coins, ChevronLeft, ChevronRight, ShoppingBasket } from "lucide-react"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import { Chart } from "react-google-charts"
@@ -44,6 +44,7 @@ const PaginaEstadisticas: React.FC = () => {
   });
 
   const [productoSeleccionado, setProductoSeleccionado] = useState<number | null>(null)
+  const [paginaRentabilidad, setPaginaRentabilidad] = useState<number>(0)
 
   // Estados de carga (sin cambios)
   const [cargando, setCargando] = useState(true)
@@ -132,7 +133,7 @@ const PaginaEstadisticas: React.FC = () => {
         ] = await Promise.all([
           obtenerKpis(),
           obtenerIngresosVsEgresos(fechasParams),
-          obtenerProductosRentables(fechasParams),
+          obtenerProductosRentables(fechasParams, paginaRentabilidad),
           obtenerVolumenVentas(fechasParams, productoSeleccionado),
           obtenerVentasPorHora(fechasParams),
           obtenerListaProductosVenta(),
@@ -199,7 +200,7 @@ const PaginaEstadisticas: React.FC = () => {
     };
 
     cargarTodosLosDatos();
-  }, [fechaInicio, fechaFin, productoSeleccionado]);
+  }, [fechaInicio, fechaFin, productoSeleccionado, paginaRentabilidad]);
 
   let ticksIngresosVsEgresos: Date[] = [];
   if (datosIngresosVsEgresos && datosIngresosVsEgresos.length > 1) {
@@ -238,7 +239,7 @@ const PaginaEstadisticas: React.FC = () => {
     legend: {
       position: 'none'
     },
-    colors: ["#5E94EB"],
+    colors: ["#6793DA"],
     backgroundColor: "transparent",
     chartArea: { left: 120, top: 15, right: 35, width: "100%", height: "80%" },
   }
@@ -297,7 +298,7 @@ const PaginaEstadisticas: React.FC = () => {
         },
         format: '#'
       },
-      colors: ["#816752"],
+      colors: ["#978567"],
       backgroundColor: "transparent",
       chartArea: { left: 60, top: 30, right: 40, width: "80%", height: "70%" },
     };
@@ -318,7 +319,7 @@ const PaginaEstadisticas: React.FC = () => {
     legend: {
       position: 'none'
     },
-    colors: ["#9A83CE"],
+    colors: ["#8888C6"],
     backgroundColor: "transparent",
     chartArea: { left: 60, top: 60, bottom: 35, right: 30, width: "80%", height: "70%" },
   }
@@ -335,7 +336,7 @@ const PaginaEstadisticas: React.FC = () => {
         bold: true,
       }
     },
-    colors: ["#7B987A", "#343D57", "#9F4A36", "#E5A156", "#ECCAB1"],
+    colors: ["#7B987A", "#38465E", "#9F4A36", "#E5A156", "#ECCAB1"],
     chartArea: { left: 30, top: 40, bottom: 30, right: 30, width: "80%", height: "70%" },
   }
 
@@ -344,7 +345,7 @@ const PaginaEstadisticas: React.FC = () => {
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <ChartNoAxesCombined className="text-blue-600" size={32} />
+          <ChartNoAxesCombined className="text-primary" size={32} />
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Estadísticas</h1>
             <p className="text-gray-600">Panel de indicadores y análisis del negocio</p>
@@ -385,23 +386,24 @@ const PaginaEstadisticas: React.FC = () => {
       {error && <div className="p-4 bg-red-100 border-l-4 border-red-500 text-red-700 mb-6">{error}</div>}
 
       {/* Sección de KPIs */}
-      <div className="grid grid-cols-5 gap-6 mb-6">
+      <div className="grid grid-cols-6 gap-6 mb-6">
         {kpis.map((kpi, index) => (
-          <div key={index} className="bg-white rounded-lg shadow-sm px-6 py-5">
+          <div key={index} className="bg-white rounded-lg shadow-sm px-4 py-5">
             <p className="text-sm text-center font-medium text-gray-600 mb-3">{kpi.titulo}</p>
             <div className="flex items-center justify-center">
               <div className="flex-shrink-0">
                 {/* Lógica de íconos (sin cambios) */}
-                {index === 0 && <TrendingUp className="h-8 w-8 text-green-600" />}
-                {index === 1 && <TrendingDown className="h-8 w-8 text-red-600" />}
-                {index === 2 && <ClipboardList className="h-8 w-8 text-gray-600" />}
-                {index === 3 && <Activity className="h-8 w-8 text-gray-600" />}
-                {index === 4 && <AlertTriangle className="h-8 w-8 text-yellow-500" />}
+                {index === 0 && <PiggyBank className="h-8 w-8 text-pink-400" />}
+                {index === 1 && <ShoppingBasket className="h-8 w-8 text-gray-600" />}
+                {index === 2 && <Coins className="h-8 w-8 text-yellow-500" />}
+                {index === 3 && <ClipboardList className="h-8 w-8 text-gray-600" />}
+                {index === 4 && <Activity className="h-8 w-8 text-gray-600" />}
+                {index === 5 && <AlertTriangle className="h-8 w-8 text-red-600" />}
               </div>
               <div className="ml-3">
 
-                <p className="text-2xl font-semibold text-center text-gray-900">
-                  {index === 0 || index === 1 || index === 3
+                <p className="text-xl font-semibold text-center text-gray-900">
+                  {index === 0 || index === 1 || index === 2 || index === 4
                     ? formatCurrency(kpi.valor as number)
                     : kpi.valor.toString()}
                 </p>
@@ -434,9 +436,38 @@ const PaginaEstadisticas: React.FC = () => {
           )}
         </div>
 
-        {/* Gráfico 2: Top 5 Productos Rentables */}
+        {/* Gráfico 2: Top 7 Productos Rentables */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Top 7 Productos Más Rentables</h3>
+
+
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold text-gray-800">Productos por Rentabilidad</h3>
+
+            {/* Controles de Paginación */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setPaginaRentabilidad(p => Math.max(0, p - 1))}
+                disabled={paginaRentabilidad === 0 || cargando}
+                className="p-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              <p className="text-sm text-gray-700">
+                Página <span className="font-medium">{paginaRentabilidad + 1}</span>
+              </p>
+
+              <button
+                disabled={!datosProductosRentables || datosProductosRentables.slice(1).length < 7 || cargando}
+                onClick={() => setPaginaRentabilidad(p => p + 1)}
+                className="p-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
+
+
           {cargando || !datosProductosRentables ? (
             <div className="h-64 flex items-center justify-center text-gray-500">
               <div className="flex items-center">

@@ -9,6 +9,7 @@ import { useCategoriaStore } from "../../store/categoriaStore"
 import { obtenerListaMarcas } from "../../api/marcaApi"
 import { obtenerListaProveedores } from "../../api/proveedorApi"
 import { SelectJerarquicoCategorias } from "../categorias/SelectJerarquicoCategorias"
+import { ModalNuevaMarcaRapida } from "../marcas/ModalNuevaMarcaRapida"
 import { InputMoneda } from "../InputMoneda"
 
 interface Props {
@@ -37,6 +38,8 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
     idProveedor: 0,
   })
 
+  const [modalMarcaRapidaAbierto, setModalMarcaRapidaAbierto] = useState(false)
+
   useEffect(() => {
     // Carga los datos para los selects solo cuando el modal se abre
     if (estaAbierto) {
@@ -62,6 +65,13 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
       ...prev,
       [campo]: valor,
     }))
+  }
+
+  const handleNuevaMarcaSuccess = (nuevaMarca: MarcaLista) => {
+    // 1. Reload marca list
+    cargarDatosSelect()
+    // 2. Auto-select the new marca in the form
+    setFormulario((prev) => ({ ...prev, idMarca: nuevaMarca.idMarca }))
   }
 
   const manejarEnvio = async (e: React.FormEvent): Promise<void> => {
@@ -146,7 +156,7 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="$ 0"                
                 required
-              />              
+              /> 
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -157,7 +167,6 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
                 value={formulario.stock}
                 onChange={(e) => manejarCambio("stock", Number.parseInt(e.target.value) || 0)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                min="0"
                 required
               />
             </div>
@@ -168,7 +177,6 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
                 value={formulario.stockMinimo}
                 onChange={(e) => manejarCambio("stockMinimo", Number.parseInt(e.target.value) || 0)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                min="0"
                 required
               />
             </div>
@@ -186,19 +194,30 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Marca</label>
-            <select
-              value={formulario.idMarca}
-              onChange={(e) => manejarCambio("idMarca", Number.parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"              
-            >
-              <option value={0}>Seleccionar marca</option>
-              {marcas.map((marca) => (
-                <option key={marca.idMarca} value={marca.idMarca}>
-                  {marca.nombre}
-                </option>
-              ))}
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
+            <div className="flex gap-2">
+              <select
+                value={formulario.idMarca}
+                onChange={(e) => manejarCambio("idMarca", Number.parseInt(e.target.value))}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value={0}>Seleccionar marca</option>
+                {marcas.map((marca) => (
+                  <option key={marca.idMarca} value={marca.idMarca}>
+                    {marca.nombre}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setModalMarcaRapidaAbierto(true)}
+                className="px-3 py-2 bg-white text-gray-800 rounded-md hover:underline text-sm"
+                title="Añadir nueva marca"
+              >
+                <span>Nueva Marca</span>
+              </button>
+            </div>
           </div>
 
           <div>
@@ -229,12 +248,18 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
             <button
               type="submit"
               disabled={cargando}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary-dark disabled:opacity-50"
             >
               {cargando ? "Creando..." : "Crear Producto"}
             </button>
           </div>
         </form>
+
+        <ModalNuevaMarcaRapida
+          isOpen={modalMarcaRapidaAbierto}
+          onClose={() => setModalMarcaRapidaAbierto(false)}
+          onSuccess={handleNuevaMarcaSuccess}
+        />
       </div>
     </div>
   )

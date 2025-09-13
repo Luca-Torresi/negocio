@@ -34,8 +34,8 @@ export const cambiarEstadoProducto = async (id: number): Promise<void> => {
   await apiClient.patch(`/producto/cambiarEstado/${id}`)
 }
 
-export const obtenerListaProductosPorProveedor = async (idProveedor: number): Promise<ProductoLista[]> => {
-  const response = await apiClient.get(`/producto/listaCompra/${idProveedor}`)
+export const obtenerListaProductosCompra = async (): Promise<ProductoLista[]> => {
+  const response = await apiClient.get(`/producto/listaCompra`)
   return response.data
 }
 

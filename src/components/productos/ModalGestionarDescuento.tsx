@@ -104,8 +104,7 @@ export const ModalGestionarDescuento: React.FC<Props> = ({ estaAbierto, producto
             <input
               type="number"
               min="0"
-              max="100"
-              step="0.01"
+              max="100"              
               value={porcentaje}
               onChange={(e) => manejarCambioPorcentaje(Number.parseFloat(e.target.value) || 0)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -132,7 +131,7 @@ export const ModalGestionarDescuento: React.FC<Props> = ({ estaAbierto, producto
               <button
                 onClick={manejarEliminar}
                 disabled={cargando}
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50"
+                className="px-4 py-2 bg-tertiary text-white rounded-md hover:bg-tertiary-dark disabled:opacity-50"
               >
                 {cargando ? "Eliminando..." : "Eliminar"}
               </button>
@@ -141,7 +140,7 @@ export const ModalGestionarDescuento: React.FC<Props> = ({ estaAbierto, producto
             <button
               onClick={manejarGuardar}
               disabled={cargando || porcentaje <= 0}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
+              className="px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary-dark disabled:opacity-50"
             >
               {cargando
                 ? tieneDescuento

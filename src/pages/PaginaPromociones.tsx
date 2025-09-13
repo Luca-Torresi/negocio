@@ -90,7 +90,7 @@ export const PaginaPromociones: React.FC = () => {
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <ShoppingBag className="text-blue-600" size={32} />
+          <ShoppingBag className="text-primary" size={32} />
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Promociones</h1>
             <p className="text-gray-600">Gestiona las promociones del negocio</p>
@@ -98,7 +98,7 @@ export const PaginaPromociones: React.FC = () => {
         </div>
         <button
           onClick={abrirModalNueva}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2"
+          className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark flex items-center gap-2"
         >
           <Plus size={20} />
           Nueva Promoción
@@ -210,7 +210,7 @@ export const PaginaPromociones: React.FC = () => {
 
                         <button
                           onClick={() => manejarCambiarEstado(promocion.idPromocion)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${promocion.estado ? "bg-green-500 focus:ring-green-500" : "bg-red-400 focus:ring-red-400"
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${promocion.estado ? "bg-toggleOn focus:ring-toggleOn" : "bg-toggleOff focus:ring-toggleOff"
                             }`}
                           title={promocion.estado ? "Desactivar" : "Activar"}
                         >

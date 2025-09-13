@@ -7,7 +7,8 @@ import type { CompraDTO } from "../../types/dto/Compra"
 import type { ProductoLista } from "../../types/dto/Producto"
 import { crearCompra, modificarCompra, obtenerCompraPorId } from "../../api/compraApi"
 import { obtenerListaProveedores } from "../../api/proveedorApi"
-import { obtenerListaProductosPorProveedor } from "../../api/productoApi"
+import { obtenerListaProductosCompra } from "../../api/productoApi"
+import { formatCurrency } from "../../utils/numberFormatUtils"
 
 interface Props {
   isOpen: boolean
@@ -71,7 +72,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
 
   const cargarProductosProveedor = async () => {
     try {
-      const data = await obtenerListaProductosPorProveedor(proveedorSeleccionado)
+      const data = await obtenerListaProductosCompra()
       setProductos(data)
     } catch (error) {
       console.error("Error al cargar productos del proveedor:", error)
@@ -205,7 +206,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
               value={proveedorSeleccionado}
               onChange={(e) => setProveedorSeleccionado(Number(e.target.value))}
               disabled={esEdicion}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+              className="w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             >
               <option value={0}>Seleccionar proveedor</option>
               {proveedores.map((proveedor) => (
@@ -221,7 +222,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="text-lg font-medium text-gray-800 mb-3">Añadir Productos</h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div className="inline-grid grid-cols-[2fr_0.5fr_0.9fr] gap-4 items-end">
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Producto</label>
                   <input
@@ -274,7 +275,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
                   <button
                     onClick={añadirProducto}
                     disabled={!productoSeleccionado || cantidadInput <= 0}
-                    className="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+                    className="w-full flex items-center justify-center px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary-dark disabled:opacity-50"
                   >
                     <Plus size={20} className="mr-2" />
                     Añadir Producto
@@ -319,9 +320,9 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
                       <tr key={index}>
                         <td className="px-4 py-2 text-sm text-gray-900">{detalle.nombreProducto}</td>
                         <td className="px-4 py-2 text-sm text-gray-900">{detalle.cantidad}</td>
-                        <td className="px-4 py-2 text-sm text-gray-900">${detalle.costoUnitario.toFixed(2)}</td>
+                        <td className="px-4 py-2 text-sm text-gray-900">{formatCurrency(detalle.costoUnitario)}</td>
                         <td className="px-4 py-2 text-sm text-gray-900 font-semibold">
-                          ${(detalle.cantidad * detalle.costoUnitario).toFixed(2)}
+                          {formatCurrency(detalle.cantidad * detalle.costoUnitario)}
                         </td>
                         {!esEdicion && (
                           <td className="px-4 py-2 text-sm text-gray-900">
@@ -347,7 +348,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="flex justify-between items-center">
                 <span className="text-lg font-medium text-gray-800">Total de la Compra:</span>
-                <span className="text-2xl font-bold text-blue-600">${calcularTotal().toFixed(2)}</span>
+                <span className="text-2xl font-bold text-gray-800">{formatCurrency(calcularTotal())}</span>
               </div>
             </div>
           )}
@@ -363,7 +364,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
             <button
               onClick={manejarGuardar}
               disabled={cargando || proveedorSeleccionado === 0 || detalles.length === 0}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark disabled:opacity-50"
             >
               {cargando ? "Guardando..." : "Guardar Compra"}
             </button>

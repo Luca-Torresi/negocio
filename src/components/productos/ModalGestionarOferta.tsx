@@ -7,6 +7,7 @@ import type { ProductoAbm } from "../../types/dto/Producto"
 import type { OfertaDTO } from "../../types/dto/Oferta"
 import { crearOferta, modificarOferta, eliminarOferta } from "../../api/ofertaApi"
 import { formatCurrency } from "../../utils/numberFormatUtils"
+import { InputMoneda } from "../InputMoneda"
 
 interface Props {
   estaAbierto: boolean
@@ -98,13 +99,11 @@ export const ModalGestionarOferta: React.FC<Props> = ({ estaAbierto, producto, a
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nuevo Precio</label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
+            <InputMoneda
               value={nuevoPrecio}
-              onChange={(e) => setNuevoPrecio(Number.parseFloat(e.target.value) || 0)}
+              onValueChange={(valor) => setNuevoPrecio(valor || 0)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="$ 0"
             />
           </div>
 
@@ -130,7 +129,7 @@ export const ModalGestionarOferta: React.FC<Props> = ({ estaAbierto, producto, a
               <button
                 onClick={manejarEliminar}
                 disabled={cargando}
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50"
+                className="px-4 py-2 bg-tertiary text-white rounded-md hover:bg-tertiary-dark disabled:opacity-50"
               >
                 {cargando ? "Eliminando..." : "Eliminar"}
               </button>
@@ -139,7 +138,7 @@ export const ModalGestionarOferta: React.FC<Props> = ({ estaAbierto, producto, a
             <button
               onClick={manejarGuardar}
               disabled={cargando || nuevoPrecio <= 0}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
+              className="px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary-dark disabled:opacity-50"
             >
               {cargando
                 ? tieneOferta

@@ -140,7 +140,7 @@ const PaginaCompras: React.FC = () => {
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <ShoppingCart className="text-blue-600" size={32} />
+          <ShoppingCart className="text-primary" size={32} />
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Compras</h1>
             <p className="text-gray-600">Gestiona las compras a proveedores</p>
@@ -148,7 +148,7 @@ const PaginaCompras: React.FC = () => {
         </div>
         <button
           onClick={() => setModalNuevoAbierto(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
         >
           <Plus size={20} />
           <span>Nueva Compra</span>

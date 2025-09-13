@@ -17,14 +17,15 @@ export const obtenerIngresosVsEgresos = async (fechas: FiltrosFecha): Promise<Da
   return response.data
 }
 
-// Obtener productos más rentables
-export const obtenerProductosRentables = async (fechas: FiltrosFecha): Promise<DatosParaGrafico> => {
-  const params = new URLSearchParams()
-  params.append("fechaInicio", fechas.fechaInicio)
-  params.append("fechaFin", fechas.fechaFin)
-
-  const response = await apiClient.get(`/estadistica/productosRentables?${params.toString()}`)
-  return response.data
+export const obtenerProductosRentables = async (fechas: FiltrosFecha, page: number): Promise<DatosParaGrafico> => {
+  const params = {
+    fechaInicio: fechas.fechaInicio,
+    fechaFin: fechas.fechaFin,
+    page: page,
+  };
+  
+  const response = await apiClient.get('/estadistica/productosRentables', { params });
+  return response.data;
 }
 
 // Obtener volumen de ventas mensual
