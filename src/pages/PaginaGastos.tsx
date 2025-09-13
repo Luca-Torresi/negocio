@@ -270,8 +270,13 @@ const PaginaGastos: React.FC = () => {
                     <tr key={gasto.idGasto} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{gasto.idGasto}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{gasto.tipoGasto}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{gasto.descripcion}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className={`px-4 py-3 ${!gasto.descripcion
+                        ? 'text-sm text-gray-400 italic'
+                        : 'text-sm text-gray-900'
+                        }`}>
+                        {gasto.descripcion || "Sin Descripción"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
                         {formatCurrency(gasto.monto)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{gasto.usuario}</td>

@@ -219,7 +219,7 @@ export const PaginaProductos: React.FC = () => {
 
       {/* Panel de Filtros */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-        <div className="inline-grid grid-cols-[1.1fr_0.9fr_0.9fr_0.9fr_0.8fr_auto] gap-4 mb-2">
+        <div className="inline-grid grid-cols-[1fr_0.7fr_0.6fr_0.6fr_0.63fr_auto] gap-4 mb-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Buscar por nombre</label>
             <input
@@ -248,7 +248,7 @@ export const PaginaProductos: React.FC = () => {
               onChange={(e) => manejarCambioFiltro("idMarca", Number.parseInt(e.target.value))}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value={0}>Todas las marcas</option>
+              <option value={0}>Todas</option>
               {marcas.map((marca) => (
                 <option key={marca.idMarca} value={marca.idMarca}>
                   {marca.nombre}
@@ -264,7 +264,7 @@ export const PaginaProductos: React.FC = () => {
               onChange={(e) => manejarCambioFiltro("idProveedor", Number.parseInt(e.target.value))}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value={0}>Todos los proveedores</option>
+              <option value={0}>Todos</option>
               {proveedores.map((proveedor) => (
                 <option key={proveedor.idProveedor} value={proveedor.idProveedor}>
                   {proveedor.nombre}
@@ -377,7 +377,12 @@ export const PaginaProductos: React.FC = () => {
                           {producto.stock}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.marca}</td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm ${!producto.marca
+                        ? 'text-gray-400 italic'
+                        : 'text-gray-900'
+                        }`}>
+                        {producto.marca || "Sin Marca"}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex justify-center space-x-2">
                           <button

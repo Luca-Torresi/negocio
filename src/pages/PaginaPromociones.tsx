@@ -182,7 +182,13 @@ export const PaginaPromociones: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {promocion.nombre}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">{promocion.descripcion}</td>
+                    <td className={`px-6 py-4 max-w-xs truncate ${!promocion.descripcion
+                      ? 'text-sm text-gray-400 italic'
+                      : 'text-sm text-gray-900'
+                      }`}>
+                      {promocion.descripcion || "Sin Descripción"}
+                    </td>
+
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {formatCurrency(promocion.precio)}
                     </td>

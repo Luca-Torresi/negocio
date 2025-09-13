@@ -30,4 +30,5 @@ export interface ModificarCategoriaDTO {
 export interface CategoriaArbol extends Categoria {
   hijos: CategoriaArbol[]
   nivel: number
+  esHijoDeRaiz?: boolean
 }

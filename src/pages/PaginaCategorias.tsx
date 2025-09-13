@@ -7,7 +7,7 @@ import { construirArbolCategorias } from "../utils/categoriaUtils"
 import { ModalNuevaCategoria } from "../components/categorias/ModalNuevaCategoria"
 import { ModalEditarCategoria } from "../components/categorias/ModalEditarCategoria"
 import { ModalDetallesCategoria } from "../components/categorias/ModalDetallesCategoria"
-import { ChevronDown, ChevronRight, Eye, Pencil, Tag, Plus, BrushCleaning } from "lucide-react"
+import { Eye, Pencil, Tag, Plus, BrushCleaning, CornerDownRight } from "lucide-react"
 
 type FiltroEstado = "todas" | "activas" | "inactivas"
 
@@ -40,9 +40,7 @@ const PaginaCategorias: React.FC = () => {
     // Expandir todas las categorías por defecto
     const expandidas: Record<number, boolean> = {}
     categorias.forEach((cat) => {
-      if (cat.idCategoriaPadre === null) {
-        expandidas[cat.idCategoria] = true
-      }
+      expandidas[cat.idCategoria] = true
     })
     setCategoriasExpandidas(expandidas)
   }, [categorias])
@@ -90,12 +88,12 @@ const PaginaCategorias: React.FC = () => {
     }
   }
 
-  const toggleExpansion = (idCategoria: number) => {
-    setCategoriasExpandidas((prev) => ({
-      ...prev,
-      [idCategoria]: !prev[idCategoria],
-    }))
-  }
+  // const toggleExpansion = (idCategoria: number) => {
+  //   setCategoriasExpandidas((prev) => ({
+  //     ...prev,
+  //     [idCategoria]: !prev[idCategoria],
+  //   }))
+  // }
 
   // Filtrar categorías
   const categoriasFiltradas = categorias.filter((categoria) => {
@@ -117,7 +115,7 @@ const PaginaCategorias: React.FC = () => {
       <React.Fragment key={categoria.idCategoria}>
         <tr className="border-b hover:bg-gray-50">
           <td className="px-4 py-3">{categoria.idCategoria}</td>
-          <td className="px-4 py-3">
+          {/* <td className="px-4 py-3">
             {tieneHijos && (
               <button
                 onClick={() => toggleExpansion(categoria.idCategoria)}
@@ -126,13 +124,27 @@ const PaginaCategorias: React.FC = () => {
                 {estaExpandida ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
               </button>
             )}
+          </td> */}
+
+          <td className="px-4 py-3" style={{ paddingLeft: `${16 + categoria.nivel * 25 - (categoria.esHijoDeRaiz ? 5 : 0)}px` }}>
+            {categoria.idCategoriaPadre != null && (
+              <div className="flex items-center gap-2">
+                <CornerDownRight size={16} className="text-gray-800" />
+                <span>{categoria.nombre}</span>
+              </div>
+            )}
+            {categoria.idCategoriaPadre == null && (
+              <div className="flex items-center">
+                {categoria.nombre}
+              </div>
+            )}
           </td>
-          <td className="px-4 py-3" style={{ paddingLeft: `${16 + categoria.nivel * 40}px` }}>
-            <div className="flex items-center">
-              {categoria.nombre}
-            </div>
+          <td className={`px-4 py-3 ${!categoria.descripcion
+            ? 'text-gray-400 italic'
+            : 'text-gray-900'
+            }`}>
+            {categoria.descripcion || "Sin Descripción"}
           </td>
-          <td className="px-4 py-3">{categoria.descripcion}</td>
           <td className="px-4 py-3 text-center">{categoria.productos.length}</td>
           <td className="px-4 py-3">
             <div className="flex justify-center space-x-2">
@@ -243,7 +255,7 @@ const PaginaCategorias: React.FC = () => {
               }}
               className="p-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 flex items-center justify-center"
             >
-              <BrushCleaning size={20} />              
+              <BrushCleaning size={20} />
             </button>
           </div>
         </div>
@@ -258,7 +270,7 @@ const PaginaCategorias: React.FC = () => {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">ID</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700"></th>
+              {/* <th className="px-4 py-3 text-left text-sm font-medium text-gray-700"></th> */}
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Nombre</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Descripción</th>
               <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Cant. Productos</th>

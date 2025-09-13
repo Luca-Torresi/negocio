@@ -20,7 +20,7 @@ export const obtenerProductos = async (filtros: any): Promise<PaginaDeProductos>
 }
 
 // Crear nuevo producto
-export const crearProducto = async (data: ProductoDTO): Promise<void> => {
+export const crearProducto = async (data: ProductoDTO): Promise<void> => {  
   await apiClient.post(`/producto/nuevo`, data)
 }
 

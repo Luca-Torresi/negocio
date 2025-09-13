@@ -131,7 +131,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
   const manejarSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
 
-    if (!nombre.trim() || !descripcion.trim() || !precio || detalles.length === 0) {
+    if (!nombre.trim() || !precio || detalles.length === 0) {
       alert("Por favor completa todos los campos y agrega al menos un producto")
       return
     }
@@ -214,7 +214,6 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             />
           </div>
 

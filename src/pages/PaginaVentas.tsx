@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Search, Plus, Trash2, ShoppingCart, ListPlus } from "lucide-react"
 import type { ItemCatalogo, ItemVenta, VentaDTO } from "../types/dto/Venta"
@@ -11,10 +11,12 @@ import {
   crearVenta,
 } from "../api/ventaApi"
 import { buscarProductoPorCodigo } from "../api/productoApi"
+import { formatCurrency } from "../utils/numberFormatUtils"
 
 const PaginaVentas: React.FC = () => {
   const { idVenta } = useParams<{ idVenta: string }>()
   const navigate = useNavigate()
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Estados principales
   const [catalogo, setCatalogo] = useState<ItemCatalogo[]>([])
@@ -27,12 +29,19 @@ const PaginaVentas: React.FC = () => {
   const [itemSeleccionado, setItemSeleccionado] = useState<ItemCatalogo | null>(null)
   const [cantidad, setCantidad] = useState<number>(1)
   const [mostrarSugerencias, setMostrarSugerencias] = useState<boolean>(false)
+  const [activeIndex, setActiveIndex] = useState<number>(-1);
 
   // Estados de carga y error
   const [cargando, setCargando] = useState<boolean>(true)
   const [error, setError] = useState<string | null>("")
   const [procesandoVenta, setProcesandoVenta] = useState<boolean>(false)
 
+  const seleccionarItem = (item: ItemCatalogo) => {
+    setItemSeleccionado(item);
+    setBusquedaItem(item.nombre);
+    setMostrarSugerencias(false);
+    setActiveIndex(-1); // Reseteamos el índice
+  };
 
   // --- 3. INICIO DE LA LÓGICA DEL LECTOR DE CÓDIGO DE BARRAS ---
   const [codigoDeBarras, setCodigoDeBarras] = useState("");
@@ -135,8 +144,32 @@ const PaginaVentas: React.FC = () => {
     cargarDatos()
   }, [idVenta])
 
-  // Filtrar catálogo según búsqueda
-  const itemsFiltrados = catalogo.filter((item) => item.nombre.toLowerCase().includes(busquedaItem.toLowerCase()))
+  const itemsFiltrados = useMemo(() => {
+    if (!busquedaItem) return [];
+    return catalogo.filter((item) =>
+      item.nombre.toLowerCase().includes(busquedaItem.toLowerCase())
+    );
+  }, [catalogo, busquedaItem]);
+
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [itemsFiltrados]);
+
+  useEffect(() => {
+    // Verificamos si hay un elemento activo y si el contenedor existe
+    if (activeIndex >= 0 && dropdownRef.current) {
+      // Buscamos el hijo del contenedor que corresponde al índice activo
+      const activeItem = dropdownRef.current.children[activeIndex] as HTMLElement;
+
+      if (activeItem) {
+        // Le pedimos al navegador que mueva el scroll para que este item sea visible
+        activeItem.scrollIntoView({
+          block: 'nearest', // Se desplazará lo mínimo necesario para que sea visible
+          behavior: 'smooth' // Le da una animación suave al scroll
+        });
+      }
+    }
+  }, [activeIndex]); // Se dispara solo cuando cambia el activeIndex
 
   // Calcular precio unitario aplicado según ofertas
   const calcularPrecioUnitario = (item: ItemCatalogo, cantidad: number): number => {
@@ -146,10 +179,43 @@ const PaginaVentas: React.FC = () => {
     return item.precioFinal
   }
 
+  // --- 2. AÑADIMOS LA NUEVA LÓGICA DE SELECCIÓN ---
+  const añadirItem = (itemToAdd: ItemCatalogo | null, cantidadToAdd: number): void => {
+    if (!itemToAdd || cantidadToAdd <= 0) return;
+
+    const precioUnitario = calcularPrecioUnitario(itemToAdd, cantidadToAdd);
+    const indiceExistente = carrito.findIndex(
+      (carritoItem) => carritoItem.item.id === itemToAdd.id && carritoItem.item.tipo === itemToAdd.tipo
+    );
+
+    if (indiceExistente >= 0) {
+      setCarrito((prev) =>
+        prev.map((item, index) => {
+          if (index === indiceExistente) {
+            const nuevaCantidad = item.cantidad + cantidadToAdd;
+            return {
+              ...item,
+              cantidad: nuevaCantidad,
+              precioUnitarioAplicado: calcularPrecioUnitario(item.item, nuevaCantidad),
+            };
+          }
+          return item;
+        })
+      );
+    } else {
+      const nuevoItem: ItemVenta = {
+        item: itemToAdd,
+        cantidad: cantidadToAdd,
+        precioUnitarioAplicado: precioUnitario,
+      };
+      setCarrito((prev) => [...prev, nuevoItem]);
+    }
+  };
+
   // Añadir item al carrito
   const añadirManualmente = (): void => {
     if (!itemSeleccionado || cantidad <= 0) return;
-    añadirItemAlCarrito(itemSeleccionado, cantidad);
+    añadirItem(itemSeleccionado, cantidad);
 
     // Limpiar selección del buscador manual
     setBusquedaItem("");
@@ -237,7 +303,7 @@ const PaginaVentas: React.FC = () => {
       </div>
 
       {/* Layout principal: dos columnas */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-[1.5fr_2fr] gap-6">
         {/* Columna Izquierda: Constructor de Venta */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
@@ -250,6 +316,7 @@ const PaginaVentas: React.FC = () => {
             <input
               type="text"
               placeholder="Buscar producto o promoción..."
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               value={busquedaItem}
               onChange={(e) => {
                 setBusquedaItem(e.target.value)
@@ -257,21 +324,55 @@ const PaginaVentas: React.FC = () => {
                 setItemSeleccionado(null)
               }}
               onFocus={() => setMostrarSugerencias(true)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onKeyDown={(e) => {
+                if (itemsFiltrados.length === 0) return;
+
+                switch (e.key) {
+                  case "ArrowDown":
+                    e.preventDefault();
+                    setActiveIndex((prev) => Math.min(prev + 1, itemsFiltrados.length - 1));
+                    break;
+
+                  case "ArrowUp":
+                    e.preventDefault();
+                    setActiveIndex((prev) => Math.max(0, prev - 1));
+                    break;
+
+                  case "Enter":
+                  case "Tab":
+                    e.preventDefault();
+                    // --- 3. LÓGICA CORREGIDA ---
+                    // Si hay un item resaltado, lo seleccionamos.
+                    // Si no, seleccionamos el PRIMERO de la lista.
+                    const itemASelleccionar = activeIndex >= 0
+                      ? itemsFiltrados[activeIndex]
+                      : itemsFiltrados[0];
+
+                    seleccionarItem(itemASelleccionar);
+                    break;
+
+                  case "Escape":
+                    setMostrarSugerencias(false);
+                    break;
+                }
+              }}
             />
 
             {/* Sugerencias */}
             {mostrarSugerencias && busquedaItem && itemsFiltrados.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
-                {itemsFiltrados.slice(0, 10).map((item) => (
+              <div
+                ref={dropdownRef}
+                className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto"
+              >
+                {itemsFiltrados.slice(0, 10).map((item, index) => (
                   <div
                     key={`${item.tipo}-${item.id}`}
-                    onClick={() => {
-                      setItemSeleccionado(item)
-                      setBusquedaItem(item.nombre)
-                      setMostrarSugerencias(false)
-                    }}
-                    className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                    onClick={() => seleccionarItem(item)}
+                    // 2. Sincronizamos el mouse con el estado activo
+                    onMouseEnter={() => setActiveIndex(index)}
+                    // 3. Aplicamos un estilo diferente si el item está activo
+                    className={`p-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${index === activeIndex ? "bg-gray-100" : "hover:bg-gray-100"
+                      }`}
                   >
                     <div className="flex justify-between items-center">
                       <div>
@@ -283,11 +384,11 @@ const PaginaVentas: React.FC = () => {
                           {item.tipo}
                         </span>
                       </div>
-                      <span className="font-semibold text-green-600">${item.precioFinal.toFixed(2)}</span>
+                      <span className="font-semibold text-green-600">{formatCurrency(item.precioFinal)}</span>
                     </div>
                     {item.oferta && (
                       <div className="text-sm text-orange-600 mt-1">
-                        Oferta: {item.oferta.cantidadMinima}+ unidades = ${item.oferta.nuevoPrecio.toFixed(2)} c/u
+                        Oferta: {item.oferta.cantidadMinima}+ unidades = {formatCurrency(item.oferta.nuevoPrecio)} c/u
                       </div>
                     )}
                   </div>
@@ -298,21 +399,21 @@ const PaginaVentas: React.FC = () => {
 
           {/* Cantidad y botón añadir */}
           <div className="flex gap-3">
-            <div className="flex-1">
+            <div className="grid">
               <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
               <input
                 type="number"
                 min="1"
                 value={cantidad}
                 onChange={(e) => setCantidad(Number.parseInt(e.target.value) || 1)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div className="flex items-end">
               <button
                 onClick={añadirManualmente}
                 disabled={!itemSeleccionado}
-                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+                className="px-6 py-3 bg-secondary text-white rounded-lg hover:bg-secondary-dark disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
               >
                 <Plus size={16} className="mr-1" />
                 Añadir
@@ -325,13 +426,13 @@ const PaginaVentas: React.FC = () => {
             <div className="mt-4 p-4 bg-gray-50 rounded-lg">
               <h3 className="font-medium text-gray-900">{itemSeleccionado.nombre}</h3>
               <div className="text-sm text-gray-600 mt-1">
-                Precio unitario: ${calcularPrecioUnitario(itemSeleccionado, cantidad).toFixed(2)}
+                Precio unitario: {formatCurrency(calcularPrecioUnitario(itemSeleccionado, cantidad))}
                 {itemSeleccionado.oferta && cantidad >= itemSeleccionado.oferta.cantidadMinima && (
                   <span className="text-orange-600 ml-2">(Oferta aplicada)</span>
                 )}
               </div>
               <div className="font-semibold text-green-600 mt-1">
-                Subtotal: ${(calcularPrecioUnitario(itemSeleccionado, cantidad) * cantidad).toFixed(2)}
+                Subtotal: {formatCurrency((calcularPrecioUnitario(itemSeleccionado, cantidad) * cantidad))}
               </div>
             </div>
           )}
@@ -357,7 +458,7 @@ const PaginaVentas: React.FC = () => {
                       <th className="text-center py-2">Cant.</th>
                       <th className="text-right py-2">P. Unit.</th>
                       <th className="text-right py-2">Subtotal</th>
-                      <th className="text-center py-2">Acc.</th>
+                      <th className="text-center py-2"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -365,7 +466,7 @@ const PaginaVentas: React.FC = () => {
                       <tr key={indice} className="border-b border-gray-100">
                         <td className="py-3">
                           <div>
-                            <div className="font-medium">{item.item.nombre}</div>
+                            <div className="font-medium mb-1">{item.item.nombre}</div>
                             <span
                               className={`text-xs px-2 py-1 rounded ${item.item.tipo === "PRODUCTO"
                                 ? "bg-blue-100 text-blue-800"
@@ -385,9 +486,9 @@ const PaginaVentas: React.FC = () => {
                             className="w-16 p-1 text-center border border-gray-300 rounded"
                           />
                         </td>
-                        <td className="py-3 text-right">${item.precioUnitarioAplicado.toFixed(2)}</td>
+                        <td className="py-3 text-right">{formatCurrency(item.precioUnitarioAplicado)}</td>
                         <td className="py-3 text-right font-semibold">
-                          ${(item.cantidad * item.precioUnitarioAplicado).toFixed(2)}
+                          {formatCurrency(item.cantidad * item.precioUnitarioAplicado)}
                         </td>
                         <td className="py-3 text-center">
                           <button
@@ -425,7 +526,7 @@ const PaginaVentas: React.FC = () => {
 
             <div className="flex justify-between items-center mb-4">
               <span className="text-xl font-semibold">Total General:</span>
-              <span className="text-2xl font-bold text-gray-700">${totalGeneral.toFixed(2)}</span>
+              <span className="text-2xl font-bold text-gray-700">{formatCurrency(totalGeneral)}</span>
             </div>
 
             <div className="flex justify-end">

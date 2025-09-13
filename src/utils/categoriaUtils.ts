@@ -45,9 +45,13 @@ export const construirArbolCategorias = (categorias: Categoria[]): CategoriaArbo
   };
 
   asignarNivel(raices, 0);
-  
-  // Para depurar: Muestra el resultado final en la consola
-  console.log("Árbol construido:", raices);
+
+  // Etiquetamos a los hijos directos de las categorías raíz.
+  raices.forEach(raiz => {
+    raiz.hijos.forEach(hijo => {
+      hijo.esHijoDeRaiz = true;
+    });
+  });
 
   return raices;
 };

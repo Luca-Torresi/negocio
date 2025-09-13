@@ -20,9 +20,9 @@ const OpcionRecursiva: React.FC<{ categoria: CategoriaArbol; nivel: number; onSe
       <div
         onClick={() => onSelect(categoria.idCategoria, categoria.nombre)}
         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-        style={{ paddingLeft: `${16 + nivel * 20}px` }}
+        style={{ paddingLeft: `${16 + nivel * 22}px` }}
       >
-        {nivel > 0 && <CornerDownRight size={14} className="mr-2 flex-shrink-0" />}
+        {nivel > 0 && <CornerDownRight size={14} className="mr-[8px] flex-shrink-0" />}
         <span className="truncate">{categoria.nombre}</span>
       </div>
 
@@ -76,7 +76,7 @@ export const SelectJerarquicoCategorias: React.FC<Props> = ({ categorias, select
   };
 
   return (
-    <div className="relative w-full" ref={ref}>
+    <div className="relative w-[250px]" ref={ref}>
       {/* Botón que muestra el valor seleccionado y abre/cierra el dropdown */}
       <button
         type="button"
