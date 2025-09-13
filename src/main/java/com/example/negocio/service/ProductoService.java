@@ -119,8 +119,8 @@ public class ProductoService {
         });
     }
 
-    public List<ProductoCompraDTO> listarProductosCompra(Long idProveedor){
-        List<Producto> productos = productoRepository.findByEstadoTrueAndProveedorIdProveedor(idProveedor);
+    public List<ProductoCompraDTO> listarProductosCompra(){
+        List<Producto> productos = productoRepository.findByEstadoTrue();
 
         return productos.stream()
                 .map(productoMapper::toCompraDto)

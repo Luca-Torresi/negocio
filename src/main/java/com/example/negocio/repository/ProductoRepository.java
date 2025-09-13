@@ -11,7 +11,6 @@ import java.util.Optional;
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Long>, JpaSpecificationExecutor<Producto> {
     List<Producto> findByEstadoTrue();
-    List<Producto> findByEstadoTrueAndProveedorIdProveedor(Long idProveedor);
     Optional<Producto> findByCodigoDeBarras(String codigoDeBarras);
 
     // KPI: Productos con stock bajo

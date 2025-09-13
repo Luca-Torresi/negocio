@@ -1,6 +1,5 @@
 package com.example.negocio.service;
 
-import com.example.negocio.dto.marca.MarcaAbmDTO;
 import com.example.negocio.dto.marca.MarcaDTO;
 import com.example.negocio.dto.marca.MarcaListaDTO;
 import com.example.negocio.entity.Marca;
@@ -20,8 +19,6 @@ public class MarcaService {
 
     public Marca nuevaMarca(MarcaDTO dto){
         Marca marca = marcaMapper.toEntity(dto);
-        marca.setEstado(true);
-
         return marcaRepository.save(marca);
     }
 
@@ -32,26 +29,12 @@ public class MarcaService {
         return marcaRepository.save(marca);
     }
 
-    public List<MarcaAbmDTO> obtenerMarcas(){
-        List<Marca> marcas = marcaRepository.findAll();
-
-        return marcas.stream()
-                .map(marcaMapper::toAbmDto)
-                .collect(Collectors.toList());
-    }
-
     public List<MarcaListaDTO> listarMarcas(){
-        List<Marca> marcas = marcaRepository.findByEstadoTrue();
+        List<Marca> marcas = marcaRepository.findAll();
 
         return marcas.stream()
                 .map(marcaMapper::toListaDto)
                 .collect(Collectors.toList());
     }
 
-    public void cambiarEstadoMarca(Long idMarca){
-        Marca marca = marcaRepository.findById(idMarca).orElseThrow(() -> new MarcaNoEncontradaException());
-
-        marca.setEstado(!marca.getEstado());
-        marcaRepository.save(marca);
-    }
 }

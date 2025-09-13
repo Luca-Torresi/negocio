@@ -1,6 +1,5 @@
 package com.example.negocio.mapper;
 
-import com.example.negocio.dto.marca.MarcaAbmDTO;
 import com.example.negocio.dto.marca.MarcaDTO;
 import com.example.negocio.dto.marca.MarcaListaDTO;
 import com.example.negocio.entity.Marca;
@@ -11,8 +10,6 @@ import org.mapstruct.MappingTarget;
 public interface MarcaMapper {
 
     Marca toEntity(MarcaDTO marcaDTO);
-
-    MarcaAbmDTO toAbmDto(Marca marca);
 
     MarcaListaDTO toListaDto(Marca marca);
 

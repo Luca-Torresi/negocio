@@ -70,11 +70,12 @@ public class EstadisticaService {
         return resultados;
     }
 
-    public List<List<Object>> productosMasRentables(LocalDate fechaInicio, LocalDate fechaFin) {
+    public List<List<Object>> productosMasRentables(Integer page, LocalDate fechaInicio, LocalDate fechaFin) {
         LocalDateTime inicio = fechaInicio.atStartOfDay();
         LocalDateTime fin = fechaFin.plusDays(1).atStartOfDay();
+        Integer offset = page * 7;
 
-        List<GraficoGeneralDTO> datos = detalleVentaRepository.findTopProductosMasRentables(inicio, fin);
+        List<GraficoGeneralDTO> datos = detalleVentaRepository.findTopProductosMasRentables(offset, inicio, fin);
 
         List<List<Object>> resultadoParaGrafico = new ArrayList<>();
         resultadoParaGrafico.add(List.of("Producto", "Ganancia"));
@@ -133,14 +134,13 @@ public class EstadisticaService {
         BigDecimal ticketPromedio = ventaRepository.findTicketPromedioMesActual();
         Long productosStockBajo = productoRepository.countProductosConStockBajo();
 
-        BigDecimal totalEgresos = totalGastos.add(totalCompras);
-
         List<KpiDTO> kpis = new ArrayList<>();
         kpis.add(new KpiDTO("Recaudado este Mes", totalRecaudado));
-        kpis.add(new KpiDTO("Gastos de este Mes", totalEgresos));
+        kpis.add(new KpiDTO("Compras del mes", totalCompras));
+        kpis.add(new KpiDTO("Gastos del Mes", totalGastos));
         kpis.add(new KpiDTO("Ventas de este Mes", cantidadVentas));
         kpis.add(new KpiDTO("Ticket Promedio", ticketPromedio));
-        kpis.add(new KpiDTO("Productos con Bajo Stock           ", productosStockBajo));
+        kpis.add(new KpiDTO("Productos   Bajo Stock", productosStockBajo));
 
         return kpis;
     }

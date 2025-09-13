@@ -33,9 +33,10 @@ public class EstadisticaController {
 
     @GetMapping("/productosRentables")
     public ResponseEntity<List<List<Object>>> productosMasRentables(
+            @RequestParam Integer page,
             @RequestParam LocalDate fechaInicio,
             @RequestParam LocalDate fechaFin){
-        return ResponseEntity.ok(estadisticaService.productosMasRentables(fechaInicio, fechaFin));
+        return ResponseEntity.ok(estadisticaService.productosMasRentables(page, fechaInicio, fechaFin));
     }
 
     @GetMapping("/volumenVentas")

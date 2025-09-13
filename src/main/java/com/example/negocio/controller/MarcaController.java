@@ -1,7 +1,6 @@
 package com.example.negocio.controller;
 
 import com.example.negocio.dto.marca.MarcaDTO;
-import com.example.negocio.dto.marca.MarcaAbmDTO;
 import com.example.negocio.dto.marca.MarcaListaDTO;
 import com.example.negocio.entity.Marca;
 import com.example.negocio.service.MarcaService;
@@ -27,20 +26,9 @@ public class MarcaController {
         return ResponseEntity.ok(marcaService.modificarMarca(idMarca, dto));
     }
 
-    @GetMapping("/abm")
-    public ResponseEntity<List<MarcaAbmDTO>> obtenerMarcas(){
-        return ResponseEntity.ok(marcaService.obtenerMarcas());
-    }
-
     @GetMapping("/lista")
     public ResponseEntity<List<MarcaListaDTO>> listarMarcas(){
         return ResponseEntity.ok(marcaService.listarMarcas());
-    }
-
-    @PatchMapping("/cambiarEstado/{idMarca}")
-    public ResponseEntity<Void> cambiarEstadoMarca(@PathVariable Long idMarca) {
-        marcaService.cambiarEstadoMarca(idMarca);
-        return ResponseEntity.ok().build();
     }
 
 }

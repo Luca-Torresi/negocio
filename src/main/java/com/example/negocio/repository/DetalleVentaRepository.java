@@ -49,7 +49,19 @@ public interface DetalleVentaRepository extends JpaRepository<DetalleVenta, Long
     @Query(
             value = "SELECT " +
                     "    p.nombre AS etiqueta, " +
-                    "    SUM((dv.precioUnitario - p.costo) * dv.cantidad) AS valor " +
+                    "    SUM((dv.precioUnitario - " +
+                    "        IFNULL(" +
+                    "            (" +
+                    "                SELECT dc.costoUnitario " +
+                    "                FROM detalleCompra dc " +
+                    "                JOIN compra c ON dc.idCompra = c.idCompra " +
+                    "                WHERE dc.idProducto = p.idProducto AND c.fechaHora <= v.fechaHora " +
+                    "                ORDER BY c.fechaHora DESC " +
+                    "                LIMIT 1" +
+                    "            ), " +
+                    "            p.costo" +
+                    "        )" +
+                    "    ) * dv.cantidad) AS valor " +
                     "FROM detalleVenta dv " +
                     "INNER JOIN producto p ON p.idProducto = dv.idProducto " +
                     "INNER JOIN venta v ON v.idVenta = dv.idVenta " +
@@ -61,10 +73,11 @@ public interface DetalleVentaRepository extends JpaRepository<DetalleVenta, Long
                     "    p.idProducto, p.nombre " +
                     "ORDER BY " +
                     "    valor DESC " +
-                    "LIMIT 7",
+                    "LIMIT 7 OFFSET :offset",
             nativeQuery = true
     )
     List<GraficoGeneralDTO> findTopProductosMasRentables(
+            @Param("offset") Integer offset,
             @Param("fechaInicio") LocalDateTime fechaInicio,
             @Param("fechaFin") LocalDateTime fechaFin
     );

@@ -38,9 +38,9 @@ public class ProductoController {
         return productoService.obtenerProductos(page, size, nombre, idCategoria, idMarca, idProveedor, bajoStock);
     }
 
-    @GetMapping("/listaCompra/{idProveedor}")
+    @GetMapping("/listaCompra/")
     public ResponseEntity<List<ProductoCompraDTO>> listarProductosCompra(@PathVariable Long idProveedor){
-        return ResponseEntity.ok(productoService.listarProductosCompra(idProveedor));
+        return ResponseEntity.ok(productoService.listarProductosCompra());
     }
 
     @GetMapping("/listaVenta")
