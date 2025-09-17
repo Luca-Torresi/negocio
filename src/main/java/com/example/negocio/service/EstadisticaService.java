@@ -1,6 +1,6 @@
 package com.example.negocio.service;
 
-import com.example.negocio.dto.estadisticas.*;
+import com.example.negocio.dto.estadistica.*;
 import com.example.negocio.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class EstadisticaService {
     private final ProductoRepository productoRepository;
     private final DetalleVentaRepository detalleVentaRepository;
 
-    public List<List<Object>> ingresosVsEgresos(LocalDate fechaInicio, LocalDate fechaFin) {
+    public List<List<Object>> obtenerIngresosVsEgresos(LocalDate fechaInicio, LocalDate fechaFin) {
         LocalDateTime inicio = fechaInicio.atStartOfDay();
         LocalDateTime fin = fechaFin.plusMonths(1).atStartOfDay();
 
@@ -55,7 +55,7 @@ public class EstadisticaService {
         return resultadoFinal;
     }
 
-    public List<List<Object>> ventasPorMetodoDePago(LocalDate fechaInicio, LocalDate fechaFin) {
+    public List<List<Object>> obtenerVentasPorMetodoDePago(LocalDate fechaInicio, LocalDate fechaFin) {
         LocalDateTime inicio = fechaInicio.atStartOfDay();
         LocalDateTime fin = fechaFin.plusDays(1).atStartOfDay();
 
@@ -70,7 +70,7 @@ public class EstadisticaService {
         return resultados;
     }
 
-    public List<List<Object>> productosMasRentables(Integer page, LocalDate fechaInicio, LocalDate fechaFin) {
+    public List<List<Object>> obtenerProductosMasRentables(Integer page, LocalDate fechaInicio, LocalDate fechaFin) {
         LocalDateTime inicio = fechaInicio.atStartOfDay();
         LocalDateTime fin = fechaFin.plusDays(1).atStartOfDay();
         Integer offset = page * 7;
@@ -87,7 +87,7 @@ public class EstadisticaService {
         return resultadoParaGrafico;
     }
 
-    public List<List<Object>> volumenVentas(LocalDate fechaInicio,LocalDate fechaFin,Long idProducto) {
+    public List<List<Object>> obtenerVolumenVentas(LocalDate fechaInicio, LocalDate fechaFin, Long idProducto) {
         LocalDateTime inicio = fechaInicio.atStartOfDay();
         LocalDateTime fin = fechaFin.plusDays(1).atStartOfDay();
 
@@ -110,7 +110,7 @@ public class EstadisticaService {
         return resultadoParaGrafico;
     }
 
-    public List<List<Object>> ventasPorHora(LocalDate fechaInicio, LocalDate fechaFin) {
+    public List<List<Object>> obtenerVentasPorHora(LocalDate fechaInicio, LocalDate fechaFin) {
         LocalDateTime inicio = fechaInicio.atStartOfDay();
         LocalDateTime fin = fechaFin.plusDays(1).atStartOfDay();
 
@@ -126,6 +126,32 @@ public class EstadisticaService {
         return resultadoParaGrafico;
     }
 
+    public List<List<Object>> obtenerGraficoVentasPorCategoria(LocalDate fechaInicio, LocalDate fechaFin) {
+        LocalDateTime inicio = fechaInicio.atStartOfDay();
+        LocalDateTime fin = fechaFin.plusDays(1).atStartOfDay();
+
+        List<GraficoGeneralDTO> datosCompletos = detalleVentaRepository.findVentasPorCategoria(inicio, fin);
+
+        List<List<Object>> resultadoParaGrafico = new ArrayList<>();
+        resultadoParaGrafico.add(List.of("Categoría", "Total Vendido"));
+
+        if (datosCompletos.size() > 4) {
+            List<GraficoGeneralDTO> top3 = datosCompletos.subList(0, 4);
+            top3.forEach(dato -> resultadoParaGrafico.add(List.of(dato.getEtiqueta(), dato.getValor())));
+
+            BigDecimal sumaOtras = datosCompletos.subList(4, datosCompletos.size()).stream()
+                    .map(GraficoGeneralDTO::getValor)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            resultadoParaGrafico.add(List.of("Otras", sumaOtras));
+
+        } else {
+            datosCompletos.forEach(dato -> resultadoParaGrafico.add(List.of(dato.getEtiqueta(), dato.getValor())));
+        }
+
+        return resultadoParaGrafico;
+    }
+
     public List<KpiDTO> obtenerKpis() {
         BigDecimal totalRecaudado = ventaRepository.findTotalRecaudadoMesActual();
         BigDecimal totalGastos = gastoRepository.findTotalGastosMesActual();
@@ -136,11 +162,11 @@ public class EstadisticaService {
 
         List<KpiDTO> kpis = new ArrayList<>();
         kpis.add(new KpiDTO("Recaudado este Mes", totalRecaudado));
-        kpis.add(new KpiDTO("Compras del mes", totalCompras));
-        kpis.add(new KpiDTO("Gastos del Mes", totalGastos));
+        kpis.add(new KpiDTO("Gastos fijos del Mes", totalGastos));
+        kpis.add(new KpiDTO("Compras del Mes", totalCompras));
         kpis.add(new KpiDTO("Ventas de este Mes", cantidadVentas));
         kpis.add(new KpiDTO("Ticket Promedio", ticketPromedio));
-        kpis.add(new KpiDTO("Productos   Bajo Stock", productosStockBajo));
+        kpis.add(new KpiDTO("Productos Bajo Stock", productosStockBajo));
 
         return kpis;
     }

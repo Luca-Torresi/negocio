@@ -39,6 +39,9 @@ dependencies {
 	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
+	// Excel
+	implementation 'org.apache.poi:poi-ooxml:5.2.5'
+
 	//OpenApi -> http://localhost:8080/swagger-ui/index.html#/
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
 

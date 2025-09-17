@@ -19,6 +19,7 @@ public class Compra {
     private Long idCompra;
     private BigDecimal total;
     private LocalDateTime fechaHora;
+    private Integer descuento;
 
     @ManyToOne @JoinColumn(name = "idProveedor")
     private Proveedor proveedor;

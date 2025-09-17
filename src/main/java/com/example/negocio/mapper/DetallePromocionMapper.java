@@ -14,7 +14,7 @@ public interface DetallePromocionMapper {
 
     DetallePromocion toEntity(DetallePromocionDTO dto);
 
-    @Mapping(source = "producto.nombre", target = "producto")
+    @Mapping(source = "producto.idProducto", target = "idProducto")
     DetallePromocionAbmDTO toAbmDTO(DetallePromocion detallePromocion);
 
 }

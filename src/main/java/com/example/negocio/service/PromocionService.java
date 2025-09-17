@@ -51,7 +51,8 @@ public class PromocionService {
         Promocion promocion = promocionRepository.findById(idPromocion).orElseThrow(() -> new PromocionNoEncontradaException());
 
         promocionMapper.updateFromDto(dto, promocion);
-        List<DetallePromocion> detalles = new ArrayList<>();
+        promocion.getDetalles().clear();
+
         for(DetallePromocionDTO detalleDto: dto.getDetalles()){
             Producto producto = productoRepository.findById(detalleDto.getIdProducto()).orElseThrow(() -> new ProductoNoEncontradoException());
 
@@ -59,9 +60,8 @@ public class PromocionService {
             detallePromocion.setProducto(producto);
             detallePromocion.setPromocion(promocion);
 
-            detalles.add(detallePromocion);
+            promocion.getDetalles().add(detallePromocion);
         }
-        promocion.setDetalles(detalles);
 
         return promocionRepository.save(promocion);
     }

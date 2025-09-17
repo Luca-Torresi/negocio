@@ -1,8 +1,7 @@
 package com.example.negocio.repository;
-import com.example.negocio.dto.estadisticas.GraficoDeConteoDTO;
-import com.example.negocio.dto.estadisticas.GraficoGeneralDTO;
-import com.example.negocio.dto.estadisticas.ResultadoMensualDTO;
-import com.example.negocio.dto.estadisticas.VentasPorHoraDTO;
+import com.example.negocio.dto.estadistica.GraficoDeConteoDTO;
+import com.example.negocio.dto.estadistica.ResultadoMensualDTO;
+import com.example.negocio.dto.estadistica.VentasPorHoraDTO;
 import com.example.negocio.entity.Venta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -77,5 +76,14 @@ public interface VentaRepository extends JpaRepository<Venta, Long>, JpaSpecific
             "  AND fechaHora < DATE_FORMAT(CURDATE(), '%Y-%m-01') + INTERVAL 1 MONTH",
             nativeQuery = true)
     BigDecimal findTicketPromedioMesActual();
+
+    @Query(value = "SELECT IFNULL(SUM(total), 0) " +
+            "FROM venta " +
+            "WHERE fechaHora >= :fechaInicio AND fechaHora < :fechaFin ",
+            nativeQuery = true)
+    BigDecimal findRecaudadoVentasDiarias(
+            @Param("fechaInicio") LocalDateTime fechaInicio,
+            @Param("fechaFin") LocalDateTime fechaFin
+    );
 
 }

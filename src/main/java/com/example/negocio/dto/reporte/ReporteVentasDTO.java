@@ -1,0 +1,14 @@
+package com.example.negocio.dto.reporte;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
+
+@Data @Builder @AllArgsConstructor @NoArgsConstructor
+public class ReporteVentasDTO {
+    private String producto;
+    private Long cantidad;
+    private BigDecimal precio;
+}

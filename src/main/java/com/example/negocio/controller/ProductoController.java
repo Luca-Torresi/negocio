@@ -38,8 +38,8 @@ public class ProductoController {
         return productoService.obtenerProductos(page, size, nombre, idCategoria, idMarca, idProveedor, bajoStock);
     }
 
-    @GetMapping("/listaCompra/")
-    public ResponseEntity<List<ProductoCompraDTO>> listarProductosCompra(@PathVariable Long idProveedor){
+    @GetMapping("/listaCompra")
+    public ResponseEntity<List<ProductoCompraDTO>> listarProductosCompra(){
         return ResponseEntity.ok(productoService.listarProductosCompra());
     }
 

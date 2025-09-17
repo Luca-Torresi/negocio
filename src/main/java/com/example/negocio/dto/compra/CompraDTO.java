@@ -13,6 +13,7 @@ import java.util.List;
 public class CompraDTO {
     @NotNull
     private Long idProveedor;
+    private Integer descuento;
     @Valid @NotEmpty
     private List<DetalleCompraDTO> detalles;
 }

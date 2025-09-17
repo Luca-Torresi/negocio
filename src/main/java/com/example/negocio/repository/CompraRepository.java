@@ -1,6 +1,6 @@
 package com.example.negocio.repository;
 
-import com.example.negocio.dto.estadisticas.ResultadoMensualDTO;
+import com.example.negocio.dto.estadistica.ResultadoMensualDTO;
 import com.example.negocio.entity.Compra;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

@@ -1,5 +1,7 @@
 package com.example.negocio.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +18,6 @@ public class Oferta {
     private Integer cantidadMinima;
     private BigDecimal nuevoPrecio;
 
-    @OneToOne @JoinColumn(name = "idProducto")
+    @OneToOne @JsonIgnore @JoinColumn(name = "idProducto")
     private Producto producto;
 }

@@ -67,6 +67,16 @@ public class CompraService {
             detalles.add(detalle);
         }
         compra.setDetalles(detalles);
+
+        if (dto.getDescuento() != null && dto.getDescuento() > 0) {
+            BigDecimal descuentoPorcentaje = new BigDecimal(dto.getDescuento());
+            BigDecimal cien = new BigDecimal("100");
+
+            BigDecimal multiplicador = BigDecimal.ONE.subtract(descuentoPorcentaje.divide(cien));
+
+            total = total.multiply(multiplicador);
+        }
+
         compra.setTotal(total);
 
         return compraRepository.save(compra);

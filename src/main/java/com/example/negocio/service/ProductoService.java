@@ -128,7 +128,7 @@ public class ProductoService {
     }
 
     public List<ProductoVentaDTO> listarProductosVenta(){
-        List<Producto> productos = productoRepository.findByEstadoTrue();
+        List<Producto> productos = productoRepository.findAll();
 
         return productos.stream()
                 .map(productoMapper::toVentaDto)

@@ -1,13 +1,16 @@
 package com.example.negocio.repository;
 
-import com.example.negocio.dto.estadisticas.GraficoGeneralDTO;
-import com.example.negocio.dto.estadisticas.VolumenVentasDTO;
+import com.example.negocio.dto.estadistica.GraficoGeneralDTO;
+import com.example.negocio.dto.estadistica.VolumenVentasDTO;
 import com.example.negocio.dto.producto.MesAnteriorDTO;
+import com.example.negocio.dto.reporte.ReporteVentasDTO;
 import com.example.negocio.entity.DetalleVenta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -151,6 +154,93 @@ public interface DetalleVentaRepository extends JpaRepository<DetalleVenta, Long
             @Param("fechaInicio") LocalDateTime fechaInicio,
             @Param("fechaFin") LocalDateTime fechaFin,
             @Param("idProducto") Long idProducto
+    );
+
+    @Query(
+            value = "SELECT " +
+                    "    t.producto, " +
+                    "    CAST(SUM(t.cantidad) AS SIGNED) AS cantidad, " +
+                    "    t.precio " +
+                    "FROM ( " +
+                    "    SELECT " +
+                    "        p.nombre AS producto, " +
+                    "        dv.cantidad AS cantidad, " +
+                    "        p.precio AS precio " +
+                    "    FROM detalleVenta dv " +
+                    "    JOIN producto p ON dv.idProducto = p.idProducto " +
+                    "    JOIN venta v ON dv.idVenta = v.idVenta " +
+                    "    WHERE dv.idProducto IS NOT NULL " +
+                    "      AND v.fechaHora >= :fechaInicio AND v.fechaHora < :fechaFin " +
+                    " " +
+                    "    UNION ALL " +
+                    " " +
+                    "    SELECT " +
+                    "        p_promo.nombre AS producto, " +
+                    "        (dv.cantidad * dp.cantidad) AS cantidad, " +
+                    "        p_promo.precio AS precio " +
+                    "    FROM detalleVenta dv " +
+                    "    JOIN venta v ON dv.idVenta = v.idVenta " +
+                    "    JOIN detallePromocion dp ON dv.idPromocion = dp.idPromocion " +
+                    "    JOIN producto p_promo ON dp.idProducto = p_promo.idProducto " +
+                    "    WHERE dv.idPromocion IS NOT NULL " +
+                    "      AND v.fechaHora >= :fechaInicio AND v.fechaHora < :fechaFin " +
+                    ") AS t " +
+                    "GROUP BY t.producto, t.precio " +
+                    "ORDER BY t.producto ASC",
+            nativeQuery = true
+    )
+    List<ReporteVentasDTO> findDatosParaReporteVentas(
+            @Param("fechaInicio") LocalDateTime fechaInicio,
+            @Param("fechaFin") LocalDateTime fechaFin
+    );
+
+    @Query(
+            value = "SELECT IFNULL(SUM(t.costo_total_linea), 0) " +
+                    "FROM ( " +
+                    "    SELECT SUM(p.costo * dv.cantidad) AS costo_total_linea " +
+                    "    FROM detalleVenta dv " +
+                    "    JOIN producto p ON dv.idProducto = p.idProducto " +
+                    "    JOIN venta v ON dv.idVenta = v.idVenta " +
+                    "    WHERE dv.idProducto IS NOT NULL " +
+                    "      AND v.fechaHora >= :fechaInicio AND v.fechaHora < :fechaFin " +
+                    " " +
+                    "    UNION ALL " +
+                    " " +
+                    "    SELECT SUM(p_promo.costo * dp.cantidad * dv.cantidad) AS costo_total_linea " +
+                    "    FROM detalleVenta dv " +
+                    "    JOIN venta v ON dv.idVenta = v.idVenta " +
+                    "    JOIN detallePromocion dp ON dv.idPromocion = dp.idPromocion " +
+                    "    JOIN producto p_promo ON dp.idProducto = p_promo.idProducto " +
+                    "    WHERE dv.idPromocion IS NOT NULL " +
+                    "      AND v.fechaHora >= :fechaInicio AND v.fechaHora < :fechaFin " +
+                    ") AS t",
+            nativeQuery = true
+    )
+    BigDecimal findCostoTotalDeVentasEnRango(
+            @Param("fechaInicio") LocalDateTime fechaInicio,
+            @Param("fechaFin") LocalDateTime fechaFin
+    );
+
+    @Query(
+            value = "SELECT " +
+                    "    cat.nombre AS etiqueta, " +
+                    "    SUM(dv.precioUnitario * dv.cantidad) AS valor " +
+                    "FROM detalleVenta dv " +
+                    "JOIN producto p ON dv.idProducto = p.idProducto " +
+                    "JOIN categoria cat ON p.idCategoria = cat.idCategoria " + // Join para llegar a la categoría
+                    "JOIN venta v ON dv.idVenta = v.idVenta " +
+                    "WHERE " +
+                    "    dv.idProducto IS NOT NULL " + // Nos aseguramos de contar solo productos
+                    "    AND v.fechaHora >= :fechaInicio AND v.fechaHora < :fechaFin " +
+                    "GROUP BY " +
+                    "    cat.idCategoria, cat.nombre " +
+                    "ORDER BY " +
+                    "    valor DESC",
+            nativeQuery = true
+    )
+    List<GraficoGeneralDTO> findVentasPorCategoria(
+            @Param("fechaInicio") LocalDateTime fechaInicio,
+            @Param("fechaFin") LocalDateTime fechaFin
     );
 
 }

@@ -31,7 +31,6 @@ public interface ProductoMapper {
     @Mapping(source = "oferta.idOferta", target = "idOferta")
     ProductoAbmDTO toAbmDto(Producto entity);
 
-    @Mapping(target = "precio", expression = "java(mapPrecioLista(entity))")
     ProductoVentaDTO toVentaDto(Producto entity);
 
     ProductoCompraDTO toCompraDto(Producto entity);
@@ -39,21 +38,6 @@ public interface ProductoMapper {
     default BigDecimal mapPrecioAbm(Producto producto) {
         if (producto.getDescuento() == null) {
             return null;
-        }
-
-        BigDecimal precioOriginal = producto.getPrecio();
-        BigDecimal porcentaje = new BigDecimal(producto.getDescuento().getPorcentaje());
-        BigDecimal cien = new BigDecimal("100");
-        BigDecimal factorDescuento = porcentaje.divide(cien);
-        BigDecimal multiplicador = BigDecimal.ONE.subtract(factorDescuento);
-        BigDecimal precioFinal = precioOriginal.multiply(multiplicador);
-
-        return precioFinal;
-    }
-
-    default BigDecimal mapPrecioLista(Producto producto) {
-        if (producto.getDescuento() == null) {
-            return producto.getPrecio();
         }
 
         BigDecimal precioOriginal = producto.getPrecio();

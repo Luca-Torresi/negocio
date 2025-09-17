@@ -1,6 +1,6 @@
 package com.example.negocio.controller;
 
-import com.example.negocio.dto.estadisticas.KpiDTO;
+import com.example.negocio.dto.estadistica.KpiDTO;
 import com.example.negocio.service.EstadisticaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +21,21 @@ public class EstadisticaController {
     public ResponseEntity<List<List<Object>>> ingresosVsEgresos(
             @RequestParam LocalDate fechaInicio,
             @RequestParam LocalDate fechaFin) {
-        return ResponseEntity.ok(estadisticaService.ingresosVsEgresos(fechaInicio, fechaFin));
+        return ResponseEntity.ok(estadisticaService.obtenerIngresosVsEgresos(fechaInicio, fechaFin));
     }
 
     @GetMapping("/ventasPorMetodoDePago")
     public ResponseEntity<List<List<Object>>> ventasPorMetodoDePago(
             @RequestParam LocalDate fechaInicio,
             @RequestParam LocalDate fechaFin){
-        return ResponseEntity.ok(estadisticaService.ventasPorMetodoDePago(fechaInicio, fechaFin));
+        return ResponseEntity.ok(estadisticaService.obtenerVentasPorMetodoDePago(fechaInicio, fechaFin));
+    }
+
+    @GetMapping("/ventasPorCategoria")
+    public ResponseEntity<List<List<Object>>> obtenerGraficoVentasPorCategoria(
+            @RequestParam LocalDate fechaInicio,
+            @RequestParam LocalDate fechaFin){
+        return ResponseEntity.ok(estadisticaService.obtenerGraficoVentasPorCategoria(fechaInicio, fechaFin));
     }
 
     @GetMapping("/productosRentables")
@@ -36,7 +43,7 @@ public class EstadisticaController {
             @RequestParam Integer page,
             @RequestParam LocalDate fechaInicio,
             @RequestParam LocalDate fechaFin){
-        return ResponseEntity.ok(estadisticaService.productosMasRentables(page, fechaInicio, fechaFin));
+        return ResponseEntity.ok(estadisticaService.obtenerProductosMasRentables(page, fechaInicio, fechaFin));
     }
 
     @GetMapping("/volumenVentas")
@@ -44,14 +51,14 @@ public class EstadisticaController {
             @RequestParam LocalDate fechaInicio,
             @RequestParam LocalDate fechaFin,
             @RequestParam(required = false) Long idProducto) {
-        return ResponseEntity.ok(estadisticaService.volumenVentas(fechaInicio, fechaFin, idProducto));
+        return ResponseEntity.ok(estadisticaService.obtenerVolumenVentas(fechaInicio, fechaFin, idProducto));
     }
 
     @GetMapping("/ventasPorHora")
     public ResponseEntity<List<List<Object>>> ventasPorHora(
             @RequestParam LocalDate fechaInicio,
             @RequestParam LocalDate fechaFin){
-        return ResponseEntity.ok(estadisticaService.ventasPorHora(fechaInicio, fechaFin));
+        return ResponseEntity.ok(estadisticaService.obtenerVentasPorHora(fechaInicio, fechaFin));
     }
 
     @GetMapping("/kpis")

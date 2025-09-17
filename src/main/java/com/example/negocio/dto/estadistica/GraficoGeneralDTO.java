@@ -1,4 +1,4 @@
-package com.example.negocio.dto.estadisticas;
+package com.example.negocio.dto.estadistica;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Data @Builder @AllArgsConstructor @NoArgsConstructor
-public class VolumenVentasDTO {
-    private String mes;
-    private String nombre;
-    private BigDecimal cantidad;
+public class GraficoGeneralDTO {
+    private String etiqueta;
+    private BigDecimal valor;
 }
