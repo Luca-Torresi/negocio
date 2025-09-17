@@ -1,5 +1,5 @@
 import apiClient from "./interceptors/apiClient"
-import type { ItemCatalogo, VentaDTO, PaginaDeVentas, VentaHistorial } from "../types/dto/Venta"
+import type { ItemCatalogo, VentaDTO, PaginaDeVentas } from "../types/dto/Venta"
 
 // Obtener catálogo unificado para la terminal de venta
 export const obtenerCatalogoVenta = async (): Promise<ItemCatalogo[]> => {
@@ -18,11 +18,6 @@ export const crearVenta = async (data: VentaDTO): Promise<void> => {
   await apiClient.post(`/venta/nueva`, data)
 }
 
-// Modificar venta existente
-export const modificarVenta = async (id: number, data: VentaDTO): Promise<void> => {
-  await apiClient.put(`/venta/modificar/${id}`, data)
-}
-
 // Obtener ventas con filtros y paginación
 export const obtenerVentas = async (filtros: any): Promise<PaginaDeVentas> => {
   const params = new URLSearchParams()
@@ -37,11 +32,5 @@ export const obtenerVentas = async (filtros: any): Promise<PaginaDeVentas> => {
   console.log(filtros.metodoDePago)
 
   const response = await apiClient.get(`/venta/obtener?${params}`)
-  return response.data
-}
-
-// Obtener venta por ID para edición
-export const obtenerVentaPorId = async (id: number): Promise<VentaHistorial> => {
-  const response = await apiClient.get(`/venta/obtener/${id}`)
   return response.data
 }

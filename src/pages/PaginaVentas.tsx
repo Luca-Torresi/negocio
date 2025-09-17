@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { Search, Plus, Trash2, ShoppingCart, ListPlus } from "lucide-react"
+import { Search, Plus, Trash2, ListPlus, ShoppingBasket } from "lucide-react"
 import type { ItemCatalogo, ItemVenta, VentaDTO } from "../types/dto/Venta"
 import {
   obtenerCatalogoVenta,
@@ -85,6 +85,7 @@ const PaginaVentas: React.FC = () => {
       const productoEncontrado = await buscarProductoPorCodigo(codigo);
       if (productoEncontrado) {
         añadirItemAlCarrito(productoEncontrado, 1);
+        setBusquedaItem('');
       } else {
         alert(`Producto con código ${codigo} no encontrado.`);
       }
@@ -121,8 +122,6 @@ const PaginaVentas: React.FC = () => {
     };
   }, [codigoDeBarras, procesarCodigoDeBarras]);
   // --- FIN DE LA LÓGICA DEL LECTOR ---
-
-
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -441,7 +440,7 @@ const PaginaVentas: React.FC = () => {
         {/* Columna Derecha: Carrito/Ticket */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
-            <ShoppingCart className="mr-2" size={20} />
+            <ShoppingBasket className="mr-2" size={20} />
             Ticket Actual
           </h2>
 
@@ -454,11 +453,11 @@ const PaginaVentas: React.FC = () => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="text-left py-2">Item</th>
+                      <th className="text-left py-2 w-64">Item</th>
                       <th className="text-center py-2">Cant.</th>
-                      <th className="text-right py-2">P. Unit.</th>
-                      <th className="text-right py-2">Subtotal</th>
-                      <th className="text-center py-2"></th>
+                      <th className="text-center py-2">P. Unit.</th>
+                      <th className="text-center py-2">Subtotal</th>
+                      <th className="text-center py-2 w-[10px]"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -483,11 +482,11 @@ const PaginaVentas: React.FC = () => {
                             min="1"
                             value={item.cantidad}
                             onChange={(e) => modificarCantidadCarrito(indice, Number.parseInt(e.target.value) || 1)}
-                            className="w-16 p-1 text-center border border-gray-300 rounded"
+                            className="w-[60px] p-1 text-center border border-gray-300 rounded"
                           />
                         </td>
-                        <td className="py-3 text-right">{formatCurrency(item.precioUnitarioAplicado)}</td>
-                        <td className="py-3 text-right font-semibold">
+                        <td className="py-3 text-center">{formatCurrency(item.precioUnitarioAplicado)}</td>
+                        <td className="py-3 text-center font-semibold">
                           {formatCurrency(item.cantidad * item.precioUnitarioAplicado)}
                         </td>
                         <td className="py-3 text-center">

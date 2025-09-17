@@ -20,14 +20,3 @@ export const obtenerCompras = async (filtros: any): Promise<PaginaDeCompras> => 
 export const crearCompra = async (data: CompraDTO): Promise<void> => {
   await apiClient.post(`/compra/nueva`, data)
 }
-
-// Modificar compra existente
-export const modificarCompra = async (id: number, data: CompraDTO): Promise<void> => {
-  await apiClient.put(`/compra/modificar/${id}`, data)
-}
-
-// Obtener compra por ID
-export const obtenerCompraPorId = async (id: number): Promise<any> => {
-  const response = await apiClient.get(`/compra/${id}`)
-  return response.data
-}

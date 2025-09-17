@@ -1,8 +1,11 @@
 "use client"
 
 import type React from "react"
+import { useState, useEffect } from "react"
 import { X } from "lucide-react"
 import type { Promocion } from "../../types/dto/Promocion"
+import type { ProductoVenta } from "../../types/dto/Producto"
+import { obtenerListaProductosVenta } from "../../api/productoApi"
 import { formatCurrency } from "../../utils/numberFormatUtils"
 
 interface Props {
@@ -11,7 +14,53 @@ interface Props {
   promocion: Promocion | null
 }
 
+interface DetalleEnriquecido {
+  idDetallePromocion: number
+  idProducto: string
+  nombreProducto: string
+  cantidad: number
+  precioUnitario: number
+  subtotal: number
+}
+
 export const ModalDetallesPromocion: React.FC<Props> = ({ isOpen, onClose, promocion }) => {
+  const [productosDisponibles, setProductosDisponibles] = useState<ProductoVenta[]>([])
+  const [detallesEnriquecidos, setDetallesEnriquecidos] = useState<DetalleEnriquecido[]>([])
+
+  useEffect(() => {
+    if (isOpen) {
+      cargarProductosDisponibles()
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (promocion && productosDisponibles.length > 0) {
+      const detallesConInfo = promocion.detalles.map((detalle) => {
+        const productoEncontrado = productosDisponibles.find((p) => p.idProducto === Number(detalle.idProducto))
+        const precioUnitario = productoEncontrado?.precio || 0
+
+        return {
+          idDetallePromocion: detalle.idDetallePromocion,
+          idProducto: detalle.idProducto,
+          nombreProducto: productoEncontrado?.nombre || `Producto ID: ${detalle.idProducto}`,
+          cantidad: detalle.cantidad,
+          precioUnitario: precioUnitario,
+          subtotal: precioUnitario * detalle.cantidad,
+        }
+      })
+      setDetallesEnriquecidos(detallesConInfo)
+    }
+  }, [promocion, productosDisponibles])
+
+  const cargarProductosDisponibles = async (): Promise<void> => {
+    try {
+      const productos = await obtenerListaProductosVenta()
+      setProductosDisponibles(productos)
+    } catch (error) {
+      console.error("Error al cargar productos:", error)
+    }
+  }
+
   if (!isOpen || !promocion) return null
 
   return (
@@ -53,13 +102,17 @@ export const ModalDetallesPromocion: React.FC<Props> = ({ isOpen, onClose, promo
                 <tr className="bg-gray-50">
                   <th className="border border-gray-300 px-4 py-2 text-left">Producto</th>
                   <th className="border border-gray-300 px-4 py-2 text-left">Cantidad</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Precio Unit.</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Subtotal</th>
                 </tr>
               </thead>
               <tbody>
-                {promocion.detalles.map((detalle, index) => (
-                  <tr key={index}>
-                    <td className="border border-gray-300 px-4 py-2">{detalle.producto}</td>
+                {detallesEnriquecidos.map((detalle) => (
+                  <tr key={detalle.idDetallePromocion}>
+                    <td className="border border-gray-300 px-4 py-2">{detalle.nombreProducto}</td>
                     <td className="border border-gray-300 px-4 py-2">{detalle.cantidad}</td>
+                    <td className="border border-gray-300 px-4 py-2">{formatCurrency(detalle.precioUnitario)}</td>
+                    <td className="border border-gray-300 px-4 py-2">{formatCurrency(detalle.subtotal)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -86,26 +86,29 @@ export const ModalGestionarOferta: React.FC<Props> = ({ estaAbierto, producto, a
             <p className="text-lg font-semibold text-gray-900">{formatCurrency(producto.precio)}</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad Mínima</label>
-            <input
-              type="number"
-              min="1"
-              value={cantidadMinima}
-              onChange={(e) => setCantidadMinima(Number.parseInt(e.target.value) || 1)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          <div className="flex gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad Mínima</label>
+              <input
+                type="number"
+                min="1"
+                value={cantidadMinima}
+                onChange={(e) => setCantidadMinima(Number.parseInt(e.target.value) || 1)}
+                className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nuevo Precio</label>
+              <InputMoneda
+                value={nuevoPrecio}
+                onValueChange={(valor) => setNuevoPrecio(valor || 0)}
+                className="w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="$ 0"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nuevo Precio</label>
-            <InputMoneda
-              value={nuevoPrecio}
-              onValueChange={(valor) => setNuevoPrecio(valor || 0)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="$ 0"
-            />
-          </div>
 
           <div className="bg-gray-50 p-4 rounded-md">
             <label className="block text-sm font-medium text-gray-700 mb-1">Vista Previa - Precio Final</label>

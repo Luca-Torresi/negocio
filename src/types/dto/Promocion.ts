@@ -1,6 +1,7 @@
 // Para el detalle dentro de una Promoción
 export interface DetallePromocion {
-  producto: string
+  idDetallePromocion: number
+  idProducto: string
   cantidad: number
 }
 
@@ -19,8 +20,5 @@ export interface PromocionDTO {
   nombre: string
   descripcion: string
   precio: number
-  detalles: {
-    idProducto: number
-    cantidad: number
-  }[]
+  detalles: DetallePromocion[]
 }

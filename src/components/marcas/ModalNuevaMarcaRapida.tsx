@@ -52,7 +52,7 @@ export const ModalNuevaMarcaRapida: React.FC<Props> = ({ isOpen, onClose, onSucc
 
         <form onSubmit={manejarEnvio} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de la marca *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Nombre *</label>
             <input
               type="text"
               value={nombre}
@@ -75,7 +75,7 @@ export const ModalNuevaMarcaRapida: React.FC<Props> = ({ isOpen, onClose, onSucc
             <button
               type="submit"
               disabled={!nombre.trim() || cargando}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary-dark disabled:opacity-50"
             >
               {cargando ? "Guardando..." : "Guardar"}
             </button>

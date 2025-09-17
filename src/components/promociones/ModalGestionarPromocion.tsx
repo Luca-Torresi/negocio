@@ -46,25 +46,29 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
     }
   }, [isOpen])
 
-  // Cargar datos para edición
   useEffect(() => {
-    if (promocionParaEditar) {
+    if (promocionParaEditar && productosDisponibles.length > 0) {
       setNombre(promocionParaEditar.nombre)
       setDescripcion(promocionParaEditar.descripcion)
       setPrecio(promocionParaEditar.precio)
 
-      // Convertir detalles de la promoción a formato del formulario
-      const detallesFormulario = promocionParaEditar.detalles.map((detalle) => ({
-        idProducto: 0, // Se actualizará cuando se carguen los productos
-        nombreProducto: detalle.producto,
-        cantidad: detalle.cantidad,
-        precio: 0, // Se actualizará cuando se carguen los productos
-      }))
+      // Convertir detalles de la promoción a formato del formulario usando los productos disponibles
+      const detallesFormulario = promocionParaEditar.detalles.map((detalle) => {
+        // Buscar el producto en la lista de productos disponibles por ID
+        const productoEncontrado = productosDisponibles.find((p) => p.idProducto === Number(detalle.idProducto))
+
+        return {
+          idProducto: Number(detalle.idProducto),
+          nombreProducto: productoEncontrado?.nombre || `Producto ID: ${detalle.idProducto}`,
+          cantidad: detalle.cantidad,
+          precio: productoEncontrado?.precio || 0,
+        }
+      })
       setDetalles(detallesFormulario)
-    } else {
+    } else if (!promocionParaEditar) {
       limpiarFormulario()
     }
-  }, [promocionParaEditar])
+  }, [promocionParaEditar, productosDisponibles])
 
   // Calcular precio sugerido cuando cambian los detalles
   useEffect(() => {
@@ -144,7 +148,8 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
         descripcion: descripcion.trim(),
         precio: precio,
         detalles: detalles.map((d) => ({
-          idProducto: d.idProducto,
+          idDetallePromocion: 0, // Se asigna en el backend
+          idProducto: d.idProducto.toString(), // Convertir a string según el tipo
           cantidad: d.cantidad,
         })),
       }
@@ -203,7 +208,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="$ 0"
                 required
-              />              
+              />
             </div>
           </div>
 

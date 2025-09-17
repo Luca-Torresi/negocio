@@ -20,7 +20,7 @@ export interface ItemVenta {
 
 // DTO para enviar al backend al crear/modificar una venta
 export interface VentaDTO {
-  metodoDePago: string // Ej: "EFECTIVO", "TARJETA"
+  metodoDePago: string 
   detalles: {
     idProducto?: number
     idPromocion?: number

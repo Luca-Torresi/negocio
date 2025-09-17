@@ -25,7 +25,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/productos" replace /> 
+        element: <Navigate to="/ventas" replace /> 
       },
       {
         path: 'categorias',
@@ -60,7 +60,7 @@ const router = createBrowserRouter([
         element: <PaginaHistorial />,
       },
       {
-        path: 'reportes',
+        path: 'estadisticas',
         element: <PaginaEstadisticas />,
       },
     ],

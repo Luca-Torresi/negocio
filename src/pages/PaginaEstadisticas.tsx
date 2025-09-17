@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useMemo } from "react"
-import { ChartNoAxesCombined, Activity, RefreshCw, ClipboardList, AlertTriangle, PiggyBank, Coins, ChevronLeft, ChevronRight, ShoppingBasket } from "lucide-react"
+import { ChartNoAxesCombined, Activity, RefreshCw, ClipboardList, AlertTriangle, PiggyBank, Coins, ChevronLeft, ChevronRight, TableProperties, Truck } from "lucide-react"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import { Chart } from "react-google-charts"
@@ -14,10 +14,12 @@ import {
   obtenerVolumenVentas,
   obtenerVentasPorHora,
   obtenerVentasPorMetodoDePago,
+  obtenerVentasPorCategoria
 } from "../api/estadisticaApi"
 import { obtenerListaProductosVenta } from "../api/productoApi"
 import type { ProductoVenta } from "../types/dto/Producto"
 import { formatCurrency } from "../utils/numberFormatUtils"
+import ModalExportarReporte from "../components/reportes/ModalExportarReporte"
 
 const PaginaEstadisticas: React.FC = () => {
   // Estados principales (sin cambios)
@@ -28,6 +30,8 @@ const PaginaEstadisticas: React.FC = () => {
   const [datosVentasPorHora, setDatosVentasPorHora] = useState<DatosParaGrafico | null>(null)
   const [productosVenta, setProductosVenta] = useState<ProductoVenta[]>([])
   const [datosMetodosDePago, setDatosMetodosDePago] = useState<DatosParaGrafico | null>(null)
+  const [datosVentasPorCategoria, setDatosVentasPorCategoria] = useState<DatosParaGrafico | null>(null)
+  const [modalExportarAbierto, setModalExportarAbierto] = useState(false)
 
   // Estados de filtros (sin cambios)
   const [fechaInicio, setFechaInicio] = useState<Date | null>(() => {
@@ -130,6 +134,7 @@ const PaginaEstadisticas: React.FC = () => {
           ventasHoraData,
           productosListaData,
           metodosPagoData,
+          ventasPorCategoriaData
         ] = await Promise.all([
           obtenerKpis(),
           obtenerIngresosVsEgresos(fechasParams),
@@ -138,6 +143,7 @@ const PaginaEstadisticas: React.FC = () => {
           obtenerVentasPorHora(fechasParams),
           obtenerListaProductosVenta(),
           obtenerVentasPorMetodoDePago(fechasParams),
+          obtenerVentasPorCategoria(fechasParams)
         ]);
 
         // --- 3. APLICAMOS LAS TRANSFORMACIONES ---
@@ -191,6 +197,7 @@ const PaginaEstadisticas: React.FC = () => {
         setKpis(kpisData);
         setProductosVenta(productosListaData);
         setDatosMetodosDePago(metodosPagoData);
+        setDatosVentasPorCategoria(ventasPorCategoriaData);
 
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error al cargar estadísticas");
@@ -220,7 +227,7 @@ const PaginaEstadisticas: React.FC = () => {
     vAxis: {
       format: '$ #,##0'
     },
-    colors: ["#10B981", "#EF4444"],
+    colors: ["#4dbe7a", "#EF4444"],
     backgroundColor: "transparent",
     legend: {
       position: "top",
@@ -232,7 +239,7 @@ const PaginaEstadisticas: React.FC = () => {
     chartArea: { left: 65, top: 30, right: 10, width: "80%", height: "70%" },
   }
 
-  const opcionesProductosRentables = {
+  const opcionesProductosRentables = {    
     hAxis: {
       format: '$ #,##0'
     },
@@ -242,29 +249,8 @@ const PaginaEstadisticas: React.FC = () => {
     colors: ["#6793DA"],
     backgroundColor: "transparent",
     chartArea: { left: 120, top: 15, right: 35, width: "100%", height: "80%" },
-  }
+  }  
 
-  // const opcionesVolumenVentas = {
-  //   hAxis: {
-  //     format: 'MMM y',
-  //     slantedText: true,
-  //     slantedTextAngle: 60,
-  //     ticks: ticksIngresosVsEgresos,
-  //   },
-  //   vAxis: {
-  //     title: "Cantidad Vendida",
-  //     titleTextStyle: { color: "#374151", fontSize: 12 },
-  //   },
-  //   bar: { groupWidth: "30px" },
-  //   legend: {
-  //     position: 'none'
-  //   },
-  //   colors: ["#de9922"],
-  //   backgroundColor: "transparent",
-  //   chartArea: { left: 60, top: 30, right: 40, width: "80%", height: "70%" },
-  // }
-
-  // 2. Usamos useMemo para que las opciones se recalculen solo cuando los datos cambien
   const opcionesVolumenVentas = useMemo(() => {
     let maxValor = 0;
     // Buscamos el valor más alto en los datos actuales
@@ -304,7 +290,7 @@ const PaginaEstadisticas: React.FC = () => {
     };
   }, [datosVolumenVentas, productoSeleccionado, productosVenta]);
 
-  const opcionesVentasPorHora = {
+  const opcionesVentasPorHora = {    
     hAxis: {
       showTextEvery: 1,
       slantedText: true,
@@ -324,7 +310,7 @@ const PaginaEstadisticas: React.FC = () => {
     chartArea: { left: 60, top: 60, bottom: 35, right: 30, width: "80%", height: "70%" },
   }
 
-  const opcionesMetodosDePago = {
+  const opcionesMetodosDePago = {    
     is3D: true,
     backgroundColor: "transparent",
     legend: {
@@ -338,6 +324,21 @@ const PaginaEstadisticas: React.FC = () => {
     },
     colors: ["#7B987A", "#38465E", "#9F4A36", "#E5A156", "#ECCAB1"],
     chartArea: { left: 30, top: 40, bottom: 30, right: 30, width: "80%", height: "70%" },
+  }
+
+  const opcionesVentasPorCategoria = {    
+    pieHole: 0.5,    
+    backgroundColor: "transparent",
+    legend: {
+      position: "right",
+      alignment: "start",
+      textStyle: {
+        color: '#4B5563',
+        fontSize: 17,        
+      }
+    },
+    colors: ["#96A78D", "#65647C", "#5C7886", "#EBD08F", "#A76F6F"],
+    chartArea: { left: 30, top: 50, bottom: 40, right: 30, width: "80%", height: "70%" },
   }
 
   return (
@@ -354,14 +355,15 @@ const PaginaEstadisticas: React.FC = () => {
       </div>
 
       {/* Panel de Filtros */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <div className="flex gap-4">
+      <div className="bg-white rounded-lg shadow-sm p-4 pr-8 mb-6">
+        <div className="flex items-end gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
             <DatePicker
               selected={fechaInicio}
               onChange={(date) => setFechaInicio(date)}
               showMonthYearPicker
+              locale="es"
               dateFormat="MM/yyyy"
               placeholderText="Seleccionar mes/año"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -374,10 +376,21 @@ const PaginaEstadisticas: React.FC = () => {
               selected={fechaFin}
               onChange={manejarCambioFechaFin}
               showMonthYearPicker
+              locale="es"
               dateFormat="MM/yyyy"
               placeholderText="Seleccionar mes/año"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          <div className="ml-auto mb-3">
+            <button
+              onClick={() => setModalExportarAbierto(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#19754C] text-white rounded-md hover:bg-[#156541]"
+            >
+              <TableProperties size={18} />
+              Exportar a Excel
+            </button>
           </div>
         </div>
       </div>
@@ -394,8 +407,8 @@ const PaginaEstadisticas: React.FC = () => {
               <div className="flex-shrink-0">
                 {/* Lógica de íconos (sin cambios) */}
                 {index === 0 && <PiggyBank className="h-8 w-8 text-pink-400" />}
-                {index === 1 && <ShoppingBasket className="h-8 w-8 text-gray-600" />}
-                {index === 2 && <Coins className="h-8 w-8 text-yellow-500" />}
+                {index === 1 && <Coins className="h-8 w-8 text-yellow-500" />}
+                {index === 2 && <Truck className="h-8 w-8 text-gray-600" />}
                 {index === 3 && <ClipboardList className="h-8 w-8 text-gray-600" />}
                 {index === 4 && <Activity className="h-8 w-8 text-gray-600" />}
                 {index === 5 && <AlertTriangle className="h-8 w-8 text-red-600" />}
@@ -414,7 +427,8 @@ const PaginaEstadisticas: React.FC = () => {
       </div>
 
       {/* Sección de Gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-6">
+        
         {/* Gráfico 1: Ingresos vs Egresos */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Ingresos vs. Egresos</h3>
@@ -564,7 +578,30 @@ const PaginaEstadisticas: React.FC = () => {
           )}
         </div>
 
+        {/* Gráfico 6: Ventas por Categoría */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Categorías con Mayor Facturación</h3>
+          {cargando || !datosVentasPorCategoria ? (
+            <div className="h-64 flex items-center justify-center text-gray-500">
+              <div className="flex items-center">
+                <RefreshCw className="animate-spin mr-2" size={20} />
+                Cargando datos...
+              </div>
+            </div>
+          ) : (
+            <Chart
+              chartType="PieChart"
+              width="100%"
+              height="300px"
+              data={datosVentasPorCategoria}
+              options={opcionesVentasPorCategoria}
+            />
+          )}
+        </div>
       </div>
+
+      <ModalExportarReporte isOpen={modalExportarAbierto} onClose={() => setModalExportarAbierto(false)} />
+
     </div>
   )
 }

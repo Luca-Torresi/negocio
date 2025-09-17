@@ -21,8 +21,8 @@ export default {
           light: '#c27070',
           dark: '#AB4949', 
         },
-        'toggleOn': '#6ACF68',        
-        'toggleOff': '#EA6363'        
+        'toggleOn': '#5ed387',        
+        'toggleOff': '#ff6666'        
       },
     },
   },

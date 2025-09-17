@@ -157,7 +157,7 @@ export const ModalGestionarMarcas: React.FC<Props> = ({ isOpen, onClose, onDataC
                               className="text-green-700 hover:text-green-800"
                               title="Guardar"
                             >
-                              <Check size={16} />
+                              <Check size={18} />
                             </button>
                             {" "}
                             <button
@@ -165,7 +165,7 @@ export const ModalGestionarMarcas: React.FC<Props> = ({ isOpen, onClose, onDataC
                               className="text-red-600 hover:text-red-700"
                               title="Cancelar"
                             >
-                              <X size={16} />
+                              <X size={18} />
                             </button>
                           </div>
                         ) : (

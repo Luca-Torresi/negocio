@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.react-datepicker__current-month {
+  @apply capitalize;
+}
+
+.react-datepicker__month-text {
+  @apply capitalize;
+}

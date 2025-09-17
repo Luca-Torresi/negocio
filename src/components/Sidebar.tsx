@@ -11,9 +11,9 @@ import {
   ChartNoAxesCombined,
   Tag,
   ScrollText,
-  ListPlus,
-  CircleUserRound,
-  LogOut,
+  ListPlus,  
+  LogOut,  
+  User,
 } from "lucide-react"
 import { useUsuarioStore } from "../store/usuarioStore"
 
@@ -41,7 +41,7 @@ const Sidebar: React.FC = () => {
     { label: "Compras", path: "/compras", icon: <ShoppingCart size={20} /> },
     { label: "Proveedores", path: "/proveedores", icon: <Truck size={20} /> },
     { label: "Gastos", path: "/gastos", icon: <ReceiptText size={20} /> },
-    { label: "Reportes", path: "/reportes", icon: <ChartNoAxesCombined size={20} /> },
+    { label: "Estadísticas", path: "/estadisticas", icon: <ChartNoAxesCombined size={20} /> },
     { label: "Promociones", path: "/promociones", icon: <ShoppingBag size={20} /> },
   ]
 
@@ -56,7 +56,7 @@ const Sidebar: React.FC = () => {
       {usuario && (
         <div className="p-4 border-b border-gray-700">
           <div className="flex items-center space-x-3">
-            <CircleUserRound size={32} className="text-gray-300" />
+            <User size={32} className="text-gray-300" />
             <div>
               <p className="text-sm font-medium text-white">{usuario.nombre}</p>
               <p className="text-xs text-gray-400">Usuario activo</p>
