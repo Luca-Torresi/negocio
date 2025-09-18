@@ -20,6 +20,7 @@ interface Props {
 
 export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alConfirmar }) => {
   const [cargando, setCargando] = useState(false)
+  const [error, setError] = useState<string | null>("")
 
   // 3. Obtiene las categorías del store de Zustand
   const { categoriasArbol, cargarCategorias } = useCategoriaStore()
@@ -93,8 +94,12 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
         idCategoria: 0,
         idProveedor: 0,
       })
-    } catch (error) {
-      console.error("Error al crear producto:", error)
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        setError(error.response.data);
+      } else {
+        setError("Error al procesar la venta");
+      }
     } finally {
       setCargando(false)
     }
@@ -107,7 +112,8 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
       <div className="bg-white rounded-lg p-6 w-full max-w-[600px] max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">Nuevo Producto</h2>
-          <button onClick={alCerrar} className="text-gray-500 hover:text-gray-700">
+          {error && <div className="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{error}</div>}
+          <button onClick={alCerrar} className="text-gray-500 hover:text-gray-700 ml-3">
             <X size={24} />
           </button>
         </div>
@@ -177,6 +183,7 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
               <input
                 type="number"
                 value={formulario.stock}
+                min="0"
                 onChange={(e) => manejarCambio("stock", Number.parseInt(e.target.value) || 0)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
@@ -187,6 +194,7 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
               <input
                 type="number"
                 value={formulario.stockMinimo}
+                min="0"
                 onChange={(e) => manejarCambio("stockMinimo", Number.parseInt(e.target.value) || 0)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
