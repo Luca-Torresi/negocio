@@ -5,6 +5,7 @@ import com.example.negocio.dto.promocion.PromocionDTO;
 import com.example.negocio.dto.promocion.PromocionListaDTO;
 import com.example.negocio.entity.Promocion;
 import com.example.negocio.service.PromocionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +19,14 @@ public class PromocionController {
     private final PromocionService promocionService;
 
     @PostMapping("/nueva")
-    public ResponseEntity<Promocion> nuevaPromocion(@RequestBody PromocionDTO dto) {
+    public ResponseEntity<Promocion> nuevaPromocion(@Valid @RequestBody PromocionDTO dto) {
         return ResponseEntity.ok(promocionService.nuevaPromocion(dto));
     }
 
     @PutMapping("/modificar/{idPromocion}")
-    public ResponseEntity<Promocion> modificarPromocion(@PathVariable Long idPromocion, @RequestBody PromocionDTO dto) {
+    public ResponseEntity<Promocion> modificarPromocion(
+            @PathVariable Long idPromocion,
+            @Valid @RequestBody PromocionDTO dto) {
         return ResponseEntity.ok(promocionService.modificarPromocion(idPromocion, dto));
     }
 

@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface ProductoRepository extends JpaRepository<Producto, Long>, JpaSpecificationExecutor<Producto> {
     List<Producto> findByEstadoTrue();
     Optional<Producto> findByCodigoDeBarras(String codigoDeBarras);
+    Optional<Producto> findByNombre(String nombre);
 
     // KPI: Productos con stock bajo
     @Query(value = "SELECT COUNT(*) FROM producto WHERE stock <= stockMinimo AND estado = true",

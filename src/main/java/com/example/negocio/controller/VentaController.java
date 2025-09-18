@@ -6,6 +6,7 @@ import com.example.negocio.dto.venta.VentaListaDTO;
 import com.example.negocio.entity.Venta;
 import com.example.negocio.enums.MetodoDePago;
 import com.example.negocio.service.VentaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class VentaController {
     @PostMapping("/nueva")
     public ResponseEntity<Venta> nuevaVenta(
             @RequestHeader("X-Usuario-ID") Long idUsuario,
-            @RequestBody VentaDTO dto) {
+            @Valid @RequestBody VentaDTO dto) {
         return ResponseEntity.ok(ventaService.nuevaVenta(idUsuario, dto));
     }
 

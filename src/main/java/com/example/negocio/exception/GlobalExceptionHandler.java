@@ -71,4 +71,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
+    @ExceptionHandler(NombreRepetidoException.class)
+    public ResponseEntity<String> handleNombreRepetidoException(NombreRepetidoException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+
+    @ExceptionHandler(CodigoDeBarrasEnUsoException.class)
+    public ResponseEntity<String> handleCodigoDeBarrasEnUsoException(CodigoDeBarrasEnUsoException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
 }

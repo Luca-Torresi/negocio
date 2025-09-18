@@ -20,6 +20,7 @@ public class ProductoDTO {
     private BigDecimal costo;
     @NotNull @PositiveOrZero
     private Integer stock;
+    @NotNull @PositiveOrZero
     private Integer stockMinimo;
     private String codigoDeBarras;
     private Long idMarca;

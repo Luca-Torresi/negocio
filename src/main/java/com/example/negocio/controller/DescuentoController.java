@@ -3,6 +3,7 @@ package com.example.negocio.controller;
 import com.example.negocio.dto.descuento.DescuentoDTO;
 import com.example.negocio.entity.Descuento;
 import com.example.negocio.service.DescuentoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,12 +15,14 @@ public class DescuentoController {
     private final DescuentoService descuentoService;
 
     @PostMapping("/nuevo")
-    public ResponseEntity<Descuento> nuevoDescuento(@RequestBody DescuentoDTO dto) {
+    public ResponseEntity<Descuento> nuevoDescuento(@Valid @RequestBody DescuentoDTO dto) {
         return ResponseEntity.ok(descuentoService.nuevoDescuento(dto));
     }
 
     @PutMapping("/modificar/{idDescuento}")
-    public ResponseEntity<Descuento> modificarDescuento(@PathVariable Long idDescuento, @RequestBody DescuentoDTO dto) {
+    public ResponseEntity<Descuento> modificarDescuento(
+            @PathVariable Long idDescuento,
+            @Valid @RequestBody DescuentoDTO dto) {
         return ResponseEntity.ok(descuentoService.modificarDescuento(idDescuento, dto));
     }
 

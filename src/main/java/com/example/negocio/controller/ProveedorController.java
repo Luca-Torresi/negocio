@@ -5,6 +5,7 @@ import com.example.negocio.dto.proveedor.ProveedorDTO;
 import com.example.negocio.dto.proveedor.ProveedorListaDTO;
 import com.example.negocio.entity.Proveedor;
 import com.example.negocio.service.ProveedorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +19,14 @@ public class ProveedorController {
     private final ProveedorService proveedorService;
 
     @PostMapping("/nuevo")
-    public ResponseEntity<Proveedor> nuevoProveedor(@RequestBody ProveedorDTO dto) {
+    public ResponseEntity<Proveedor> nuevoProveedor(@Valid @RequestBody ProveedorDTO dto) {
         return ResponseEntity.ok(proveedorService.nuevoProveedor(dto));
     }
 
     @PutMapping("/modificar/{idProveedor}")
-    public ResponseEntity<Proveedor> modificarProveedor(@PathVariable Long idProveedor, @RequestBody ProveedorDTO dto) {
+    public ResponseEntity<Proveedor> modificarProveedor(
+            @PathVariable Long idProveedor,
+            @Valid @RequestBody ProveedorDTO dto) {
         return ResponseEntity.ok(proveedorService.modificarProveedor(idProveedor, dto));
     }
 

@@ -4,6 +4,7 @@ import com.example.negocio.dto.compra.CompraDTO;
 import com.example.negocio.dto.compra.CompraFullDTO;
 import com.example.negocio.entity.Compra;
 import com.example.negocio.service.CompraService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,13 +23,8 @@ public class CompraController {
     @PostMapping("/nueva")
     public Compra nuevaCompra(
             @RequestHeader("X-Usuario-ID") Long idUsuario,
-            @RequestBody CompraDTO dto) {
+            @Valid @RequestBody CompraDTO dto) {
         return compraService.nuevaCompra(idUsuario, dto);
-    }
-
-    @PutMapping("/modificar/{idCompra}")
-    public Compra modificarCompra(@PathVariable Long idCompra, @RequestBody CompraDTO dto) {
-        return compraService.modificarCompra(idCompra, dto);
     }
 
     @GetMapping("/obtener")

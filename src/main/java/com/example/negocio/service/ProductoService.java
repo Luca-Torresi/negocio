@@ -39,6 +39,10 @@ public class ProductoService {
 
     @Transactional
     public Producto nuevoProducto(ProductoDTO dto) {
+        if (productoRepository.findByNombre(dto.getNombre()).isPresent()) {
+            throw new NombreRepetidoException(dto.getNombre());
+        }
+
         validarCodigoDeBarrasUnico(dto.getCodigoDeBarras(), null);
 
         Producto producto = productoMapper.toEntity(dto);
@@ -62,6 +66,12 @@ public class ProductoService {
 
     @Transactional
     public Producto modificarProducto(Long idProducto, ProductoDTO dto) {
+        Optional<Producto> productoExistente = productoRepository.findByNombre(dto.getNombre());
+
+        if (productoExistente.isPresent() && !productoExistente.get().getIdProducto().equals(idProducto)) {
+            throw new NombreRepetidoException(dto.getNombre());
+        }
+
         validarCodigoDeBarrasUnico(dto.getCodigoDeBarras(), idProducto);
 
         Producto producto = productoRepository.findById(idProducto).orElseThrow(() -> new ProductoNoEncontradoException());
@@ -158,12 +168,10 @@ public class ProductoService {
 
     public CatalogoDTO buscarPorCodigo(String codigoDeBarras){
         Producto producto = productoRepository.findByCodigoDeBarras(codigoDeBarras).orElseThrow(() -> new ProductoNoEncontradoException());
-
         return ventaMapper.productoToCalalogoDto(producto);
     }
 
     private void validarCodigoDeBarrasUnico(String codigoDeBarras, Long idProductoActual) {
-        // Si el código de barras es nulo o vacío, no hay nada que validar.
         if (codigoDeBarras == null || codigoDeBarras.trim().isEmpty()) {
             return;
         }
@@ -171,10 +179,8 @@ public class ProductoService {
         Optional<Producto> productoExistente = productoRepository.findByCodigoDeBarras(codigoDeBarras);
 
         if (productoExistente.isPresent()) {
-            // Si estamos modificando, debemos asegurarnos de que el código encontrado
-            // no pertenezca al mismo producto que estamos editando.
             if (idProductoActual == null || !productoExistente.get().getIdProducto().equals(idProductoActual)) {
-                throw new DataIntegrityViolationException("El código de barras '" + codigoDeBarras + "' ya está en uso.");
+                throw new CodigoDeBarrasEnUsoException(productoExistente.get().getNombre());
             }
         }
     }

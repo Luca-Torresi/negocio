@@ -5,6 +5,7 @@ import com.example.negocio.dto.gasto.GastoListaDTO;
 import com.example.negocio.entity.Gasto;
 import com.example.negocio.enums.TipoGasto;
 import com.example.negocio.service.GastoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +23,14 @@ public class GastoController {
     @PostMapping("/nuevo")
     public ResponseEntity<Gasto> nuevoGasto(
             @RequestHeader("X-Usuario-ID") Long idUsuario,
-            @RequestBody GastoDTO dto) {
+            @Valid @RequestBody GastoDTO dto) {
         return ResponseEntity.ok(gastoService.nuevoGasto(idUsuario, dto));
     }
 
     @PutMapping("/modificar/{idGasto}")
-    public ResponseEntity<Gasto> modificarGasto(@PathVariable Long idGasto, @RequestBody GastoDTO dto) {
+    public ResponseEntity<Gasto> modificarGasto(
+            @PathVariable Long idGasto,
+            @Valid @RequestBody GastoDTO dto) {
         return ResponseEntity.ok(gastoService.modificarGasto(idGasto,dto));
     }
 

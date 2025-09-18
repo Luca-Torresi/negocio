@@ -4,6 +4,7 @@ import com.example.negocio.dto.producto.*;
 import com.example.negocio.dto.venta.CatalogoDTO;
 import com.example.negocio.entity.Producto;
 import com.example.negocio.service.ProductoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +18,14 @@ public class ProductoController {
     private final ProductoService productoService;
 
     @PostMapping("/nuevo")
-    public ResponseEntity<Producto> nuevoProducto(@RequestBody ProductoDTO dto) {
+    public ResponseEntity<Producto> nuevoProducto(@Valid @RequestBody ProductoDTO dto) {
         return ResponseEntity.ok(productoService.nuevoProducto(dto));
     }
 
     @PutMapping("/modificar/{idProducto}")
-    public ResponseEntity<Producto> modificarProducto(@PathVariable Long idProducto, @RequestBody ProductoDTO dto) {
+    public ResponseEntity<Producto> modificarProducto(
+            @PathVariable Long idProducto,
+            @Valid @RequestBody ProductoDTO dto) {
         return ResponseEntity.ok(productoService.modificarProducto(idProducto, dto));
     }
 

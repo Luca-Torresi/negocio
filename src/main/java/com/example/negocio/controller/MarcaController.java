@@ -4,6 +4,7 @@ import com.example.negocio.dto.marca.MarcaDTO;
 import com.example.negocio.dto.marca.MarcaListaDTO;
 import com.example.negocio.entity.Marca;
 import com.example.negocio.service.MarcaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +18,12 @@ public class MarcaController {
     private final MarcaService marcaService;
 
     @PostMapping("/nueva")
-    public ResponseEntity<Marca> nuevaMarca(@RequestBody MarcaDTO dto) {
+    public ResponseEntity<Marca> nuevaMarca(@Valid @RequestBody MarcaDTO dto) {
         return ResponseEntity.ok(marcaService.nuevaMarca(dto));
     }
 
     @PutMapping("/modificar/{idMarca}")
-    public ResponseEntity<Marca> modificarMarca(@PathVariable Long idMarca, @RequestBody MarcaDTO dto) {
+    public ResponseEntity<Marca> modificarMarca(@PathVariable Long idMarca, @Valid @RequestBody MarcaDTO dto) {
         return ResponseEntity.ok(marcaService.modificarMarca(idMarca, dto));
     }
 

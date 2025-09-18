@@ -82,34 +82,6 @@ public class CompraService {
         return compraRepository.save(compra);
     }
 
-    public Compra modificarCompra(Long idCompra, CompraDTO dto){
-        Compra compra = compraRepository.findById(idCompra).orElseThrow(() -> new CompraNoEncontradaException());
-
-        compraMapper.updateFromDto(dto, compra);
-        compra.getDetalles().clear();
-
-        BigDecimal total = BigDecimal.ZERO;
-
-        List<DetalleCompra> detalles = new ArrayList<>();
-        for(DetalleCompraDTO detalleDto :dto.getDetalles()){
-            Producto producto = productoRepository.findById(detalleDto.getIdProducto()).orElseThrow(() -> new ProductoNoEncontradoException());
-
-            DetalleCompra detalle = detalleCompraMapper.toEntity(detalleDto);
-            detalle.setProducto(producto);
-            detalle.setCostoUnitario(producto.getCosto());
-
-            BigDecimal cantidad = new BigDecimal(detalle.getCantidad());
-            BigDecimal subtotal = detalle.getCostoUnitario().multiply(cantidad);
-            total = total.add(subtotal);
-
-            detalles.add(detalle);
-        }
-        compra.setDetalles(detalles);
-        compra.setTotal(total);
-
-        return compraRepository.save(compra);
-    }
-
     public Page<CompraFullDTO> obtenerCompras(Integer page, Integer size, LocalDate fechaInicio, LocalDate fechaFin, Long idProveedor, Long idUsuario){
         Pageable pageable = PageRequest.of(page, size, Sort.by("fechaHora").descending());
         Specification<Compra> spec = CompraSpecification.porFechaInicio(fechaInicio)
