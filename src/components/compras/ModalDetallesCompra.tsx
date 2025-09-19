@@ -5,6 +5,7 @@ import { X } from "lucide-react"
 import type { Compra } from "../../types/dto/Compra"
 import { formatearFecha, formatearHora } from "../../utils/fechaUtils"
 import { formatCurrency } from "../../utils/numberFormatUtils"
+import { useEffect } from "react"
 
 interface Props {
   isOpen: boolean
@@ -13,6 +14,20 @@ interface Props {
 }
 
 export const ModalDetallesCompra: React.FC<Props> = ({ isOpen, onClose, compra }) => {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
   if (!isOpen || !compra) return null
 
   const calcularSubtotal = (cantidad: number, costoUnitario: number) => {

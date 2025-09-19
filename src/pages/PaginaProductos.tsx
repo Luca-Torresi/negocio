@@ -30,7 +30,7 @@ export const PaginaProductos: React.FC = () => {
     idProveedor: 0,
     bajoStock: false,
     page: 0,
-    size: 10,
+    size: 25,
   })
 
   // Estados para las listas de los select

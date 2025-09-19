@@ -44,6 +44,21 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
     }
   }, [isOpen])
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
+
   const productosFiltrados = productos.filter((producto) =>
     producto.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()),
   )
@@ -175,20 +190,20 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
             </div>
 
             {/* Descuento Input Field */}
-              <div className="rounded-lg">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Descuento (%) - Opcional</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="1"
-                  value={descuento}
-                  onChange={(e) => setDescuento(Number(e.target.value) || 0)}
-                  placeholder="0"
-                  className="w-32 max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">Ingrese un porcentaje de descuento (0-100)</p>
-              </div>
+            <div className="rounded-lg">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Descuento (%) - Opcional</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                value={descuento}
+                onChange={(e) => setDescuento(Number(e.target.value) || 0)}
+                placeholder="0"
+                className="w-32 max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">Ingrese un porcentaje de descuento (0-100)</p>
+            </div>
           </div>
 
           {/* Constructor de Items */}

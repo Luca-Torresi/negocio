@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { X } from "lucide-react"
 import type { GastoDTO } from "../../types/dto/Gasto"
 import { crearGasto } from "../../api/gastoApi"
@@ -53,6 +53,19 @@ export const ModalNuevoGasto: React.FC<ModalNuevoGastoProps> = ({ isOpen, onClos
     }))
   }
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
   if (!isOpen) return null
 
   return (
@@ -102,7 +115,7 @@ export const ModalNuevoGasto: React.FC<ModalNuevoGastoProps> = ({ isOpen, onClos
             <label className="block text-sm font-medium text-gray-700 mb-1">Monto</label>
             <InputMoneda
               value={formData.monto}
-              onValueChange={(nuevoValor) => {              
+              onValueChange={(nuevoValor) => {
                 setFormData((prev) => ({
                   ...prev,
                   monto: nuevoValor || 0,

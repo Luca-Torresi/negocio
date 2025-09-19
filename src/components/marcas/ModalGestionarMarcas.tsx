@@ -24,7 +24,7 @@ export const ModalGestionarMarcas: React.FC<Props> = ({ isOpen, onClose, onDataC
     if (isOpen) {
       cargarMarcas()
     }
-  }, [isOpen])
+  }, [isOpen])  
 
   const cargarMarcas = async (): Promise<void> => {
     setCargando(true)
@@ -77,6 +77,19 @@ export const ModalGestionarMarcas: React.FC<Props> = ({ isOpen, onClose, onDataC
       console.error("Error al modificar marca:", error)
     }
   }
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
 
   if (!isOpen) return null
 
@@ -176,7 +189,7 @@ export const ModalGestionarMarcas: React.FC<Props> = ({ isOpen, onClose, onDataC
                               title="Editar"
                             >
                               <Edit2 size={16} />
-                            </button>                           
+                            </button>
                           </>
                         )}
                       </div>

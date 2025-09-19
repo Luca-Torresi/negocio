@@ -8,6 +8,7 @@ import { ModalNuevaCategoria } from "../components/categorias/ModalNuevaCategori
 import { ModalEditarCategoria } from "../components/categorias/ModalEditarCategoria"
 import { ModalDetallesCategoria } from "../components/categorias/ModalDetallesCategoria"
 import { Eye, Pencil, Tag, Plus, BrushCleaning, CornerDownRight } from "lucide-react"
+import { useCategoriaStore } from "../store/categoriaStore"
 
 type FiltroEstado = "todas" | "activas" | "inactivas"
 
@@ -16,6 +17,7 @@ const PaginaCategorias: React.FC = () => {
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { refrescarCategorias } = useCategoriaStore();
 
   // Estados de filtros
   const [filtroNombre, setFiltroNombre] = useState("")
@@ -61,6 +63,7 @@ const PaginaCategorias: React.FC = () => {
   const handleCrearCategoria = async (data: CrearCategoriaDTO) => {
     try {
       await crearCategoria(data)
+      await refrescarCategorias();
       setModalNueva(false)
       await cargarCategorias()
     } catch (err) {
@@ -71,6 +74,7 @@ const PaginaCategorias: React.FC = () => {
   const handleModificarCategoria = async (id: number, data: ModificarCategoriaDTO) => {
     try {
       await modificarCategoria(id, data)
+      await refrescarCategorias();
       setModalEditar(false)
       setCategoriaSeleccionada(null)
       await cargarCategorias()
@@ -86,14 +90,7 @@ const PaginaCategorias: React.FC = () => {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al cambiar estado")
     }
-  }
-
-  // const toggleExpansion = (idCategoria: number) => {
-  //   setCategoriasExpandidas((prev) => ({
-  //     ...prev,
-  //     [idCategoria]: !prev[idCategoria],
-  //   }))
-  // }
+  } 
 
   // Filtrar categorías
   const categoriasFiltradas = categorias.filter((categoria) => {
@@ -114,17 +111,7 @@ const PaginaCategorias: React.FC = () => {
     return (
       <React.Fragment key={categoria.idCategoria}>
         <tr className="border-b hover:bg-gray-50">
-          <td className="px-4 py-3">{categoria.idCategoria}</td>
-          {/* <td className="px-4 py-3">
-            {tieneHijos && (
-              <button
-                onClick={() => toggleExpansion(categoria.idCategoria)}
-                className="mr-2 text-gray-500 hover:text-gray-700"
-              >
-                {estaExpandida ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-              </button>
-            )}
-          </td> */}
+          <td className="px-4 py-3">{categoria.idCategoria}</td>          
 
           <td className="px-4 py-3" style={{ paddingLeft: `${16 + categoria.nivel * 25 - (categoria.esHijoDeRaiz ? 5 : 0)}px` }}>
             {categoria.idCategoriaPadre != null && (

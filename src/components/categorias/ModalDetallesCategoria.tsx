@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useEffect } from "react"
 import type { Categoria } from "../../types/dto/Categoria"
 import { formatCurrency } from "../../utils/numberFormatUtils"
 
@@ -11,6 +12,21 @@ interface ModalDetallesCategoriaProps {
 }
 
 export const ModalDetallesCategoria: React.FC<ModalDetallesCategoriaProps> = ({ isOpen, onClose, categoria }) => {
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
   if (!isOpen || !categoria) return null
 
   return (
@@ -34,21 +50,22 @@ export const ModalDetallesCategoria: React.FC<ModalDetallesCategoriaProps> = ({ 
             <p className="text-lg">{categoria.nombre}</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-600">Descripción</label>
-            <p className="text-lg">{categoria.descripcion}</p>
-          </div>
+          {categoria.descripcion && (
+            <div>
+              <label className="block text-sm font-medium text-gray-600">Descripción</label>
+              <p className="text-lg">{categoria.descripcion}</p>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-600">Estado</label>
             <span
-              className={`px-2 py-1 rounded text-sm ${
-                categoria.estado ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-              }`}
+              className={`px-2 py-1 rounded text-sm ${categoria.estado ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                }`}
             >
               {categoria.estado ? "Activa" : "Inactiva"}
             </span>
-          </div>          
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-600">Productos ({categoria.productos.length})</label>

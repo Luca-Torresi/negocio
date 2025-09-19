@@ -30,7 +30,6 @@ export const ModalEditarGasto: React.FC<ModalEditarGastoProps> = ({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Cargar datos del gasto cuando se abre el modal
   useEffect(() => {
     if (gasto && isOpen) {
       setFormData({
@@ -39,7 +38,7 @@ export const ModalEditarGasto: React.FC<ModalEditarGastoProps> = ({
         monto: gasto.monto,
       })
     }
-  }, [gasto, isOpen])
+  }, [gasto, isOpen])  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,6 +65,20 @@ export const ModalEditarGasto: React.FC<ModalEditarGastoProps> = ({
       [name]: name === "monto" ? Number.parseFloat(value) || 0 : value,
     }))
   }
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
 
   if (!isOpen || !gasto) return null
 

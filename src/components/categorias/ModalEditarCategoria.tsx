@@ -10,7 +10,7 @@ interface ModalEditarCategoriaProps {
   isOpen: boolean
   onClose: () => void
   onConfirmar: (id: number, data: ModificarCategoriaDTO) => void
-  categoria: Categoria | null // La categoría a editar se sigue pasando por props
+  categoria: Categoria | null
 }
 
 export const ModalEditarCategoria: React.FC<ModalEditarCategoriaProps> = ({
@@ -38,6 +38,21 @@ export const ModalEditarCategoria: React.FC<ModalEditarCategoriaProps> = ({
     }
   }, [categoria, isOpen])
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (categoria) {
@@ -54,7 +69,7 @@ export const ModalEditarCategoria: React.FC<ModalEditarCategoriaProps> = ({
         hijos: filtrarJerarquia(nodo.hijos, idAExcluir),
       }));
   };
-  
+
   const categoriasParaSelect = categoria ? filtrarJerarquia(categoriasArbol, categoria.idCategoria) : categoriasArbol;
 
   if (!isOpen || !categoria) return null
@@ -82,7 +97,6 @@ export const ModalEditarCategoria: React.FC<ModalEditarCategoriaProps> = ({
               value={formData.descripcion}
               onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             />
           </div>
 

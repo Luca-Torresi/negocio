@@ -7,6 +7,7 @@ interface CategoriaState {
   categorias: Categoria[];
   categoriasArbol: CategoriaArbol[];
   cargarCategorias: () => Promise<void>;
+  refrescarCategorias: () => Promise<void>;
 }
 
 export const useCategoriaStore = create<CategoriaState>((set, get) => ({
@@ -23,6 +24,17 @@ export const useCategoriaStore = create<CategoriaState>((set, get) => ({
     } catch (error) {
       console.error("Error al cargar y procesar categorías:", error);
       // Opcional: manejar el estado de error en el store
+    }
+  },
+
+  refrescarCategorias: async () => {
+    // Esta función SIEMPRE va a la API a buscar los datos más recientes
+    try {
+      const categoriasFlat = await obtenerCategorias();
+      const categoriasTree = construirArbolCategorias(categoriasFlat);
+      set({ categorias: categoriasFlat, categoriasArbol: categoriasTree });
+    } catch (error) {
+      console.error("Error al refrescar categorías:", error);
     }
   },
 }));

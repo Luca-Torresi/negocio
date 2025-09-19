@@ -338,7 +338,7 @@ const PaginaEstadisticas: React.FC = () => {
       }
     },
     colors: ["#96A78D", "#65647C", "#5C7886", "#EBD08F", "#A76F6F"],
-    chartArea: { left: 30, top: 50, bottom: 40, right: 30, width: "80%", height: "70%" },
+    chartArea: { left: 15, top: 50, bottom: 40, right: 15, width: "80%", height: "70%" },
   }
 
   return (
