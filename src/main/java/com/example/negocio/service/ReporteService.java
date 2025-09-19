@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -188,8 +189,10 @@ public class ReporteService {
     }
 
     public ByteArrayInputStream generarExcelMensual(LocalDate fecha) throws IOException {
-        LocalDateTime inicioDelMes = fecha.atStartOfDay();
-        LocalDateTime finDelMes = inicioDelMes.plusMonths(1);
+        LocalDate primerDiaDelMes = fecha.withDayOfMonth(1);
+
+        LocalDateTime inicioDelMes = primerDiaDelMes.atStartOfDay();
+        LocalDateTime finDelMes = primerDiaDelMes.plusMonths(1).atStartOfDay();
 
         // --- OBTENCIÓN DE DATOS ---
         List<ReporteVentasDTO> datosDetallados = detalleVentaRepository.findDatosParaReporteVentas(inicioDelMes, finDelMes);
@@ -214,9 +217,16 @@ public class ReporteService {
             // --- ESTILOS (reutilizables para ambas hojas) ---
             Font headerFont = workbook.createFont();
             headerFont.setBold(true);
-            CellStyle headerStyle = workbook.createCellStyle();
-            headerStyle.setFont(headerFont);
-            headerStyle.setAlignment(HorizontalAlignment.CENTER);
+            CellStyle headerLeftStyle = workbook.createCellStyle();
+            headerLeftStyle.setFont(headerFont);
+
+            CellStyle headerCenterStyle = workbook.createCellStyle();
+            headerCenterStyle.cloneStyleFrom(headerLeftStyle);
+            headerCenterStyle.setAlignment(HorizontalAlignment.CENTER);
+
+            CellStyle headerRightStyle = workbook.createCellStyle();
+            headerRightStyle.cloneStyleFrom(headerLeftStyle);
+            headerRightStyle.setAlignment(HorizontalAlignment.RIGHT);
 
             CellStyle quantityStyle = workbook.createCellStyle();
             quantityStyle.setAlignment(HorizontalAlignment.CENTER);
@@ -232,10 +242,17 @@ public class ReporteService {
             // Encabezados de la tabla de ventas
             Row headerVentas = sheetVentas.createRow(0);
             String[] headersVentas = {"Producto", "Precio", "Cantidad Vendida", "Subtotal", "Ganancia"};
-            for (int i = 0; i < headersVentas.length; i++) {
-                headerVentas.createCell(i).setCellValue(headersVentas[i]);
-                headerVentas.getCell(i).setCellStyle(headerStyle);
-            }
+
+            headerVentas.createCell(0).setCellValue(headersVentas[0]);
+            headerVentas.getCell(0).setCellStyle(headerLeftStyle);
+            headerVentas.createCell(1).setCellValue(headersVentas[1]);
+            headerVentas.getCell(1).setCellStyle(headerRightStyle);
+            headerVentas.createCell(2).setCellValue(headersVentas[2]);
+            headerVentas.getCell(2).setCellStyle(headerCenterStyle);
+            headerVentas.createCell(3).setCellValue(headersVentas[3]);
+            headerVentas.getCell(3).setCellStyle(headerRightStyle);
+            headerVentas.createCell(4).setCellValue(headersVentas[4]);
+            headerVentas.getCell(4).setCellStyle(headerRightStyle);
 
             // Filas de datos de ventas
             int rowIdxVentas = 1;
@@ -281,7 +298,7 @@ public class ReporteService {
             Row filaTituloVentas = sheetVentas.getRow(1); // Usamos la segunda fila para alinear
             if (filaTituloVentas == null) filaTituloVentas = sheetVentas.createRow(1);
             filaTituloVentas.createCell(colResumenVentas).setCellValue("Resumen del Mes");
-            filaTituloVentas.getCell(colResumenVentas).setCellStyle(headerStyle);
+            filaTituloVentas.getCell(colResumenVentas).setCellStyle(headerLeftStyle);
 
             Row filaRecaudado = sheetVentas.getRow(2);
             if (filaRecaudado == null) filaRecaudado = sheetVentas.createRow(2);
@@ -309,10 +326,17 @@ public class ReporteService {
             // Encabezados de la tabla de inventario
             Row headerInventario = sheetInventario.createRow(0);
             String[] headersInventario = {"Producto", "Stock Actual", "Costo", "En Stock ($)", "En Posibles Ventas ($)"};
-            for (int i = 0; i < headersInventario.length; i++) {
-                headerInventario.createCell(i).setCellValue(headersInventario[i]);
-                headerInventario.getCell(i).setCellStyle(headerStyle);
-            }
+
+            headerInventario.createCell(0).setCellValue(headersInventario[0]);
+            headerInventario.getCell(0).setCellStyle(headerLeftStyle);
+            headerInventario.createCell(1).setCellValue(headersInventario[1]);
+            headerInventario.getCell(1).setCellStyle(headerCenterStyle);
+            headerInventario.createCell(2).setCellValue(headersInventario[2]);
+            headerInventario.getCell(2).setCellStyle(headerRightStyle);
+            headerInventario.createCell(3).setCellValue(headersInventario[3]);
+            headerInventario.getCell(3).setCellStyle(headerRightStyle);
+            headerInventario.createCell(4).setCellValue(headersInventario[4]);
+            headerInventario.getCell(4).setCellStyle(headerRightStyle);
 
             // Filas de datos de inventario
             int rowIdxInventario = 1;
@@ -355,7 +379,7 @@ public class ReporteService {
             Row filaTituloInventario = sheetInventario.getRow(1);
             if (filaTituloInventario == null) filaTituloInventario = sheetInventario.createRow(1);
             filaTituloInventario.createCell(colResumenInventario).setCellValue("Resumen de Inventario");
-            filaTituloInventario.getCell(colResumenInventario).setCellStyle(headerStyle);
+            filaTituloInventario.getCell(colResumenInventario).setCellStyle(headerLeftStyle);
 
             Row filaValorStock = sheetInventario.getRow(2);
             if (filaValorStock == null) filaValorStock = sheetInventario.createRow(2);

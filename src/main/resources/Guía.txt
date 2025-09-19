@@ -1,9 +1,9 @@
 
-En los mapper que utilizan Detalle...Mapper.class, se conserva esto o no? para mapear los detalles
-
 Antes de empaquetar la aplicación, eliminar todos los imports que no se esten utilizando
 
-Y también modificar los modales que están medio rari
-
 Añadir el código de barras al modal DetallesProducto
+
+En la pantalla InicioDeSesión añadir un botón para crear un nuevo usuario
+
+Cerrar todos los modales con Esc. Seguir desde la carpeta productos inclusive
 
