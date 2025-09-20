@@ -4,6 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { X } from "lucide-react"
 import type { Proveedor, ProveedorDTO } from "../../types/dto/Proveedor"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
 
 interface ModalEditarProveedorProps {
   isOpen: boolean
@@ -48,6 +49,8 @@ export const ModalEditarProveedor: React.FC<ModalEditarProveedorProps> = ({
       onConfirm(proveedor.idProveedor, formData)
     }
   }
+
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen || !proveedor) return null
 

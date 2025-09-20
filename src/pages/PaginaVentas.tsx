@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useRef, useCallback, useMemo } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { Search, Plus, Trash2, ListPlus, ShoppingBasket } from "lucide-react"
 import type { ItemCatalogo, ItemVenta, VentaDTO } from "../types/dto/Venta"
 import {
@@ -12,10 +12,10 @@ import {
 } from "../api/ventaApi"
 import { buscarProductoPorCodigo } from "../api/productoApi"
 import { formatCurrency } from "../utils/numberFormatUtils"
+import { toast } from "react-toastify"
 
 const PaginaVentas: React.FC = () => {
   const { idVenta } = useParams<{ idVenta: string }>()
-  const navigate = useNavigate()
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Estados principales
@@ -269,13 +269,19 @@ const PaginaVentas: React.FC = () => {
 
       await crearVenta(ventaDTO)
 
-      navigate("/historial")
+      toast.success('¡Venta realizada con éxito!');
+
+      setCarrito([]);
+      setMetodoPagoSeleccionado("");
+
     } catch (err: any) {
       if (err.response && err.response.data) {
-        setError(err.response.data);
+        toast.error(err.response.data)    
       } else {
-        setError("Error al procesar la venta");
+        toast.error("Error al procesar la venta")
       }
+    } finally {
+      setProcesandoVenta(false);
     }
   }
 

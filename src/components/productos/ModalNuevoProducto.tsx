@@ -11,16 +11,17 @@ import { obtenerListaProveedores } from "../../api/proveedorApi"
 import { SelectJerarquicoCategorias } from "../categorias/SelectJerarquicoCategorias"
 import { ModalNuevaMarcaRapida } from "../marcas/ModalNuevaMarcaRapida"
 import { InputMoneda } from "../InputMoneda"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
+import { toast } from "react-toastify"
 
 interface Props {
-  estaAbierto: boolean
-  alCerrar: () => void
+  isOpen: boolean
+  onClose: () => void
   alConfirmar: () => void
 }
 
-export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alConfirmar }) => {
+export const ModalNuevoProducto: React.FC<Props> = ({ isOpen, onClose, alConfirmar }) => {
   const [cargando, setCargando] = useState(false)
-  const [error, setError] = useState<string | null>("")
 
   // 3. Obtiene las categorías del store de Zustand
   const { categoriasArbol, cargarCategorias } = useCategoriaStore()
@@ -43,10 +44,10 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
 
   useEffect(() => {
     // Carga los datos para los selects solo cuando el modal se abre
-    if (estaAbierto) {
+    if (isOpen) {
       cargarDatosSelect()
     }
-  }, [estaAbierto])
+  }, [isOpen])
 
   const cargarDatosSelect = async (): Promise<void> => {
     try {
@@ -81,8 +82,9 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
 
     try {
       await crearProducto(formulario)
+      toast.success("Producto creado con éxito!")
       alConfirmar()
-      // Resetea el formulario después de una creación exitosa
+      
       setFormulario({
         nombre: "",
         codigoDeBarras: "",
@@ -96,24 +98,25 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
       })
     } catch (error: any) {
       if (error.response && error.response.data) {
-        setError(error.response.data);
+        toast.error(error.response.data);
       } else {
-        setError("Error al procesar la venta");
+        toast.error("Error al crear el nuevo producto");
       }
     } finally {
       setCargando(false)
     }
   }
 
-  if (!estaAbierto) return null
+  useEscapeKey(onClose, isOpen);
+
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-[600px] max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">Nuevo Producto</h2>
-          {error && <div className="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{error}</div>}
-          <button onClick={alCerrar} className="text-gray-500 hover:text-gray-700 ml-3">
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 ml-3">
             <X size={24} />
           </button>
         </div>
@@ -249,7 +252,7 @@ export const ModalNuevoProducto: React.FC<Props> = ({ estaAbierto, alCerrar, alC
           <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"
-              onClick={alCerrar}
+              onClick={onClose}
               className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
             >
               Cancelar

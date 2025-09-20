@@ -11,15 +11,17 @@ import { obtenerListaProveedores } from "../../api/proveedorApi"
 import { SelectJerarquicoCategorias } from "../categorias/SelectJerarquicoCategorias"
 import { ModalNuevaMarcaRapida } from "../marcas/ModalNuevaMarcaRapida"
 import { InputMoneda } from "../InputMoneda"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
+import { toast } from "react-toastify"
 
 interface Props {
-  estaAbierto: boolean
+  isOpen: boolean
   producto: ProductoAbm | null
-  alCerrar: () => void
+  onClose: () => void
   alConfirmar: () => void
 }
 
-export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, alCerrar, alConfirmar }) => {
+export const ModalEditarProducto: React.FC<Props> = ({ isOpen, producto, onClose, alConfirmar }) => {
   const [cargando, setCargando] = useState(false)
 
   // Obtiene las categorías del store de Zustand
@@ -44,7 +46,7 @@ export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, al
   // Carga los datos de los selects y rellena el formulario cuando el modal se abre
   useEffect(() => {
     const inicializarModal = async () => {
-      if (estaAbierto && producto) {
+      if (isOpen && producto) {
         try {
           // Carga los datos de los selects
           await cargarCategorias()
@@ -71,7 +73,7 @@ export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, al
       }
     }
     inicializarModal()
-  }, [estaAbierto, producto])
+  }, [isOpen, producto])
 
   const manejarCambio = (campo: keyof ProductoDTO, valor: string | number | null): void => {
     setFormulario((prev) => ({
@@ -104,22 +106,29 @@ export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, al
     setCargando(true)
     try {
       await modificarProducto(producto.idProducto, formulario)
+      toast.success("Producto modificado con éxito!")
       alConfirmar()
-    } catch (error) {
-      console.error("Error al modificar producto:", error)
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        toast.error(error.response.data);
+      } else {
+        toast.error("No fue posible modificar el producto");
+      }
     } finally {
       setCargando(false)
     }
   }
 
-  if (!estaAbierto || !producto) return null
+  useEscapeKey(onClose, isOpen);
+
+  if (!isOpen || !producto) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-[600px] max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">Editar Producto</h2>
-          <button onClick={alCerrar} className="text-gray-500 hover:text-gray-700">
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <X size={24} />
           </button>
         </div>
@@ -146,19 +155,19 @@ export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, al
                 onSelect={(id) => manejarCambio("idCategoria", id ?? 0)}
                 placeholder="Seleccionar categoría"
               />
-            </div>            
+            </div>
           </div>
 
           <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Código de Barras</label>
-              <input
-                type="text"
-                value={formulario.codigoDeBarras}
-                onChange={(e) => manejarCambio("codigoDeBarras", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Ingrese el código de barras"
-              />
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Código de Barras</label>
+            <input
+              type="text"
+              value={formulario.codigoDeBarras}
+              onChange={(e) => manejarCambio("codigoDeBarras", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Ingrese el código de barras"
+            />
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -257,7 +266,7 @@ export const ModalEditarProducto: React.FC<Props> = ({ estaAbierto, producto, al
           <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"
-              onClick={alCerrar}
+              onClick={onClose}
               className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
             >
               Cancelar

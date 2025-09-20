@@ -9,6 +9,8 @@ import type { PromocionDTO, Promocion } from "../../types/dto/Promocion"
 import type { ProductoVenta } from "../../types/dto/Producto"
 import { InputMoneda } from "../InputMoneda"
 import { formatCurrency } from "../../utils/numberFormatUtils"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
+import { toast } from "react-toastify"
 
 interface Props {
   isOpen: boolean
@@ -156,20 +158,23 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
 
       if (promocionParaEditar) {
         await modificarPromocion(promocionParaEditar.idPromocion, promocionDTO)
+        toast.success("Promoción modificada con éxito!")
       } else {
         await crearPromocion(promocionDTO)
+        toast.success("Promoción creada con éxito!")
       }
 
       onSuccess()
       onClose()
       limpiarFormulario()
-    } catch (error) {
-      console.error("Error al guardar promoción:", error)
-      alert("Error al guardar la promoción")
+    } catch (error) {      
+      toast.error("Error al guardar la promoción")
     } finally {
       setCargando(false)
     }
   }
+
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null
 

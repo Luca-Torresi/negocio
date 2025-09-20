@@ -1,11 +1,13 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { X } from "lucide-react"
 import type { GastoDTO } from "../../types/dto/Gasto"
 import { crearGasto } from "../../api/gastoApi"
 import { InputMoneda } from "../InputMoneda"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
+import { toast } from "react-toastify"
 
 interface ModalNuevoGastoProps {
   isOpen: boolean
@@ -30,16 +32,17 @@ export const ModalNuevoGasto: React.FC<ModalNuevoGastoProps> = ({ isOpen, onClos
 
     try {
       await crearGasto(formData)
+      toast.success("Gasto cargado exitosamente!")
       onSuccess()
       onClose()
-      // Resetear formulario
+      
       setFormData({
         tipoGasto: "",
         descripcion: "",
         monto: 0,
       })
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Error desconocido")
+      toast.error("No fue posible cargar el gasto")
     } finally {
       setIsLoading(false)
     }
@@ -53,18 +56,7 @@ export const ModalNuevoGasto: React.FC<ModalNuevoGastoProps> = ({ isOpen, onClos
     }))
   }
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null
 

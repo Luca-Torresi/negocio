@@ -6,6 +6,8 @@ import { X } from "lucide-react"
 import type { Gasto, GastoDTO } from "../../types/dto/Gasto"
 import { modificarGasto } from "../../api/gastoApi"
 import { InputMoneda } from "../InputMoneda"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
+import { toast } from "react-toastify"
 
 interface ModalEditarGastoProps {
   isOpen: boolean
@@ -38,7 +40,7 @@ export const ModalEditarGasto: React.FC<ModalEditarGastoProps> = ({
         monto: gasto.monto,
       })
     }
-  }, [gasto, isOpen])  
+  }, [gasto, isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,10 +51,11 @@ export const ModalEditarGasto: React.FC<ModalEditarGastoProps> = ({
 
     try {
       await modificarGasto(gasto.idGasto, formData)
+      toast.success("Gasto modificado correctamente!")
       onSuccess()
       onClose()
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Error desconocido")
+      toast.error("No fue posible modificar el gasto")
     } finally {
       setIsLoading(false)
     }
@@ -66,19 +69,7 @@ export const ModalEditarGasto: React.FC<ModalEditarGastoProps> = ({
     }))
   }
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen || !gasto) return null
 

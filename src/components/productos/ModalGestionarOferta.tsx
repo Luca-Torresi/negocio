@@ -8,15 +8,17 @@ import type { OfertaDTO } from "../../types/dto/Oferta"
 import { crearOferta, modificarOferta, eliminarOferta } from "../../api/ofertaApi"
 import { formatCurrency } from "../../utils/numberFormatUtils"
 import { InputMoneda } from "../InputMoneda"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
+import { toast } from "react-toastify"
 
 interface Props {
-  estaAbierto: boolean
+  isOpen: boolean
   producto: ProductoAbm | null
-  alCerrar: () => void
+  onClose: () => void
   alConfirmar: () => void
 }
 
-export const ModalGestionarOferta: React.FC<Props> = ({ estaAbierto, producto, alCerrar, alConfirmar }) => {
+export const ModalGestionarOferta: React.FC<Props> = ({ isOpen, producto, onClose, alConfirmar }) => {
   const [cargando, setCargando] = useState(false)
   const [cantidadMinima, setCantidadMinima] = useState<number>(1)
   const [nuevoPrecio, setNuevoPrecio] = useState<number>(0)
@@ -24,11 +26,11 @@ export const ModalGestionarOferta: React.FC<Props> = ({ estaAbierto, producto, a
   const tieneOferta = producto?.idOferta != null;
 
   useEffect(() => {
-    if (estaAbierto && producto) {
+    if (isOpen && producto) {
       setCantidadMinima(producto.cantidadMinima || 1)
       setNuevoPrecio(producto.nuevoPrecio || 0)
     }
-  }, [estaAbierto, producto])
+  }, [isOpen, producto])
 
   const manejarGuardar = async (): Promise<void> => {
     if (!producto) return
@@ -43,12 +45,14 @@ export const ModalGestionarOferta: React.FC<Props> = ({ estaAbierto, producto, a
 
       if (tieneOferta) {
         await modificarOferta(producto.idOferta!, ofertaData)
+        toast.success("Oferta modificada con éxito")
       } else {
         await crearOferta(ofertaData)
+        toast.success("Oferta creada exitosamente")
       }
       alConfirmar()
     } catch (error) {
-      console.error("Error al gestionar oferta:", error)
+      toast.error("Hubo un problema al crear o modificar la oferta")
     } finally {
       setCargando(false)
     }
@@ -60,22 +64,25 @@ export const ModalGestionarOferta: React.FC<Props> = ({ estaAbierto, producto, a
     setCargando(true)
     try {
       await eliminarOferta(producto.idOferta)
+      toast.success("Oferta eliminada correctamente")
       alConfirmar()
     } catch (error) {
-      console.error("Error al eliminar oferta:", error)
+      toast.error("Error al eliminar la oferta")
     } finally {
       setCargando(false)
     }
   }
 
-  if (!estaAbierto || !producto) return null
+  useEscapeKey(onClose, isOpen);
+
+  if (!isOpen || !producto) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">Gestionar Oferta: {producto.nombre}</h2>
-          <button onClick={alCerrar} className="text-gray-500 hover:text-gray-700">
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <X size={24} />
           </button>
         </div>
@@ -122,7 +129,7 @@ export const ModalGestionarOferta: React.FC<Props> = ({ estaAbierto, producto, a
 
           <div className="flex justify-end space-x-3 pt-4">
             <button
-              onClick={alCerrar}
+              onClick={onClose}
               className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
             >
               Cancelar

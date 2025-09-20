@@ -4,6 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import { X } from "lucide-react"
 import type { ProveedorDTO } from "../../types/dto/Proveedor"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
 
 interface ModalNuevoProveedorProps {
   isOpen: boolean
@@ -38,6 +39,8 @@ export const ModalNuevoProveedor: React.FC<ModalNuevoProveedorProps> = ({ isOpen
     setFormData({ nombre: "", telefono: "", email: "" })
     onClose()
   }
+
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null
 

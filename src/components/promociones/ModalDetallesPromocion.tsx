@@ -7,6 +7,7 @@ import type { Promocion } from "../../types/dto/Promocion"
 import type { ProductoVenta } from "../../types/dto/Producto"
 import { obtenerListaProductosVenta } from "../../api/productoApi"
 import { formatCurrency } from "../../utils/numberFormatUtils"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
 
 interface Props {
   isOpen: boolean
@@ -60,6 +61,21 @@ export const ModalDetallesPromocion: React.FC<Props> = ({ isOpen, onClose, promo
       console.error("Error al cargar productos:", error)
     }
   }
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen || !promocion) return null
 

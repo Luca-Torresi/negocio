@@ -3,13 +3,14 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import { useUsuarioStore } from './store/usuarioStore';
 import { useEffect } from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const usuario = useUsuarioStore((state) => state.usuario);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Si no hay un usuario guardado en el estado, redirige a la página de selección
     if (!usuario) {
       navigate('/seleccionar-usuario');
     }
@@ -27,6 +28,16 @@ function App() {
       <main className="flex-1 p-8 overflow-y-auto ml-64">
         <Outlet />
       </main>
+
+      <ToastContainer
+        position="bottom-right"
+        theme='colored'
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        pauseOnHover
+      />
     </div>
   );
 }

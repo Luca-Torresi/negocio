@@ -7,6 +7,7 @@ import type { Proveedor, ProveedorDTO } from "../types/dto/Proveedor"
 import { obtenerProveedores, crearProveedor, modificarProveedor, cambiarEstadoProveedor } from "../api/proveedorApi"
 import { ModalNuevoProveedor } from "../components/proveedores/ModalNuevoProveedor"
 import { ModalEditarProveedor } from "../components/proveedores/ModalEditarProveedor"
+import { toast } from "react-toastify"
 
 const PaginaProveedores: React.FC = () => {
   const [proveedores, setProveedores] = useState<Proveedor[]>([])
@@ -52,21 +53,23 @@ const PaginaProveedores: React.FC = () => {
   const handleCrearProveedor = async (data: ProveedorDTO) => {
     try {
       await crearProveedor(data)
+      toast.success("Proveedor cargado con éxito")
       setModalNuevoAbierto(false)
       await cargarProveedores()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al crear proveedor")
+      toast.error("No fue posible cargar el nuevo proveedor")
     }
   }
 
   const handleEditarProveedor = async (id: number, data: ProveedorDTO) => {
     try {
       await modificarProveedor(id, data)
+      toast.success("Proveedor modificado con éxito")
       setModalEditarAbierto(false)
       setProveedorSeleccionado(null)
       await cargarProveedores()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al editar proveedor")
+      toast.error("No fue posible modificar el proveedor")
     }
   }
 

@@ -507,32 +507,32 @@ export const PaginaProductos: React.FC = () => {
       </div>
 
       {/* Modales */}
-      <ModalNuevoProducto estaAbierto={modalNuevoAbierto} alCerrar={cerrarModales} alConfirmar={confirmarAccion} />
+      <ModalNuevoProducto isOpen={modalNuevoAbierto} onClose={cerrarModales} alConfirmar={confirmarAccion} />
 
       <ModalEditarProducto
-        estaAbierto={modalEditarAbierto}
+        isOpen={modalEditarAbierto}
         producto={productoSeleccionado}
-        alCerrar={cerrarModales}
+        onClose={cerrarModales}
         alConfirmar={confirmarAccion}
       />
 
       <ModalDetallesProducto
-        estaAbierto={modalDetallesAbierto}
+        isOpen={modalDetallesAbierto}
         producto={productoSeleccionado}
-        alCerrar={cerrarModales}
+        onClose={cerrarModales}
       />
 
       <ModalGestionarDescuento
-        estaAbierto={modalDescuentoAbierto}
+        isOpen={modalDescuentoAbierto}
         producto={productoSeleccionado}
-        alCerrar={cerrarModales}
+        onClose={cerrarModales}
         alConfirmar={confirmarAccion}
       />
 
       <ModalGestionarOferta
-        estaAbierto={modalOfertaAbierto}
+        isOpen={modalOfertaAbierto}
         producto={productoSeleccionado}
-        alCerrar={cerrarModales}
+        onClose={cerrarModales}
         alConfirmar={confirmarAccion}
       />
 

@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import type { ModificarCategoriaDTO, Categoria, CategoriaArbol } from "../../types/dto/Categoria"
 import { useCategoriaStore } from "../../store/categoriaStore"
 import { SelectJerarquicoCategorias } from "./SelectJerarquicoCategorias"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
 
 interface ModalEditarCategoriaProps {
   isOpen: boolean
@@ -36,22 +37,7 @@ export const ModalEditarCategoria: React.FC<ModalEditarCategoriaProps> = ({
         idCategoriaPadre: categoria.idCategoriaPadre,
       })
     }
-  }, [categoria, isOpen])
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
-
+  }, [categoria, isOpen])  
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -71,6 +57,8 @@ export const ModalEditarCategoria: React.FC<ModalEditarCategoriaProps> = ({
   };
 
   const categoriasParaSelect = categoria ? filtrarJerarquia(categoriasArbol, categoria.idCategoria) : categoriasArbol;
+
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen || !categoria) return null
 

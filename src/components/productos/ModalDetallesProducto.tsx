@@ -4,22 +4,25 @@ import type React from "react"
 import { X } from "lucide-react"
 import type { ProductoAbm } from "../../types/dto/Producto"
 import { formatCurrency } from "../../utils/numberFormatUtils"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
 
 interface Props {
-  estaAbierto: boolean
+  isOpen: boolean
   producto: ProductoAbm | null
-  alCerrar: () => void
+  onClose: () => void
 }
 
-export const ModalDetallesProducto: React.FC<Props> = ({ estaAbierto, producto, alCerrar }) => {
-  if (!estaAbierto || !producto) return null
+export const ModalDetallesProducto: React.FC<Props> = ({ isOpen, producto, onClose }) => {
+  useEscapeKey(onClose, isOpen);
+
+  if (!isOpen || !producto) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-lg">
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-800">Detalles del Producto</h2>
-          <button onClick={alCerrar} className="p-1 hover:bg-gray-100 rounded">
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
             <X size={20} className="text-gray-500" />
           </button>
         </div>
@@ -33,9 +36,8 @@ export const ModalDetallesProducto: React.FC<Props> = ({ estaAbierto, producto, 
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">Estado</label>
               <span
-                className={`inline-block px-2 py-1 text-xs rounded ${
-                  producto.estado ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                }`}
+                className={`inline-block px-2 py-1 text-xs rounded ${producto.estado ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                  }`}
               >
                 {producto.estado ? "Activo" : "Inactivo"}
               </span>
@@ -90,7 +92,7 @@ export const ModalDetallesProducto: React.FC<Props> = ({ estaAbierto, producto, 
                   <span className="text-xs text-red-500 block">Stock bajo</span>
                 )}
               </p>
-            </div>            
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">Stock Mínimo</label>
               <p className="text-gray-900">{producto.stockMinimo}</p>
@@ -115,7 +117,7 @@ export const ModalDetallesProducto: React.FC<Props> = ({ estaAbierto, producto, 
 
         <div className="flex justify-end p-6 border-t border-gray-200">
           <button
-            onClick={alCerrar}
+            onClick={onClose}
             className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
           >
             Cerrar

@@ -9,3 +9,11 @@
 .react-datepicker__month-text {
   @apply capitalize;
 }
+
+.Toastify__toast--success {
+  @apply bg-emerald-500 !important;
+}
+
+.Toastify__progress-bar--success {
+  @apply bg-emerald-800 !important;
+}

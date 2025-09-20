@@ -1,9 +1,9 @@
 "use client"
 
 import type React from "react"
-import { useEffect } from "react"
 import type { Categoria } from "../../types/dto/Categoria"
 import { formatCurrency } from "../../utils/numberFormatUtils"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
 
 interface ModalDetallesCategoriaProps {
   isOpen: boolean
@@ -13,19 +13,7 @@ interface ModalDetallesCategoriaProps {
 
 export const ModalDetallesCategoria: React.FC<ModalDetallesCategoriaProps> = ({ isOpen, onClose, categoria }) => {
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen || !categoria) return null
 

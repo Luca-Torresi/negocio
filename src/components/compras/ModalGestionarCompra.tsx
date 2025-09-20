@@ -9,6 +9,8 @@ import { crearCompra } from "../../api/compraApi"
 import { obtenerListaProveedores } from "../../api/proveedorApi"
 import { obtenerListaProductosCompra } from "../../api/productoApi"
 import { formatCurrency } from "../../utils/numberFormatUtils"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
+import { toast } from "react-toastify"
 
 interface Props {
   isOpen: boolean
@@ -43,21 +45,6 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
       resetearFormulario()
     }
   }, [isOpen])
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
-
 
   const productosFiltrados = productos.filter((producto) =>
     producto.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()),
@@ -148,15 +135,18 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
 
       await crearCompra(compraData)
 
+      toast.success('¡Compra guardada con éxito!');
+
       onSuccess()
       onClose()
     } catch (error) {
-      console.error("Error al guardar compra:", error)
-      alert("Error al guardar la compra")
+      toast.error("Error al guardar la compra")
     } finally {
       setCargando(false)
     }
   }
+
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null
 

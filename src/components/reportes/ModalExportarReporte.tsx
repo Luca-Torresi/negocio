@@ -6,6 +6,7 @@ import { X, Loader2, Download } from "lucide-react"
 import DatePicker from "react-datepicker"
 import { descargarReporteDiario, descargarReporteMensual } from "../../api/reporteApi"
 import { format } from "date-fns"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
 
 interface ModalExportarReporteProps {
   isOpen: boolean
@@ -51,6 +52,8 @@ const ModalExportarReporte: React.FC<ModalExportarReporteProps> = ({ isOpen, onC
       setCargando(false)
     }
   }
+
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null
 

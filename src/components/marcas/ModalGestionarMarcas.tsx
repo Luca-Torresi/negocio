@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { X, Edit2, Plus, Check } from "lucide-react"
 import type { MarcaLista } from "../../types/dto/Producto"
 import { obtenerListaMarcas, crearMarca, modificarMarca } from "../../api/marcaApi"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
 
 interface Props {
   isOpen: boolean
@@ -78,18 +79,7 @@ export const ModalGestionarMarcas: React.FC<Props> = ({ isOpen, onClose, onDataC
     }
   }
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null
 

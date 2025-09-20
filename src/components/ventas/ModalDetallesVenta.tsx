@@ -5,6 +5,7 @@ import { X } from "lucide-react"
 import type { VentaHistorial } from "../../types/dto/Venta"
 import { formatCurrency } from "../../utils/numberFormatUtils"
 import { formatearFecha, formatearHora } from "../../utils/fechaUtils"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
 
 interface Props {
   isOpen: boolean
@@ -13,11 +14,14 @@ interface Props {
 }
 
 export const ModalDetallesVenta: React.FC<Props> = ({ isOpen, onClose, venta }) => {
-  if (!isOpen || !venta) return null
-
+  
   const calcularSubtotal = (cantidad: number, precioUnitario: number) => {
     return cantidad * precioUnitario
   }
+
+  useEscapeKey(onClose, isOpen);
+
+  if (!isOpen || !venta) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">

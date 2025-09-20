@@ -1,10 +1,11 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import type { CrearCategoriaDTO } from "../../types/dto/Categoria"
 import { useCategoriaStore } from "../../store/categoriaStore"
 import { SelectJerarquicoCategorias } from "./SelectJerarquicoCategorias"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
 
 interface ModalNuevaCategoriaProps {
   isOpen: boolean
@@ -31,19 +32,7 @@ export const ModalNuevaCategoria: React.FC<ModalNuevaCategoriaProps> = ({
     setFormData({ nombre: "", descripcion: "", idCategoriaPadre: null })
   }
 
-    useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose(); 
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]); 
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null
 
@@ -66,7 +55,7 @@ export const ModalNuevaCategoria: React.FC<ModalNuevaCategoriaProps> = ({
 
           <div>
             <label className="block text-sm font-medium mb-1">Descripción</label>
-            <textarea              
+            <textarea
               value={formData.descripcion}
               onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"

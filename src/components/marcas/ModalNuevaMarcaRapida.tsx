@@ -1,10 +1,11 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { X } from "lucide-react"
 import type { MarcaLista } from "../../types/dto/Producto"
 import { crearMarca } from "../../api/marcaApi"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
 
 interface Props {
   isOpen: boolean
@@ -38,18 +39,7 @@ export const ModalNuevaMarcaRapida: React.FC<Props> = ({ isOpen, onClose, onSucc
     onClose()
   }
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null
 

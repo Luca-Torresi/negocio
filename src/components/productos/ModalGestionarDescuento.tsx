@@ -7,15 +7,17 @@ import type { ProductoAbm } from "../../types/dto/Producto"
 import type { DescuentoDTO } from "../../types/dto/Descuento"
 import { crearDescuento, modificarDescuento, eliminarDescuento } from "../../api/descuentoApi"
 import { formatCurrency } from "../../utils/numberFormatUtils"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
+import { toast } from "react-toastify"
 
 interface Props {
-  estaAbierto: boolean
+  isOpen: boolean
   producto: ProductoAbm | null
-  alCerrar: () => void
+  onClose: () => void
   alConfirmar: () => void
 }
 
-export const ModalGestionarDescuento: React.FC<Props> = ({ estaAbierto, producto, alCerrar, alConfirmar }) => {
+export const ModalGestionarDescuento: React.FC<Props> = ({ isOpen, producto, onClose, alConfirmar }) => {
   const [cargando, setCargando] = useState(false)
   const [porcentaje, setPorcentaje] = useState<number>(0)
   const [precioCalculado, setPrecioCalculado] = useState<number>(0)
@@ -23,18 +25,18 @@ export const ModalGestionarDescuento: React.FC<Props> = ({ estaAbierto, producto
   const tieneDescuento = producto?.idDescuento != null;
 
   useEffect(() => {
-    if (estaAbierto && producto) {
+    if (isOpen && producto) {
       const porcentajeInicial = producto.porcentaje || 0
       setPorcentaje(porcentajeInicial)
       if (producto.precio) {
-          const precioCalc = producto.precio * (1 - porcentajeInicial / 100)
-          setPrecioCalculado(precioCalc)
+        const precioCalc = producto.precio * (1 - porcentajeInicial / 100)
+        setPrecioCalculado(precioCalc)
       }
     }
-  }, [estaAbierto, producto])
+  }, [isOpen, producto])
 
   const manejarCambioPorcentaje = (valor: number): void => {
-    const valorValidado = Math.max(0, Math.min(100, valor)); 
+    const valorValidado = Math.max(0, Math.min(100, valor));
     setPorcentaje(valorValidado)
     if (producto) {
       const precioCalc = producto.precio * (1 - valorValidado / 100)
@@ -53,12 +55,14 @@ export const ModalGestionarDescuento: React.FC<Props> = ({ estaAbierto, producto
       }
       if (tieneDescuento) {
         await modificarDescuento(producto.idDescuento!, descuentoData)
+        toast.success("Descuento modificado con éxito")
       } else {
         await crearDescuento(descuentoData)
+        toast.success("Descuento aplicado con éxito")
       }
       alConfirmar()
     } catch (error) {
-      console.error("Error al gestionar descuento:", error)
+      toast.error("No fue posible crear o modificar el descuento")
     } finally {
       setCargando(false)
     }
@@ -73,22 +77,25 @@ export const ModalGestionarDescuento: React.FC<Props> = ({ estaAbierto, producto
     setCargando(true)
     try {
       await eliminarDescuento(producto.idDescuento)
+      toast.success("Descuento eliminado correctamente")
       alConfirmar()
     } catch (error) {
-      console.error("Error al eliminar descuento:", error)
+      toast.error("Error al eliminar descuento")
     } finally {
       setCargando(false)
     }
   }
 
-  if (!estaAbierto || !producto) return null
+  useEscapeKey(onClose, isOpen);
+
+  if (!isOpen || !producto) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">Gestionar Descuento: {producto.nombre}</h2>
-          <button onClick={alCerrar} className="text-gray-500 hover:text-gray-700">
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <X size={24} />
           </button>
         </div>
@@ -104,7 +111,7 @@ export const ModalGestionarDescuento: React.FC<Props> = ({ estaAbierto, producto
             <input
               type="number"
               min="0"
-              max="100"              
+              max="100"
               value={porcentaje}
               onChange={(e) => manejarCambioPorcentaje(Number.parseFloat(e.target.value) || 0)}
               className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -121,7 +128,7 @@ export const ModalGestionarDescuento: React.FC<Props> = ({ estaAbierto, producto
 
           <div className="flex justify-end space-x-3 pt-4">
             <button
-              onClick={alCerrar}
+              onClick={onClose}
               className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
             >
               Cancelar
