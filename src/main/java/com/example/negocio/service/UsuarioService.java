@@ -1,5 +1,6 @@
 package com.example.negocio.service;
 
+import com.example.negocio.dto.usuario.NuevoUsuarioDTO;
 import com.example.negocio.dto.usuario.UsuarioDTO;
 import com.example.negocio.entity.Usuario;
 import com.example.negocio.mapper.UsuarioMapper;
@@ -15,6 +16,11 @@ import java.util.stream.Collectors;
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
+
+    public Usuario nuevoUsuario(NuevoUsuarioDTO dto) {
+        Usuario usuario = usuarioMapper.toEntity(dto);
+        return usuarioRepository.save(usuario);
+    }
 
     public List<UsuarioDTO> listaUsuarios() {
         List<Usuario> usuarios = usuarioRepository.findAll();
