@@ -7,6 +7,7 @@ import DatePicker from "react-datepicker"
 import { descargarReporteDiario, descargarReporteMensual } from "../../api/reporteApi"
 import { format } from "date-fns"
 import { useEscapeKey } from "../../hooks/useEscapeKey"
+import { toast } from "react-toastify"
 
 interface ModalExportarReporteProps {
   isOpen: boolean
@@ -47,7 +48,7 @@ const ModalExportarReporte: React.FC<ModalExportarReporteProps> = ({ isOpen, onC
       onClose()
     } catch (error) {
       console.error("Error al exportar reporte:", error)
-      alert("Error al generar el reporte. Por favor, intenta nuevamente.")
+      toast.error("Error al generar el reporte. Por favor, intenta nuevamente.")
     } finally {
       setCargando(false)
     }

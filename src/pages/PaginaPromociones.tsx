@@ -8,6 +8,7 @@ import { ModalGestionarPromocion } from "../components/promociones/ModalGestiona
 import { ModalDetallesPromocion } from "../components/promociones/ModalDetallesPromocion"
 import type { Promocion } from "../types/dto/Promocion"
 import { formatCurrency } from "../utils/numberFormatUtils"
+import { toast } from "react-toastify"
 
 type FiltroEstado = "todas" | "activas" | "inactivas"
 
@@ -32,7 +33,7 @@ export const PaginaPromociones: React.FC = () => {
       setPromociones(data)
     } catch (error) {
       console.error("Error al cargar promociones:", error)
-      alert("Error al cargar las promociones")
+      toast.error("Error al cargar las promociones")
     } finally {
       setCargando(false)
     }
@@ -44,7 +45,7 @@ export const PaginaPromociones: React.FC = () => {
       await cargarPromociones()
     } catch (error) {
       console.error("Error al cambiar estado:", error)
-      alert("Error al cambiar el estado de la promoción")
+      toast.error("Error al cambiar el estado de la promoción")
     }
   }
 

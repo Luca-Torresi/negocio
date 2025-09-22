@@ -118,7 +118,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
 
   const manejarGuardar = async () => {
     if (proveedorSeleccionado === 0 || detalles.length === 0) {
-      alert("Debe seleccionar un proveedor y añadir al menos un producto")
+      toast.info("Debe seleccionar un proveedor y añadir al menos un producto")
       return
     }
 

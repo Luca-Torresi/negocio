@@ -87,7 +87,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
       const productos = await obtenerListaProductosVenta()
       setProductosDisponibles(productos)
     } catch (error) {
-      console.error("Error al cargar productos:", error)
+      toast.error("Error al cargar productos")
     }
   }
 
@@ -111,7 +111,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
     // Verificar si el producto ya está en la lista
     const yaExiste = detalles.some((d) => d.idProducto === productoSeleccionado.idProducto)
     if (yaExiste) {
-      alert("Este producto ya está agregado a la promoción")
+      toast.info("Este producto ya está agregado a la promoción")
       return
     }
 
@@ -138,7 +138,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
     e.preventDefault()
 
     if (!nombre.trim() || !precio || detalles.length === 0) {
-      alert("Por favor completa todos los campos y agrega al menos un producto")
+      toast.info("Por favor completa todos los campos y agrega al menos un producto")
       return
     }
 

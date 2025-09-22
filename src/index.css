@@ -10,10 +10,27 @@
   @apply capitalize;
 }
 
+.Toastify__toast--info {
+  @apply bg-primary !important;
+}
+
+.Toastify__progress-bar--info {
+  @apply bg-primary-darker !important;
+}
+
 .Toastify__toast--success {
-  @apply bg-emerald-500 !important;
+  @apply bg-secondary !important;
 }
 
 .Toastify__progress-bar--success {
-  @apply bg-emerald-800 !important;
+  @apply bg-secondary-darker !important;
 }
+
+.Toastify__toast--error {
+  @apply bg-tertiary !important;
+}
+
+.Toastify__progress-bar--error {
+  @apply bg-tertiary-darker !important;
+}
+

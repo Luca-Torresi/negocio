@@ -9,6 +9,7 @@ import { ModalEditarCategoria } from "../components/categorias/ModalEditarCatego
 import { ModalDetallesCategoria } from "../components/categorias/ModalDetallesCategoria"
 import { Eye, Pencil, Tag, Plus, BrushCleaning, CornerDownRight } from "lucide-react"
 import { useCategoriaStore } from "../store/categoriaStore"
+import { toast } from "react-toastify"
 
 type FiltroEstado = "todas" | "activas" | "inactivas"
 
@@ -63,23 +64,27 @@ const PaginaCategorias: React.FC = () => {
   const handleCrearCategoria = async (data: CrearCategoriaDTO) => {
     try {
       await crearCategoria(data)
+      toast.success("Categoría creada con éxito")
+
       await refrescarCategorias();
       setModalNueva(false)
       await cargarCategorias()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al crear categoría")
+      toast.error("No fue posible crear la categoría")
     }
   }
 
   const handleModificarCategoria = async (id: number, data: ModificarCategoriaDTO) => {
     try {
       await modificarCategoria(id, data)
+      toast.success("Categoría modificada con éxito")
+
       await refrescarCategorias();
       setModalEditar(false)
       setCategoriaSeleccionada(null)
       await cargarCategorias()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al modificar categoría")
+      toast.error("No fue posible modificar la categoría")
     }
   }
 

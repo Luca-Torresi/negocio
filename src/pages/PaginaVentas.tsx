@@ -80,18 +80,16 @@ const PaginaVentas: React.FC = () => {
 
   // Función que se llama cuando se completa un escaneo
   const procesarCodigoDeBarras = useCallback(async (codigo: string) => {
-    console.log(`Código de barras detectado: ${codigo}`);
     try {
       const productoEncontrado = await buscarProductoPorCodigo(codigo);
       if (productoEncontrado) {
         añadirItemAlCarrito(productoEncontrado, 1);
         setBusquedaItem('');
       } else {
-        alert(`Producto con código ${codigo} no encontrado.`);
+        toast.error(`Producto con código ${codigo} no encontrado.`);
       }
     } catch (error) {
-      console.error("Error al buscar producto por código de barras:", error);
-      alert("Error al buscar el producto.");
+      console.log("Error al buscar el producto.");
     }
   }, [añadirItemAlCarrito]);
 

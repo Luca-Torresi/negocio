@@ -29,8 +29,6 @@ export const obtenerVentas = async (filtros: any): Promise<PaginaDeVentas> => {
   if (filtros.idUsuario) params.append("idUsuario", filtros.idUsuario.toString())
   if (filtros.metodoDePago) params.append("metodoDePago", filtros.metodoDePago.toString())
 
-  console.log(filtros.metodoDePago)
-
   const response = await apiClient.get(`/venta/obtener?${params}`)
   return response.data
 }
