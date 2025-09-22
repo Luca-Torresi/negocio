@@ -18,7 +18,6 @@ public class CategoriaService {
     private final CategoriaMapper categoriaMapper;
 
     public Categoria nuevaCategoria(CategoriaDTO dto) {
-
         Categoria categoria = categoriaMapper.toEntity(dto);
         categoria.setEstado(true);
 

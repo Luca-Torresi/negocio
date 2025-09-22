@@ -31,5 +31,4 @@ public interface CompraRepository extends JpaRepository<Compra, Long>, JpaSpecif
             "  AND fechaHora < DATE_FORMAT(CURDATE(), '%Y-%m-01') + INTERVAL 1 MONTH",
             nativeQuery = true)
     BigDecimal findTotalComprasMesActual();
-
 }

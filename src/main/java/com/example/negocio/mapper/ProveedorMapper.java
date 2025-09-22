@@ -9,11 +9,8 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ProveedorMapper {
-
     Proveedor toEntity(ProveedorDTO dto);
-
     ProveedorAbmDTO toAbmDto(Proveedor entity);
-
     ProveedorListaDTO toListaDTO(Proveedor entity);
 
     void updateFromDto(ProveedorDTO dto, @MappingTarget Proveedor entity);
