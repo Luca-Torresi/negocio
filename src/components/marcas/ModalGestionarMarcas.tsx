@@ -25,7 +25,7 @@ export const ModalGestionarMarcas: React.FC<Props> = ({ isOpen, onClose, onDataC
     if (isOpen) {
       cargarMarcas()
     }
-  }, [isOpen])  
+  }, [isOpen])
 
   const cargarMarcas = async (): Promise<void> => {
     setCargando(true)
@@ -139,50 +139,51 @@ export const ModalGestionarMarcas: React.FC<Props> = ({ isOpen, onClose, onDataC
                   <tr key={marca.idMarca} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       {editandoId === marca.idMarca ? (
-                        <input
-                          type="text"
-                          value={nombreEditando}
-                          onChange={(e) => setNombreEditando(e.target.value)}
-                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          onKeyPress={(e) => e.key === "Enter" && manejarGuardarEdicion(marca.idMarca)}
-                          autoFocus
-                        />
+                        // --- MODO EDICIÓN ---
+                        // 1. Usamos Flexbox para alinear el input y los botones
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="text"
+                            value={nombreEditando}
+                            onChange={(e) => setNombreEditando(e.target.value)}
+                            className="flex-grow px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            onKeyPress={(e) => e.key === "Enter" && manejarGuardarEdicion(marca.idMarca)}
+                            autoFocus
+                          />
+                          {/* 2. Movemos los botones aquí dentro */}
+                          <button
+                            onClick={() => manejarGuardarEdicion(marca.idMarca)}
+                            className="text-green-600 hover:text-green-800 ml-2"
+                            title="Guardar"
+                          >
+                            <Check size={18} />
+                          </button>
+                          <button
+                            onClick={cancelarEdicion}
+                            className="text-red-600 hover:text-red-800"
+                            title="Cancelar"
+                          >
+                            <X size={18} />
+                          </button>
+                        </div>
                       ) : (
                         <div className="text-sm font-medium text-gray-900">{marca.nombre}</div>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end space-x-2">
-                        {editandoId === marca.idMarca ? (
-                          <div className="mr-3">
-                            <button
-                              onClick={() => manejarGuardarEdicion(marca.idMarca)}
-                              className="text-green-700 hover:text-green-800"
-                              title="Guardar"
-                            >
-                              <Check size={18} />
-                            </button>
-                            {" "}
-                            <button
-                              onClick={cancelarEdicion}
-                              className="text-red-600 hover:text-red-700"
-                              title="Cancelar"
-                            >
-                              <X size={18} />
-                            </button>
-                          </div>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => iniciarEdicion(marca)}
-                              className="text-gray-900 hover:text-blue-900 mr-6"
-                              title="Editar"
-                            >
-                              <Edit2 size={16} />
-                            </button>
-                          </>
-                        )}
-                      </div>
+                      {/* Solo mostramos los botones si NO estamos editando esta fila */}
+                      {editandoId !== marca.idMarca && (
+                        <div className="flex justify-end space-x-2">
+                          <button
+                            onClick={() => iniciarEdicion(marca)}
+                            className="text-gray-900 hover:text-blue-900 mr-6"
+                            title="Editar"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          {/* Aquí también iría tu botón de eliminar si lo tuvieras */}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

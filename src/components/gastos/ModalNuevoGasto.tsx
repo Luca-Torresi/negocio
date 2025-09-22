@@ -42,7 +42,7 @@ export const ModalNuevoGasto: React.FC<ModalNuevoGastoProps> = ({ isOpen, onClos
         monto: 0,
       })
     } catch (error) {
-      toast.error("No fue posible cargar el gasto")
+      console.error("No fue posible cargar el gasto")
     } finally {
       setIsLoading(false)
     }

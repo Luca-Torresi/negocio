@@ -57,7 +57,7 @@ const PaginaProveedores: React.FC = () => {
       setModalNuevoAbierto(false)
       await cargarProveedores()
     } catch (err) {
-      toast.error("No fue posible cargar el nuevo proveedor")
+      console.error("No fue posible cargar el nuevo proveedor")
     }
   }
 
@@ -69,7 +69,7 @@ const PaginaProveedores: React.FC = () => {
       setProveedorSeleccionado(null)
       await cargarProveedores()
     } catch (err) {
-      toast.error("No fue posible modificar el proveedor")
+      console.error("No fue posible modificar el proveedor")
     }
   }
 

@@ -54,7 +54,7 @@ const PaginaCompras: React.FC = () => {
       const data = await obtenerListaProveedores()
       setProveedores(data)
     } catch (error) {
-      console.error("Error al cargar proveedores:", error)
+      console.error("Error al cargar proveedores")
     }
   }
 
@@ -63,7 +63,7 @@ const PaginaCompras: React.FC = () => {
       const data = await obtenerUsuarios()
       setUsuarios(data)
     } catch (error) {
-      console.error("Error al cargar usuarios:", error)
+      console.error("Error al cargar usuarios")
     }
   }
 
@@ -367,7 +367,6 @@ const PaginaCompras: React.FC = () => {
         isOpen={modalNuevoAbierto}
         onClose={cerrarModales}
         onSuccess={refrescarDatos}
-        idCompra={null}
       />
 
       <ModalDetallesCompra isOpen={modalDetallesAbierto} onClose={cerrarModales} compra={compraSeleccionada} />

@@ -22,9 +22,8 @@ const PaginaInicioSesion: React.FC = () => {
         setLoading(true)
         const listaUsuarios = await obtenerUsuarios()
         setUsuarios(listaUsuarios)
-      } catch (err) {
-        setError("Error al cargar los usuarios")
-        console.error(err)
+      } catch (err) {        
+        setError("Error al cargar los usuarios")        
       } finally {
         setLoading(false)
       }

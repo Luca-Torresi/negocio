@@ -55,7 +55,6 @@ export const ModalEditarProducto: React.FC<Props> = ({ isOpen, producto, onClose
           setProveedores(proveedoresData)
 
           // Rellena el formulario con los datos del producto
-          // (Asumiendo que ProductoAbm ahora incluye los IDs)
           setFormulario({
             nombre: producto.nombre,
             codigoDeBarras: producto.codigoDeBarras,
@@ -112,7 +111,7 @@ export const ModalEditarProducto: React.FC<Props> = ({ isOpen, producto, onClose
       if (error.response && error.response.data) {
         toast.error(error.response.data);
       } else {
-        toast.error("No fue posible modificar el producto");
+        console.error("No fue posible modificar el producto");
       }
     } finally {
       setCargando(false)

@@ -85,8 +85,9 @@ const PaginaVentas: React.FC = () => {
       if (productoEncontrado) {
         añadirItemAlCarrito(productoEncontrado, 1);
         setBusquedaItem('');
+        toast.info(`Se agregó ${productoEncontrado.nombre} al carrito`)
       } else {
-        toast.error(`Producto con código ${codigo} no encontrado.`);
+        toast.error(`El código ${codigo} no pertenece a ningún producto.`);
       }
     } catch (error) {
       console.log("Error al buscar el producto.");
@@ -276,7 +277,7 @@ const PaginaVentas: React.FC = () => {
       if (err.response && err.response.data) {
         toast.error(err.response.data)    
       } else {
-        toast.error("Error al procesar la venta")
+        console.error("Error al procesar la venta")
       }
     } finally {
       setProcesandoVenta(false);

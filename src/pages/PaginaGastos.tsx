@@ -42,7 +42,7 @@ const PaginaGastos: React.FC = () => {
         const tipos = await obtenerTiposGasto()
         setTiposDeGasto(tipos)
       } catch (error) {
-        console.error("Error al cargar tipos de gasto:", error)
+        console.error("Error al cargar tipos de gasto")
       }
     }
 

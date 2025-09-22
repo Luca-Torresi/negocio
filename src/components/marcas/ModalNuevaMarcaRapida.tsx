@@ -28,7 +28,7 @@ export const ModalNuevaMarcaRapida: React.FC<Props> = ({ isOpen, onClose, onSucc
       setNombre("")
       onClose()
     } catch (error) {
-      console.error("Error al crear marca:", error)
+      console.error("Error al crear marca")
     } finally {
       setCargando(false)
     }

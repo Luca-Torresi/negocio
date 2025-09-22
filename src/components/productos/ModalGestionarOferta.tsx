@@ -52,7 +52,7 @@ export const ModalGestionarOferta: React.FC<Props> = ({ isOpen, producto, onClos
       }
       alConfirmar()
     } catch (error) {
-      toast.error("Hubo un problema al crear o modificar la oferta")
+      console.error("Hubo un problema al crear o modificar la oferta")
     } finally {
       setCargando(false)
     }
@@ -67,7 +67,7 @@ export const ModalGestionarOferta: React.FC<Props> = ({ isOpen, producto, onClos
       toast.success("Oferta eliminada correctamente")
       alConfirmar()
     } catch (error) {
-      toast.error("Error al eliminar la oferta")
+      console.error("Error al eliminar la oferta")
     } finally {
       setCargando(false)
     }

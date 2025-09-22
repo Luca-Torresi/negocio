@@ -62,7 +62,7 @@ export const ModalGestionarDescuento: React.FC<Props> = ({ isOpen, producto, onC
       }
       alConfirmar()
     } catch (error) {
-      toast.error("No fue posible crear o modificar el descuento")
+      console.error("No fue posible crear o modificar el descuento")
     } finally {
       setCargando(false)
     }
@@ -80,7 +80,7 @@ export const ModalGestionarDescuento: React.FC<Props> = ({ isOpen, producto, onC
       toast.success("Descuento eliminado correctamente")
       alConfirmar()
     } catch (error) {
-      toast.error("Error al eliminar descuento")
+      console.error("Error al eliminar descuento")
     } finally {
       setCargando(false)
     }

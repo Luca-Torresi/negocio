@@ -70,7 +70,7 @@ const PaginaCategorias: React.FC = () => {
       setModalNueva(false)
       await cargarCategorias()
     } catch (err) {
-      toast.error("No fue posible crear la categoría")
+      console.error("No fue posible crear la categoría")
     }
   }
 
@@ -84,7 +84,7 @@ const PaginaCategorias: React.FC = () => {
       setCategoriaSeleccionada(null)
       await cargarCategorias()
     } catch (err) {
-      toast.error("No fue posible modificar la categoría")
+      console.error("No fue posible modificar la categoría")
     }
   }
 

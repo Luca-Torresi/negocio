@@ -55,7 +55,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
       const data = await obtenerListaProveedores()
       setProveedores(data)
     } catch (error) {
-      console.error("Error al cargar proveedores:", error)
+      console.error("Error al cargar proveedores")
     }
   }
 
@@ -64,7 +64,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
       const data = await obtenerListaProductosCompra()
       setProductos(data)
     } catch (error) {
-      console.error("Error al cargar productos del proveedor:", error)
+      console.error("Error al cargar los productos")
     }
   }
 
@@ -140,7 +140,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
       onSuccess()
       onClose()
     } catch (error) {
-      toast.error("Error al guardar la compra")
+      console.error("Error al guardar la compra")
     } finally {
       setCargando(false)
     }
@@ -286,7 +286,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
                     <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Cantidad</th>
                     <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Costo Unitario</th>
                     <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Subtotal</th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Acciones</th>
+                    <th className="px-4 py-2"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">

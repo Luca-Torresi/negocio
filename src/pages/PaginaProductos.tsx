@@ -86,8 +86,7 @@ export const PaginaProductos: React.FC = () => {
       const datos = await obtenerProductos(filtros)
       setDatosProductos(datos)
     } catch (error) {
-      setError("Error al cargar los productos")
-      console.error("Error:", error)
+      console.error("No fue posible cargar los productos")
     } finally {
       setCargando(false)
     }

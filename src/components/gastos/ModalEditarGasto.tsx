@@ -55,7 +55,7 @@ export const ModalEditarGasto: React.FC<ModalEditarGastoProps> = ({
       onSuccess()
       onClose()
     } catch (error) {
-      toast.error("No fue posible modificar el gasto")
+      console.error("No fue posible modificar el gasto")
     } finally {
       setIsLoading(false)
     }

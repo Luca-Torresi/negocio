@@ -51,7 +51,6 @@ export const ModalNuevoProducto: React.FC<Props> = ({ isOpen, onClose, alConfirm
 
   const cargarDatosSelect = async (): Promise<void> => {
     try {
-      // 4. Llama a la acción del store para cargar categorías
       await cargarCategorias()
 
       const [marcasData, proveedoresData] = await Promise.all([obtenerListaMarcas(), obtenerListaProveedores()])
@@ -100,7 +99,7 @@ export const ModalNuevoProducto: React.FC<Props> = ({ isOpen, onClose, alConfirm
       if (error.response && error.response.data) {
         toast.error(error.response.data);
       } else {
-        toast.error("Error al crear el nuevo producto");
+        console.error("Error al crear el nuevo producto");
       }
     } finally {
       setCargando(false)

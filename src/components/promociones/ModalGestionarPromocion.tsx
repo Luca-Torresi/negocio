@@ -87,7 +87,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
       const productos = await obtenerListaProductosVenta()
       setProductosDisponibles(productos)
     } catch (error) {
-      toast.error("Error al cargar productos")
+      console.error("Error al cargar productos")
     }
   }
 
@@ -168,7 +168,7 @@ export const ModalGestionarPromocion: React.FC<Props> = ({ isOpen, onClose, onSu
       onClose()
       limpiarFormulario()
     } catch (error) {      
-      toast.error("Error al guardar la promoción")
+      console.error("Error al guardar la promoción")
     } finally {
       setCargando(false)
     }
