@@ -3,8 +3,8 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { User } from "lucide-react"
-import { obtenerUsuarios } from "../api/usuarioApi"
+import { User, Plus, X } from "lucide-react"
+import { obtenerUsuarios, crearUsuario } from "../api/usuarioApi"
 import { useUsuarioStore } from "../store/usuarioStore"
 import type { Usuario } from "../types/dto/Usuario"
 
@@ -12,6 +12,9 @@ const PaginaInicioSesion: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [mostrarModal, setMostrarModal] = useState(false)
+  const [nombreUsuario, setNombreUsuario] = useState("")
+  const [creandoUsuario, setCreandoUsuario] = useState(false)
 
   const navigate = useNavigate()
   const setUsuario = useUsuarioStore((state) => state.setUsuario)
@@ -22,8 +25,9 @@ const PaginaInicioSesion: React.FC = () => {
         setLoading(true)
         const listaUsuarios = await obtenerUsuarios()
         setUsuarios(listaUsuarios)
-      } catch (err) {        
-        setError("Error al cargar los usuarios")        
+      } catch (err) {
+        setError("Error al cargar los usuarios")
+        console.error(err)
       } finally {
         setLoading(false)
       }
@@ -35,6 +39,24 @@ const PaginaInicioSesion: React.FC = () => {
   const handleSelectUsuario = (usuario: Usuario) => {
     setUsuario(usuario)
     navigate("/")
+  }
+
+  const handleCrearUsuario = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!nombreUsuario.trim()) return
+
+    try {
+      setCreandoUsuario(true)
+      const nuevoUsuario = await crearUsuario(nombreUsuario.trim())
+      setUsuarios([...usuarios, nuevoUsuario])
+      setMostrarModal(false)
+      setNombreUsuario("")
+    } catch (err) {
+      console.error("Error al crear usuario:", err)
+      alert("Error al crear el usuario")
+    } finally {
+      setCreandoUsuario(false)
+    }
   }
 
   if (loading) {
@@ -89,12 +111,82 @@ const PaginaInicioSesion: React.FC = () => {
               </div>
             </button>
           ))}
+
+          <button
+            onClick={() => setMostrarModal(true)}
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg hover:bg-green-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 border-2 border-dashed border-gray-300 hover:border-green-400"
+          >
+            <div className="flex flex-col items-center space-y-3">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <Plus size={32} className="text-green-600" />
+              </div>
+              <span className="text-lg font-medium text-gray-800 text-center">Crear Usuario</span>
+            </div>
+          </button>
         </div>
 
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-sm text-gray-500">Sistema de Gestión © 2024</p>
         </div>
+
+        {mostrarModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+              <div className="flex items-center justify-between p-6 border-b">
+                <h2 className="text-xl font-semibold text-gray-800">Crear Nuevo Usuario</h2>
+                <button
+                  onClick={() => {
+                    setMostrarModal(false)
+                    setNombreUsuario("")
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <form onSubmit={handleCrearUsuario} className="p-6">
+                <div className="mb-4">
+                  <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre del Usuario
+                  </label>
+                  <input
+                    type="text"
+                    id="nombre"
+                    value={nombreUsuario}
+                    onChange={(e) => setNombreUsuario(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Ingresa el nombre del usuario"
+                    required
+                    disabled={creandoUsuario}
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMostrarModal(false)
+                      setNombreUsuario("")
+                    }}
+                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    disabled={creandoUsuario}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                    disabled={creandoUsuario || !nombreUsuario.trim()}
+                  >
+                    {creandoUsuario ? "Creando..." : "Crear Usuario"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

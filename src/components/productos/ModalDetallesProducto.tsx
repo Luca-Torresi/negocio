@@ -28,7 +28,7 @@ export const ModalDetallesProducto: React.FC<Props> = ({ isOpen, producto, onClo
         </div>
 
         <div className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">Nombre</label>
               <p className="text-gray-900 font-medium">{producto.nombre}</p>
@@ -42,6 +42,12 @@ export const ModalDetallesProducto: React.FC<Props> = ({ isOpen, producto, onClo
                 {producto.estado ? "Activo" : "Inactivo"}
               </span>
             </div>
+            {producto.codigoDeBarras && (
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Código de Barras</label>
+                <p className="text-gray-900 font-medium">{producto.codigoDeBarras}</p>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

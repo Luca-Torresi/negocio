@@ -11,3 +11,13 @@ export const obtenerUsuarios = async (): Promise<Usuario[]> => {
     throw new Error("No se pudo cargar la lista de usuarios");
   }
 };
+
+export const crearUsuario = async (nombre: string): Promise<Usuario> => {
+  try {
+    const response = await apiClient.post<Usuario>("/usuario/nuevo", { nombre })
+    return response.data
+  } catch (error) {
+    console.error("Error al crear el usuario:", error)
+    throw new Error("No se pudo crear el usuario")
+  }
+}
