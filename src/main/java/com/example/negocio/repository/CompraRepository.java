@@ -25,7 +25,7 @@ public interface CompraRepository extends JpaRepository<Compra, Long>, JpaSpecif
             @Param("fechaFin") LocalDateTime fechaFin
     );
 
-    // KPI: Total gastado este mes (solo la parte de 'compras')
+    // KPI: Total gastado este mes en compras a los proveedores
     @Query(value = "SELECT IFNULL(SUM(total), 0) FROM compra " +
             "WHERE fechaHora >= DATE_FORMAT(CURDATE(), '%Y-%m-01') " +
             "  AND fechaHora < DATE_FORMAT(CURDATE(), '%Y-%m-01') + INTERVAL 1 MONTH",
