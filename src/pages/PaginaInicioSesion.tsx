@@ -111,17 +111,15 @@ const PaginaInicioSesion: React.FC = () => {
               </div>
             </button>
           ))}
+        </div>
 
+        <div className="flex justify-center mt-6">
           <button
             onClick={() => setMostrarModal(true)}
-            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg hover:bg-green-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 border-2 border-dashed border-gray-300 hover:border-green-400"
+            className="flex items-center gap-2 px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary-dark transition-colors duration-200"
           >
-            <div className="flex flex-col items-center space-y-3">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                <Plus size={32} className="text-green-600" />
-              </div>
-              <span className="text-lg font-medium text-gray-800 text-center">Crear Usuario</span>
-            </div>
+            <Plus size={16} />
+            <span className="text-sm font-medium">Crear Nuevo Usuario</span>
           </button>
         </div>
 
@@ -131,7 +129,7 @@ const PaginaInicioSesion: React.FC = () => {
         </div>
 
         {mostrarModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
               <div className="flex items-center justify-between p-6 border-b">
                 <h2 className="text-xl font-semibold text-gray-800">Crear Nuevo Usuario</h2>
@@ -149,7 +147,7 @@ const PaginaInicioSesion: React.FC = () => {
               <form onSubmit={handleCrearUsuario} className="p-6">
                 <div className="mb-4">
                   <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre del Usuario
+                    Nombre
                   </label>
                   <input
                     type="text"
@@ -177,7 +175,7 @@ const PaginaInicioSesion: React.FC = () => {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                    className="flex-1 px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary-dark disabled:opacity-50"
                     disabled={creandoUsuario || !nombreUsuario.trim()}
                   >
                     {creandoUsuario ? "Creando..." : "Crear Usuario"}

@@ -11,11 +11,13 @@ import {
   ChartNoAxesCombined,
   Tag,
   ScrollText,
-  ListPlus,  
-  LogOut,  
+  ListPlus,
+  LogOut,
   User,
+  Power,
 } from "lucide-react"
 import { useUsuarioStore } from "../store/usuarioStore"
+import { apagarServidor } from "../api/appApi"
 
 interface ItemNavegacion {
   label: string
@@ -31,6 +33,13 @@ const Sidebar: React.FC = () => {
   const handleLogout = () => {
     clearUsuario()
     navigate("/seleccionar-usuario")
+  }
+
+  const handleShutdown = async () => {
+    if (window.confirm("¿Estás seguro de que deseas apagar la aplicación? Esto cerrará el servidor para todos.")) {
+      navigate("/apagado")
+      apagarServidor()
+    }
   }
 
   const itemsNavegacion: ItemNavegacion[] = [
@@ -73,8 +82,7 @@ const Sidebar: React.FC = () => {
               <NavLink
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center px-6 py-3 text-sm font-medium transition-colors duration-200 hover:bg-gray-700 hover:text-white ${
-                    isActive ? "bg-gray-700 text-white border-r-2 border-blue-500" : "text-gray-300"
+                  `flex items-center px-6 py-3 text-sm font-medium transition-colors duration-200 hover:bg-gray-700 hover:text-white ${isActive ? "bg-gray-700 text-white border-r-2 border-blue-500" : "text-gray-300"
                   }`
                 }
               >
@@ -90,11 +98,20 @@ const Sidebar: React.FC = () => {
       <div className="border-t border-gray-700">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center px-6 py-3 text-base font-medium text-red-500 hover:underline decoration-2"
+          className="w-full flex items-center px-6 py-2 text-base font-medium text-red-400 hover:underline decoration-2"
         >
           <LogOut size={20} className="mr-2" />
-          Cerrar Sesión
+          <span>Cerrar Sesión</span>
         </button>
+
+        <button
+          onClick={handleShutdown}
+          className="w-full flex items-center px-6 py-2 text-base font-medium text-red-400 hover:underline decoration-2"
+        >
+          <Power size={20} className="mr-2" />
+          <span>Apagar Aplicación</span>
+        </button>
+
         <div className="p-4">
           <p className="text-xs text-gray-400 text-center">© 2024 Sistema de Gestión</p>
         </div>
