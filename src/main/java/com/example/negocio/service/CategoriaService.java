@@ -3,12 +3,15 @@ package com.example.negocio.service;
 import com.example.negocio.dto.categoria.CategoriaAbmDTO;
 import com.example.negocio.dto.categoria.CategoriaDTO;
 import com.example.negocio.entity.Categoria;
+import com.example.negocio.entity.Producto;
 import com.example.negocio.exception.CategoriaNoEncontradaException;
+import com.example.negocio.exception.NombreRepetidoException;
 import com.example.negocio.mapper.CategoriaMapper;
 import com.example.negocio.repository.CategoriaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,6 +21,9 @@ public class CategoriaService {
     private final CategoriaMapper categoriaMapper;
 
     public Categoria nuevaCategoria(CategoriaDTO dto) {
+        if (categoriaRepository.findByNombre(dto.getNombre()).isPresent()) {
+            throw new NombreRepetidoException(dto.getNombre());
+        }
 
         Categoria categoria = categoriaMapper.toEntity(dto);
         categoria.setEstado(true);
@@ -31,6 +37,12 @@ public class CategoriaService {
     }
 
     public Categoria modificarCategoria(Long idCategoria, CategoriaDTO dto) {
+        Optional<Categoria> categoriaExistente = categoriaRepository.findByNombre(dto.getNombre());
+
+        if (categoriaExistente.isPresent() && !categoriaExistente.get().getIdCategoria().equals(idCategoria)) {
+            throw new NombreRepetidoException(dto.getNombre());
+        }
+
         Categoria categoria = categoriaRepository.findById(idCategoria).orElseThrow(() -> new CategoriaNoEncontradaException());
 
         categoriaMapper.updateFromDto(dto, categoria);
