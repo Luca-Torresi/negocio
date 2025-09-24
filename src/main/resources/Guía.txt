@@ -1,5 +1,0 @@
-
-Añadir el código de barras al modal DetallesProducto
-
-En la pantalla InicioDeSesión añadir un botón para crear un nuevo usuario
-

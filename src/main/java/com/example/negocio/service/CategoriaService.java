@@ -29,7 +29,7 @@ public class CategoriaService {
         categoria.setEstado(true);
 
         if(dto.getIdCategoriaPadre() != null){
-            Categoria categoriaPadre = categoriaRepository.findById(dto.getIdCategoriaPadre()).orElseThrow(() -> new CategoriaNoEncontradaException());
+            Categoria categoriaPadre = categoriaRepository.findById(dto.getIdCategoriaPadre()).orElseThrow(() -> new CategoriaNoEncontradaException("No se encontró la categoría padre"));
             categoria.setCategoriaPadre(categoriaPadre);
         }
 
@@ -43,12 +43,12 @@ public class CategoriaService {
             throw new NombreRepetidoException(dto.getNombre());
         }
 
-        Categoria categoria = categoriaRepository.findById(idCategoria).orElseThrow(() -> new CategoriaNoEncontradaException());
+        Categoria categoria = categoriaRepository.findById(idCategoria).orElseThrow(() -> new CategoriaNoEncontradaException("No se encontró la categoría con ID: " + idCategoria));
 
         categoriaMapper.updateFromDto(dto, categoria);
 
         if(dto.getIdCategoriaPadre() != null){
-            Categoria categoriaPadre = categoriaRepository.findById(dto.getIdCategoriaPadre()).orElseThrow(() -> new CategoriaNoEncontradaException());
+            Categoria categoriaPadre = categoriaRepository.findById(dto.getIdCategoriaPadre()).orElseThrow(() -> new CategoriaNoEncontradaException("No se encontró la categoría padre"));
             categoria.setCategoriaPadre(categoriaPadre);
         }
 
@@ -64,7 +64,7 @@ public class CategoriaService {
     }
 
     public void cambiarEstadoCategoria(Long idCategoria) {
-        Categoria categoria = categoriaRepository.findById(idCategoria).orElseThrow(() -> new CategoriaNoEncontradaException());
+        Categoria categoria = categoriaRepository.findById(idCategoria).orElseThrow(() -> new CategoriaNoEncontradaException("No se encontró la categoría con ID: " + idCategoria));
 
         categoria.setEstado(!categoria.getEstado());
         categoriaRepository.save(categoria);

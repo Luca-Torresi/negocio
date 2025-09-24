@@ -15,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,6 +44,14 @@ public class ProductoService {
 
         validarCodigoDeBarrasUnico(dto.getCodigoDeBarras(), null);
 
+        if(dto.getPrecio() == BigDecimal.ZERO){
+            throw new ValorNuloException("El precio del producto no debe ser $0");
+        }
+
+        if(dto.getCosto() == BigDecimal.ZERO){
+            throw new ValorNuloException("El costo del producto no debe ser $0");
+        }
+
         Producto producto = productoMapper.toEntity(dto);
         producto.setEstado(true);
 
@@ -52,10 +62,10 @@ public class ProductoService {
             producto.setMarca(null);
         }
 
-        Categoria categoria = categoriaRepository.findById(dto.getIdCategoria()).orElseThrow(() -> new CategoriaNoEncontradaException());
+        Categoria categoria = categoriaRepository.findById(dto.getIdCategoria()).orElseThrow(() -> new CategoriaNoEncontradaException("Debe seleccionar una categoría"));
         producto.setCategoria(categoria);
 
-        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor()).orElseThrow(() -> new ProveedorNoEncontradoException());
+        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor()).orElseThrow(() -> new ProveedorNoEncontradoException("Debe seleccionar un proveedor"));
         producto.setProveedor(proveedor);
 
         return productoRepository.save(producto);
@@ -71,14 +81,28 @@ public class ProductoService {
 
         validarCodigoDeBarrasUnico(dto.getCodigoDeBarras(), idProducto);
 
+        if(dto.getPrecio() == BigDecimal.ZERO){
+            throw new ValorNuloException("El precio del producto no debe ser $0");
+        }
+
+        if(dto.getCosto() == BigDecimal.ZERO){
+            throw new ValorNuloException("El costo del producto no debe ser $0");
+        }
+
         Producto producto = productoRepository.findById(idProducto).orElseThrow(() -> new ProductoNoEncontradoException());
-        Categoria categoria = categoriaRepository.findById(dto.getIdCategoria()).orElseThrow(() -> new CategoriaNoEncontradaException());
-        Marca marca = marcaRepository.findById(dto.getIdMarca()).orElseThrow(() -> new MarcaNoEncontradaException());
-        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor()).orElseThrow(() -> new ProveedorNoEncontradoException());
+        Categoria categoria = categoriaRepository.findById(dto.getIdCategoria()).orElseThrow(() -> new CategoriaNoEncontradaException("Debe seleccionar una categoria"));
+
+        if(dto.getIdMarca() != 0){
+            Marca marca = marcaRepository.findById(dto.getIdMarca()).orElseThrow(() -> new MarcaNoEncontradaException());
+            producto.setMarca(marca);
+        } else{
+            producto.setMarca(null);
+        }
+
+        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor()).orElseThrow(() -> new ProveedorNoEncontradoException("Debe seleccionar un proveedor"));
 
         productoMapper.updateFromDto(dto, producto);
         producto.setCategoria(categoria);
-        producto.setMarca(marca);
         producto.setProveedor(proveedor);
 
         return productoRepository.save(producto);

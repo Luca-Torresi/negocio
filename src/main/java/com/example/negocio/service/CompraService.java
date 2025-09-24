@@ -36,7 +36,7 @@ public class CompraService {
 
     public Compra nuevaCompra(Long idUsuario, CompraDTO dto){
         Usuario usuario = usuarioRepository.findById(idUsuario).orElseThrow(() -> new UsuarioNoEncontradoException());
-        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor()).orElseThrow(() -> new ProveedorNoEncontradoException());
+        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor()).orElseThrow(() -> new ProveedorNoEncontradoException("No se encontró el proveedor con el ID: " + dto.getIdProveedor()));
 
         Compra compra = compraMapper.toEntity(dto);
         compra.setFechaHora(LocalDateTime.now());

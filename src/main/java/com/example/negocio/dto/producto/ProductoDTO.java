@@ -14,9 +14,9 @@ import java.math.BigDecimal;
 public class ProductoDTO {
     @NotBlank
     private String nombre;
-    @NotNull @Positive
+    @NotNull
     private BigDecimal precio;
-    @NotNull @Positive
+    @NotNull
     private BigDecimal costo;
     @NotNull @PositiveOrZero
     private Integer stock;

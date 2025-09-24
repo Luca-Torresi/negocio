@@ -80,4 +80,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleCodigoDeBarrasEnUsoException(CodigoDeBarrasEnUsoException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
+
+    @ExceptionHandler(ValorNuloException.class)
+    public ResponseEntity<String> handleValorNuloException(ValorNuloException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
 }

@@ -26,7 +26,7 @@ public class ProveedorService {
     }
 
     public Proveedor modificarProveedor(Long idProveedor, ProveedorDTO dto) {
-        Proveedor proveedor = proveedorRepository.findById(idProveedor).orElseThrow(() -> new ProveedorNoEncontradoException());
+        Proveedor proveedor = proveedorRepository.findById(idProveedor).orElseThrow(() -> new ProveedorNoEncontradoException("No se encontró el proveedor con ID: " + idProveedor));
 
         proveedorMapper.updateFromDto(dto, proveedor);
         return proveedorRepository.save(proveedor);
@@ -49,7 +49,7 @@ public class ProveedorService {
     }
 
     public void cambiarEstadoProveedor(Long idProveedor) {
-        Proveedor proveedor = proveedorRepository.findById(idProveedor).orElseThrow(() -> new ProveedorNoEncontradoException());
+        Proveedor proveedor = proveedorRepository.findById(idProveedor).orElseThrow(() -> new ProveedorNoEncontradoException("No se encontró el proveedor con ID: " + idProveedor));
 
         proveedor.setEstado(!proveedor.getEstado());
         proveedorRepository.save(proveedor);

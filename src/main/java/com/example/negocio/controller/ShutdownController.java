@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 public class ShutdownController {
-    private ConfigurableApplicationContext context;
+    private final ConfigurableApplicationContext context;
 
     @PostMapping("/shutdownApp")
     public void shutdownApp() {
