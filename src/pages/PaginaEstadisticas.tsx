@@ -322,7 +322,7 @@ const PaginaEstadisticas: React.FC = () => {
         bold: true,
       }
     },
-    colors: ["#7B987A", "#38465E", "#9F4A36", "#E5A156", "#ECCAB1"],
+    colors: ["#7B987A", "#38465E", "#984a39", "#E5A156", "#ECCAB1"],
     chartArea: { left: 30, top: 40, bottom: 30, right: 30, width: "80%", height: "70%" },
   }
 
@@ -337,7 +337,7 @@ const PaginaEstadisticas: React.FC = () => {
         fontSize: 17,        
       }
     },
-    colors: ["#96A78D", "#65647C", "#5C7886", "#EBD08F", "#A76F6F"],
+    colors: ["#6f876f", "#4b576c", "#9c5a4b", "#e2ab70", "#82a2d5"],
     chartArea: { left: 15, top: 50, bottom: 40, right: 15, width: "80%", height: "70%" },
   }
 

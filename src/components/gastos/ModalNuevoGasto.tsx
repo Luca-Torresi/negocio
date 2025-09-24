@@ -32,7 +32,7 @@ export const ModalNuevoGasto: React.FC<ModalNuevoGastoProps> = ({ isOpen, onClos
 
     try {
       await crearGasto(formData)
-      toast.success("Gasto cargado exitosamente!")
+      toast.success("¡Gasto cargado con éxito!")
       onSuccess()
       onClose()
       

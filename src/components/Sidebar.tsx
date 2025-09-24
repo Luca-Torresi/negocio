@@ -36,10 +36,8 @@ const Sidebar: React.FC = () => {
   }
 
   const handleShutdown = async () => {
-    if (window.confirm("¿Estás seguro de que deseas apagar la aplicación? Esto cerrará el servidor para todos.")) {
-      navigate("/apagado")
-      apagarServidor()
-    }
+    navigate("/apagado")
+    apagarServidor()
   }
 
   const itemsNavegacion: ItemNavegacion[] = [
@@ -109,7 +107,7 @@ const Sidebar: React.FC = () => {
           className="w-full flex items-center px-6 py-2 text-base font-medium text-red-400 hover:underline decoration-2"
         >
           <Power size={20} className="mr-2" />
-          <span>Apagar Aplicación</span>
+          <span>Salir del Programa</span>
         </button>
 
         <div className="p-4">
