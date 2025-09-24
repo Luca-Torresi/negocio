@@ -54,9 +54,17 @@ const Sidebar: React.FC = () => {
 
   return (
     <div className="h-screen w-64 bg-gray-800 text-gray-200 fixed left-0 top-0 flex flex-col">
-      {/* Logo/Nombre de la aplicación */}
-      <div className="p-6 border-b border-gray-700">
-        <h1 className="text-xl font-medium italic text-white">"Pañalera Pepa"</h1>
+      {/* --- Logo de la aplicación --- */}
+      <div className="flex items-center p-4 m-1 border-b border-gray-700">
+        <img
+          src="/logo.png"
+          alt="Logo de Pañalera Pepa"
+          className="h-[65px] w-auto flex-shrink-0"
+        />
+        <div className="ml-3">
+          <p className="text-xl font-dynapuff font-medium text-white leading-tight">Pañalera</p>
+          <p className="text-base font-dynapuff font-normal text-gray-400 leading-tight">Pepa</p>
+        </div>
       </div>
 
       {/* User profile section */}
@@ -93,26 +101,22 @@ const Sidebar: React.FC = () => {
       </nav>
 
       {/* Footer with logout button */}
-      <div className="border-t border-gray-700">
+      <div className="border-t border-gray-700 mb-2">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center px-6 py-2 text-base font-medium text-red-400 hover:underline decoration-2"
+          className="w-full flex items-center px-6 py-2 text-sm font-medium text-red-400 hover:underline decoration-2"
         >
-          <LogOut size={20} className="mr-2" />
+          <LogOut size={18} className="mr-2" />
           <span>Cerrar Sesión</span>
         </button>
 
         <button
           onClick={handleShutdown}
-          className="w-full flex items-center px-6 py-2 text-base font-medium text-red-400 hover:underline decoration-2"
+          className="w-full flex items-center px-6 py-2 text-sm font-medium text-red-400 hover:underline decoration-2"
         >
-          <Power size={20} className="mr-2" />
+          <Power size={18} className="mr-2" />
           <span>Salir del Programa</span>
         </button>
-
-        <div className="p-4">
-          <p className="text-xs text-gray-400 text-center">© 2024 Sistema de Gestión</p>
-        </div>
       </div>
     </div>
   )

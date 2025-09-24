@@ -27,6 +27,13 @@ export default {
         'toggleOn': '#5ed387',        
         'toggleOff': '#ff6666'        
       },
+      fontFamily: {
+        'akaya': ['"Akaya Kanadaka"', 'cursive'],
+        'delius': ['"Delius Unicase"', 'cursive'],
+        'dynapuff': ['"DynaPuff"', 'sans-serif'],
+        'mogra': ['"Mogra"', 'cursive'],
+        'pacifico': ['"Pacifico"', 'cursive'],
+      },
     },
   },
   plugins: [],

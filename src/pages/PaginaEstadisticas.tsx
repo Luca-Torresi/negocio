@@ -337,7 +337,7 @@ const PaginaEstadisticas: React.FC = () => {
         fontSize: 17,        
       }
     },
-    colors: ["#6f876f", "#4b576c", "#9c5a4b", "#e2ab70", "#82a2d5"],
+    colors: ["#6f876f", "#4b576c", "#9c5a4b", "#e2ab70", "#ECCAB1"],
     chartArea: { left: 15, top: 50, bottom: 40, right: 15, width: "80%", height: "70%" },
   }
 
