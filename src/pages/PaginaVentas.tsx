@@ -17,6 +17,7 @@ import { toast } from "react-toastify"
 const PaginaVentas: React.FC = () => {
   const { idVenta } = useParams<{ idVenta: string }>()
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputBusquedaRef = useRef<HTMLInputElement>(null);  
 
   // Estados principales
   const [catalogo, setCatalogo] = useState<ItemCatalogo[]>([])
@@ -92,7 +93,7 @@ const PaginaVentas: React.FC = () => {
     } catch (error) {
       console.log("Error al buscar el producto.");
     }
-  }, [añadirItemAlCarrito]);
+  }, [añadirItemAlCarrito]);  
 
   // useEffect que escucha el teclado
   useEffect(() => {
@@ -220,6 +221,10 @@ const PaginaVentas: React.FC = () => {
     setItemSeleccionado(null);
     setCantidad(1);
     setMostrarSugerencias(false);
+
+    if (inputBusquedaRef.current) {
+      inputBusquedaRef.current.focus();
+    }
   };
 
   // Modificar cantidad en el carrito
@@ -275,7 +280,7 @@ const PaginaVentas: React.FC = () => {
 
     } catch (err: any) {
       if (err.response && err.response.data) {
-        toast.error(err.response.data)    
+        toast.error(err.response.data)
       } else {
         console.error("Error al procesar la venta")
       }
@@ -318,6 +323,7 @@ const PaginaVentas: React.FC = () => {
           {/* Buscador con autocompletado */}
           <div className="relative mb-4">
             <input
+              ref={inputBusquedaRef}
               type="text"
               placeholder="Buscar producto o promoción..."
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -343,7 +349,6 @@ const PaginaVentas: React.FC = () => {
                     break;
 
                   case "Enter":
-                  case "Tab":
                     e.preventDefault();
                     // --- 3. LÓGICA CORREGIDA ---
                     // Si hay un item resaltado, lo seleccionamos.

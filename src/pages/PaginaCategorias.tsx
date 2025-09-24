@@ -69,8 +69,12 @@ const PaginaCategorias: React.FC = () => {
       await refrescarCategorias();
       setModalNueva(false)
       await cargarCategorias()
-    } catch (err) {
-      console.error("No fue posible crear la categoría")
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        toast.error(error.response.data);
+      } else {
+        console.error("No fue posible crear la categoría")
+      }
     }
   }
 
@@ -83,8 +87,12 @@ const PaginaCategorias: React.FC = () => {
       setModalEditar(false)
       setCategoriaSeleccionada(null)
       await cargarCategorias()
-    } catch (err) {
-      console.error("No fue posible modificar la categoría")
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        toast.error(error.response.data);
+      } else {
+        console.error("No fue posible modificar la categoría")
+      }
     }
   }
 
@@ -95,7 +103,7 @@ const PaginaCategorias: React.FC = () => {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al cambiar estado")
     }
-  } 
+  }
 
   // Filtrar categorías
   const categoriasFiltradas = categorias.filter((categoria) => {
@@ -116,7 +124,7 @@ const PaginaCategorias: React.FC = () => {
     return (
       <React.Fragment key={categoria.idCategoria}>
         <tr className="border-b hover:bg-gray-50">
-          <td className="px-4 py-3">{categoria.idCategoria}</td>          
+          <td className="px-4 py-3">{categoria.idCategoria}</td>
 
           <td className="px-4 py-3" style={{ paddingLeft: `${16 + categoria.nivel * 25 - (categoria.esHijoDeRaiz ? 5 : 0)}px` }}>
             {categoria.idCategoriaPadre != null && (
