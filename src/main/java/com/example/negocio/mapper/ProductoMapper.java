@@ -5,19 +5,15 @@ import com.example.negocio.entity.Producto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @Mapper(componentModel = "spring")
 public interface ProductoMapper {
-
     Producto toEntity(ProductoDTO dto);
+    ProductoVentaDTO toVentaDto(Producto entity);
+    ProductoCompraDTO toCompraDto(Producto entity);
 
-    void updateFromDto(
-            ProductoDTO dto,
-            @MappingTarget Producto entity
-    );
+    void updateFromDto(ProductoDTO dto,@MappingTarget Producto entity);
 
     @Mapping(source = "marca.nombre", target = "marca")
     @Mapping(source = "categoria.nombre", target = "categoria")
@@ -30,10 +26,6 @@ public interface ProductoMapper {
     @Mapping(source = "descuento.idDescuento", target = "idDescuento")
     @Mapping(source = "oferta.idOferta", target = "idOferta")
     ProductoAbmDTO toAbmDto(Producto entity);
-
-    ProductoVentaDTO toVentaDto(Producto entity);
-
-    ProductoCompraDTO toCompraDto(Producto entity);
 
     default BigDecimal mapPrecioAbm(Producto producto) {
         if (producto.getDescuento() == null) {
@@ -49,7 +41,6 @@ public interface ProductoMapper {
 
         return precioFinal;
     }
-
 }
 
 

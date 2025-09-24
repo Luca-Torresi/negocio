@@ -7,7 +7,6 @@ import com.example.negocio.entity.Proveedor;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
-
 import java.util.List;
 
 public class ProductoSpecification {

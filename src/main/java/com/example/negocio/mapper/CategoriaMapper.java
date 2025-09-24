@@ -7,15 +7,10 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", uses = {ProductoMapper.class})
 public interface CategoriaMapper {
-
     Categoria toEntity(CategoriaDTO dto);
-
-    void updateFromDto(
-            CategoriaDTO dto,
-            @MappingTarget Categoria entity
-    );
 
     @Mapping(source = "categoriaPadre.idCategoria", target = "idCategoriaPadre")
     CategoriaAbmDTO toAbmDTO(Categoria categoria);
 
+    void updateFromDto(CategoriaDTO dto,@MappingTarget Categoria entity);
 }

@@ -8,13 +8,9 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", uses = {DetallePromocionMapper.class})
 public interface PromocionMapper {
-
     Promocion toEntity(PromocionDTO dto);
-
-    void updateFromDto(PromocionDTO dto, @MappingTarget Promocion entity);
-
     PromocionAbmDTO toAbmDto(Promocion entity);
-
     PromocionListaDTO toListaDto(Promocion entity);
 
+    void updateFromDto(PromocionDTO dto, @MappingTarget Promocion entity);
 }

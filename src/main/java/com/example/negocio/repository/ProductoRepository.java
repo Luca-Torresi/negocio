@@ -23,5 +23,4 @@ public interface ProductoRepository extends JpaRepository<Producto, Long>, JpaSp
     @Query(value = "SELECT nombre AS producto, stock, precio, costo FROM producto",
             nativeQuery = true)
     List<ReporteProductosDTO> findDatosParaReportesMensuales();
-
 }

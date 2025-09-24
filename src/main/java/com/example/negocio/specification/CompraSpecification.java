@@ -47,6 +47,5 @@ public class CompraSpecification {
             return cb.equal(usuarioJoin.get("idUsuario"), idUsuario);
         };
     }
-
 }
 

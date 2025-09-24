@@ -15,7 +15,6 @@ import com.example.negocio.repository.ProductoRepository;
 import com.example.negocio.repository.PromocionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

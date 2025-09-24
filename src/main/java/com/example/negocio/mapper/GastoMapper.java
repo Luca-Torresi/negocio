@@ -9,7 +9,6 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface GastoMapper {
-
     Gasto toEntity(GastoDTO dto);
 
     void updateFromDto(GastoDTO dto, @MappingTarget Gasto entity);

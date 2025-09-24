@@ -4,7 +4,6 @@ import com.example.negocio.dto.compra.CompraDTO;
 import com.example.negocio.dto.compra.CompraFullDTO;
 import com.example.negocio.dto.compra.DetalleCompraDTO;
 import com.example.negocio.entity.*;
-import com.example.negocio.exception.CompraNoEncontradaException;
 import com.example.negocio.exception.ProductoNoEncontradoException;
 import com.example.negocio.exception.ProveedorNoEncontradoException;
 import com.example.negocio.exception.UsuarioNoEncontradoException;
@@ -19,11 +18,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 

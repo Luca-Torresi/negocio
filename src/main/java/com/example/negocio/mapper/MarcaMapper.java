@@ -8,9 +8,7 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface MarcaMapper {
-
     Marca toEntity(MarcaDTO marcaDTO);
-
     MarcaListaDTO toListaDto(Marca marca);
 
     void updateFromDto(MarcaDTO dto, @MappingTarget Marca entity);

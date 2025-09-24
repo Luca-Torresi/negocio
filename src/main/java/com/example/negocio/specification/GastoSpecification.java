@@ -1,6 +1,5 @@
 package com.example.negocio.specification;
 
-import com.example.negocio.entity.Compra;
 import com.example.negocio.entity.Gasto;
 import com.example.negocio.entity.Usuario;
 import com.example.negocio.enums.TipoGasto;

@@ -1,14 +1,10 @@
 package com.example.negocio.specification;
 
-import com.example.negocio.entity.Compra;
-import com.example.negocio.entity.Gasto;
 import com.example.negocio.entity.Usuario;
 import com.example.negocio.entity.Venta;
 import com.example.negocio.enums.MetodoDePago;
-import com.example.negocio.enums.TipoGasto;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 

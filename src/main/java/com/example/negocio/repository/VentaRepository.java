@@ -1,4 +1,5 @@
 package com.example.negocio.repository;
+
 import com.example.negocio.dto.estadistica.GraficoDeConteoDTO;
 import com.example.negocio.dto.estadistica.ResultadoMensualDTO;
 import com.example.negocio.dto.estadistica.VentasPorHoraDTO;
@@ -26,31 +27,27 @@ public interface VentaRepository extends JpaRepository<Venta, Long>, JpaSpecific
             @Param("fechaFin") LocalDateTime fechaFin
     );
 
-    @Query(
-            value = "SELECT " +
-                    "    HOUR(fechaHora) AS hora, " +
-                    "    COUNT(*) AS cantidad " +
-                    "FROM venta " +
-                    "WHERE " +
-                    "    fechaHora >= :fechaInicio " +
-                    "    AND fechaHora < :fechaFin " +
-                    "GROUP BY " +
-                    "    hora " +
-                    "ORDER BY " +
-                    "    hora ASC",
-            nativeQuery = true
-    )
+    @Query(value = "SELECT " +
+            "    HOUR(fechaHora) AS hora, " +
+            "    COUNT(*) AS cantidad " +
+            "FROM venta " +
+            "WHERE " +
+            "    fechaHora >= :fechaInicio " +
+            "    AND fechaHora < :fechaFin " +
+            "GROUP BY " +
+            "    hora " +
+            "ORDER BY " +
+            "    hora ASC",
+            nativeQuery = true)
     List<VentasPorHoraDTO> findVentasPorHora(
             @Param("fechaInicio") LocalDateTime fechaInicio,
             @Param("fechaFin") LocalDateTime fechaFin
     );
 
-    @Query(
-            value = "SELECT metodoDePago AS etiqueta, COUNT(*) AS valor FROM venta\n" +
-                    "WHERE fechaHora >= :fechaInicio AND fechaHora < :fechaFin\n" +
-                    "GROUP BY metodoDePago",
-            nativeQuery = true
-    )
+    @Query(value = "SELECT metodoDePago AS etiqueta, COUNT(*) AS valor FROM venta\n" +
+            "WHERE fechaHora >= :fechaInicio AND fechaHora < :fechaFin\n" +
+            "GROUP BY metodoDePago",
+            nativeQuery = true)
     List<GraficoDeConteoDTO> findVentasPorMetodoDePago(
             @Param("fechaInicio") LocalDateTime fechaInicio,
             @Param("fechaFin") LocalDateTime fechaFin
@@ -85,5 +82,4 @@ public interface VentaRepository extends JpaRepository<Venta, Long>, JpaSpecific
             @Param("fechaInicio") LocalDateTime fechaInicio,
             @Param("fechaFin") LocalDateTime fechaFin
     );
-
 }

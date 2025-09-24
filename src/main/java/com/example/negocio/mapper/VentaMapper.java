@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 
 @Mapper(componentModel = "spring", uses = {DetalleVentaMapper.class})
 public interface VentaMapper {
-
     Venta toEntity(VentaDTO dto);
 
     @Mapping(source = "usuario.nombre", target = "usuario")

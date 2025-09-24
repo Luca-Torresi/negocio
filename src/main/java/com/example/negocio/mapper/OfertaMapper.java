@@ -8,9 +8,7 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface OfertaMapper {
-
     Oferta toEntity(NuevaOfertaDTO dto);
-
     OfertaDTO toDto(Oferta oferta);
 
     void updateFromDto(NuevaOfertaDTO dto, @MappingTarget Oferta entity);

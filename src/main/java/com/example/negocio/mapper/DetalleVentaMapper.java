@@ -8,7 +8,6 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface DetalleVentaMapper {
-
     DetalleVenta toEntity(DetalleVentaDTO dto);
 
     @Mapping(source = "detalleVenta", target = "nombre")
@@ -21,6 +20,6 @@ public interface DetalleVentaMapper {
         if (detalleVenta.getPromocion() != null) {
             return detalleVenta.getPromocion().getNombre();
         }
-        return "Item no identificado"; // O null, o lo que prefieras como fallback
+        return "Item no identificado";
     }
 }
