@@ -6,8 +6,13 @@ import com.example.negocio.entity.Compra;
 import com.example.negocio.service.CompraService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 
 @RestController
@@ -34,4 +39,17 @@ public class CompraController {
         return compraService.obtenerCompras(page, size, fechaInicio, fechaFin, idProveedor, idUsuario);
     }
 
+    @GetMapping("/comprobante/{idCompra}")
+    public ResponseEntity<InputStreamResource> descargarComprobante(@PathVariable Long idCompra) throws IOException {
+        ByteArrayInputStream pdf = compraService.generarComprobantePdf(idCompra);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "inline; filename=ComprobanteCompra#" + idCompra + ".pdf");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(pdf));
+    }
 }

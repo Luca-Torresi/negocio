@@ -135,11 +135,11 @@ public class EstadisticaService {
         List<List<Object>> resultadoParaGrafico = new ArrayList<>();
         resultadoParaGrafico.add(List.of("Categoría", "Total Vendido"));
 
-        if (datosCompletos.size() > 4) {
-            List<GraficoGeneralDTO> top3 = datosCompletos.subList(0, 4);
+        if (datosCompletos.size() > 5) {
+            List<GraficoGeneralDTO> top3 = datosCompletos.subList(0, 5);
             top3.forEach(dato -> resultadoParaGrafico.add(List.of(dato.getEtiqueta(), dato.getValor())));
 
-            BigDecimal sumaOtras = datosCompletos.subList(4, datosCompletos.size()).stream()
+            BigDecimal sumaOtras = datosCompletos.subList(5, datosCompletos.size()).stream()
                     .map(GraficoGeneralDTO::getValor)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 

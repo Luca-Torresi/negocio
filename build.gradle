@@ -28,8 +28,8 @@ dependencies {
 	//Database
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-	runtimeOnly 'com.mysql:mysql-connector-j'
-	//runtimeOnly 'ch.vorburger.mariaDB4j:mariaDB4j:2.5.3'
+	runtimeOnly 'ch.vorburger.mariaDB4j:mariaDB4j:2.5.3'
+	//runtimeOnly 'com.mysql:mysql-connector-j'
 
 	//Lombok
 	compileOnly 'org.projectlombok:lombok'
@@ -42,6 +42,9 @@ dependencies {
 
 	// Excel
 	implementation 'org.apache.poi:poi-ooxml:5.2.5'
+
+	// PDF
+	implementation 'org.apache.pdfbox:pdfbox:3.0.2'
 
 	//OpenApi -> http://localhost:8080/swagger-ui/index.html#/
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
