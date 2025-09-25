@@ -62,8 +62,8 @@ const Sidebar: React.FC = () => {
           className="h-[65px] w-auto flex-shrink-0"
         />
         <div className="ml-3">
-          <p className="text-xl font-dynapuff font-medium text-white leading-tight">Pañalera</p>
-          <p className="text-base font-dynapuff font-normal text-gray-400 leading-tight">Pepa</p>
+          <p className="text-xl font-titulo font-medium text-white leading-tight">Pañalera</p>
+          <p className="text-base font-titulo font-normal text-gray-400 leading-tight">Pepa</p>
         </div>
       </div>
 

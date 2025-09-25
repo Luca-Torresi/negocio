@@ -10,7 +10,7 @@ export type CeldaGrafico =
   | string 
   | number 
   | Date 
-  | { type?: string; label?: string } // Para encabezados
+  | { type?: string; label?: string; role?: string } // Para encabezados
   | { v?: number | Date; f?: string }; // Para valores formateados (moneda, etc.)
 
 // Una "Fila" es un array de celdas

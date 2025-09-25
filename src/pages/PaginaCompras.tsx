@@ -2,11 +2,11 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { ShoppingCart, Plus, Eye, ChevronLeft, ChevronRight, BrushCleaning } from "lucide-react"
+import { ShoppingCart, Plus, Eye, ChevronLeft, ChevronRight, BrushCleaning, Printer } from "lucide-react"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import type { PaginaDeCompras, Compra } from "../types/dto/Compra"
-import { obtenerCompras } from "../api/compraApi"
+import { descargarComprobanteCompra, obtenerCompras } from "../api/compraApi"
 import { obtenerListaProveedores } from "../api/proveedorApi"
 import { formatearFecha, formatearHora } from "../utils/fechaUtils"
 import { ModalGestionarCompra } from "../components/compras/ModalGestionarCompra"
@@ -83,6 +83,14 @@ const PaginaCompras: React.FC = () => {
       setError(error instanceof Error ? error.message : "Error al cargar compras")
     } finally {
       setCargando(false)
+    }
+  }
+
+  const handleDescargar = async (idCompra: number) => {
+    try {
+      await descargarComprobanteCompra(idCompra)
+    } catch (error) {
+      alert("Error al generar el comprobante.")
     }
   }
 
@@ -287,6 +295,14 @@ const PaginaCompras: React.FC = () => {
                             title="Ver detalles"
                           >
                             <Eye size={18} />
+                          </button>
+
+                          <button
+                            onClick={() => handleDescargar(compra.idCompra)}
+                            className="text-black disabled:opacity-50"
+                            title="Descargar Comprobante"
+                          >
+                            <Printer size={18} />
                           </button>
                         </div>
                       </td>

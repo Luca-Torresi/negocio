@@ -33,6 +33,55 @@ const PaginaEstadisticas: React.FC = () => {
   const [datosVentasPorCategoria, setDatosVentasPorCategoria] = useState<DatosParaGrafico | null>(null)
   const [modalExportarAbierto, setModalExportarAbierto] = useState(false)
 
+  const datosPivoteadosParaGrafico = useMemo(() => {
+    // Usamos el nombre 'datosOriginales' para mayor claridad.
+    // Es la misma variable que tú llamas 'datosMetodosDePago'.
+    const datosOriginales = datosMetodosDePago;
+
+    if (!datosOriginales || datosOriginales.length <= 1) {
+      return [["", ""]];
+    }
+
+    const encabezadosOriginales = datosOriginales[0];
+    const filasDeDatos = datosOriginales.slice(1);
+
+    // Calculamos el total para poder sacar los porcentajes
+    const totalGeneral = filasDeDatos.reduce((sum, fila) => sum + (fila[1] as number), 0);
+
+    // 1. Creamos la nueva fila de encabezados con las columnas de anotación
+    const nuevoEncabezado: FilaGrafico = [encabezadosOriginales[0]];
+    filasDeDatos.forEach(fila => {
+      // Para cada categoría (ej: "Efectivo"), añadimos una columna para el valor y otra para la anotación
+      nuevoEncabezado.push(fila[0], { role: 'annotation' });
+    });
+
+    // 2. Creamos la nueva fila de datos con los valores y los porcentajes
+    const nuevaFilaDeDatos: FilaGrafico = [encabezadosOriginales[1]];
+    filasDeDatos.forEach(fila => {
+      const valor = fila[1] as number;
+      const porcentaje = totalGeneral > 0 ? `${Math.round((valor / totalGeneral) * 100)}%` : '0%';
+      // Añadimos el valor numérico y, justo después, el string del porcentaje
+      nuevaFilaDeDatos.push(valor, porcentaje);
+    });
+
+    return [nuevoEncabezado, nuevaFilaDeDatos];
+  }, [datosMetodosDePago]);
+
+  // const datosPivoteadosParaGrafico = useMemo(() => {
+  //   if (!datosMetodosDePago || datosMetodosDePago.length <= 1) {
+  //     return [["", ""]]; // Devuelve datos vacíos si no hay nada
+  //   }
+
+  //   // La misma lógica de pivoteo que ya teníamos
+  //   const etiquetas = datosMetodosDePago.slice(1).map(fila => fila[0]);
+  //   const valores = datosMetodosDePago.slice(1).map(fila => fila[1]);
+
+  //   const nuevoEncabezado = [datosMetodosDePago[0][0], ...etiquetas];
+  //   const nuevaFilaDeDatos = [datosMetodosDePago[0][1], ...valores];
+
+  //   return [nuevoEncabezado, nuevaFilaDeDatos];
+  // }, [datosMetodosDePago]);
+
   // Estados de filtros (sin cambios)
   const [fechaInicio, setFechaInicio] = useState<Date | null>(() => {
     const haceUnAno = new Date()
@@ -174,8 +223,8 @@ const PaginaEstadisticas: React.FC = () => {
             ventasHoraData.slice(1).map(fila => [fila[0] as number, fila[1] as number])
           );
 
-          const horaInicio = 9;
-          const horaFin = 21;
+          const horaInicio = 8;
+          const horaFin = 22;
           const numeroDeHoras = horaFin - horaInicio + 1;
 
           const filasCompletas = Array.from({ length: numeroDeHoras }, (_, i) => {
@@ -188,8 +237,8 @@ const PaginaEstadisticas: React.FC = () => {
         } else {
           // Si no hay datos, creamos un gráfico vacío en el rango deseado
           const encabezados = ["Hora", "Cantidad"];
-          const horaInicio = 9;
-          const horaFin = 21;
+          const horaInicio = 8;
+          const horaFin = 22;
           const numeroDeHoras = horaFin - horaInicio + 1;
           const filasVacias = Array.from({ length: numeroDeHoras }, (_, i) => [`${horaInicio + i}hs`, 0]);
           setDatosVentasPorHora([encabezados, ...filasVacias]);
@@ -239,17 +288,17 @@ const PaginaEstadisticas: React.FC = () => {
     chartArea: { left: 65, top: 30, right: 10, width: "80%", height: "70%" },
   }
 
-  const opcionesProductosRentables = {    
+  const opcionesProductosRentables = {
     hAxis: {
       format: '$ #,##0'
     },
     legend: {
       position: 'none'
     },
-    colors: ["#6793DA"],
+    colors: ["#6f92ca"],
     backgroundColor: "transparent",
     chartArea: { left: 120, top: 15, right: 35, width: "100%", height: "80%" },
-  }  
+  }
 
   const opcionesVolumenVentas = useMemo(() => {
     let maxValor = 0;
@@ -284,13 +333,13 @@ const PaginaEstadisticas: React.FC = () => {
         },
         format: '#'
       },
-      colors: ["#978567"],
+      colors: ["#8B7E74"],
       backgroundColor: "transparent",
       chartArea: { left: 60, top: 30, right: 40, width: "80%", height: "70%" },
     };
   }, [datosVolumenVentas, productoSeleccionado, productosVenta]);
 
-  const opcionesVentasPorHora = {    
+  const opcionesVentasPorHora = {
     hAxis: {
       showTextEvery: 1,
       slantedText: true,
@@ -310,36 +359,54 @@ const PaginaEstadisticas: React.FC = () => {
     chartArea: { left: 60, top: 60, bottom: 35, right: 30, width: "80%", height: "70%" },
   }
 
-  const opcionesMetodosDePago = {    
+  const opcionesVentasPorCategoria = {
     is3D: true,
     backgroundColor: "transparent",
     legend: {
       position: "labeled",
-      alignment: "start",
       textStyle: {
         color: '#4B5563',
         fontSize: 12,
         bold: true,
       }
     },
-    colors: ["#7B987A", "#38465E", "#984a39", "#E5A156", "#ECCAB1"],
+    colors: ["#6f876f", "#4b576c", "#9c5a4b", "#e2ab70", "#ECCAB1", "#92b2e6"],
     chartArea: { left: 30, top: 40, bottom: 30, right: 30, width: "80%", height: "70%" },
   }
 
-  const opcionesVentasPorCategoria = {    
-    pieHole: 0.5,    
+  const opcionesMetodosDePago = {
+    isStacked: 'percent',
     backgroundColor: "transparent",
+    bar: {
+      groupWidth: '27%'
+    },
+    annotations: {
+      textStyle: {
+        fontSize: 12,
+        bold: false
+      },
+    },
     legend: {
-      position: "right",
-      alignment: "start",
+      position: "bottom",
       textStyle: {
         color: '#4B5563',
-        fontSize: 17,        
+        fontSize: 12,
+        bold: true
       }
     },
-    colors: ["#6f876f", "#4b576c", "#9c5a4b", "#e2ab70", "#ECCAB1"],
-    chartArea: { left: 15, top: 50, bottom: 40, right: 15, width: "80%", height: "70%" },
+    hAxis: {
+      minValue: 0,
+      ticks: [0, 0.2, 0.4, 0.6, 0.8, 1],
+      format: 'percent',
+      gridlines: {
+        count: 6
+      }
+    },
+    colors: ["#712A3D", "#8A2D3B", "#BE5B50", "#FBDB93"],
+    chartArea: { left: 50, top: 30, bottom: 90, right: 20, width: "80%", height: "70%" },
   }
+
+  console.log("Datos para el gráfico de barras:", datosMetodosDePago);
 
   return (
     <div className="p-6 min-h-screen">
@@ -428,7 +495,7 @@ const PaginaEstadisticas: React.FC = () => {
 
       {/* Sección de Gráficos */}
       <div className="grid grid-cols-2 gap-6">
-        
+
         {/* Gráfico 1: Ingresos vs Egresos */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Ingresos vs. Egresos</h3>
@@ -450,10 +517,8 @@ const PaginaEstadisticas: React.FC = () => {
           )}
         </div>
 
-        {/* Gráfico 2: Top 7 Productos Rentables */}
+        {/* Top Productos Rentables */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-
-
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold text-gray-800">Productos por Rentabilidad</h3>
 
@@ -481,7 +546,6 @@ const PaginaEstadisticas: React.FC = () => {
             </div>
           </div>
 
-
           {cargando || !datosProductosRentables ? (
             <div className="h-64 flex items-center justify-center text-gray-500">
               <div className="flex items-center">
@@ -500,10 +564,10 @@ const PaginaEstadisticas: React.FC = () => {
           )}
         </div>
 
-        {/* Gráfico 5: Ventas por Método de Pago */}
+        {/* Ventas por Categoría */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Ventas por Método de Pago</h3>
-          {cargando || !datosMetodosDePago ? (
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Categorías con Mayor Facturación</h3>
+          {cargando || !datosVentasPorCategoria ? (
             <div className="h-64 flex items-center justify-center text-gray-500">
               <div className="flex items-center">
                 <RefreshCw className="animate-spin mr-2" size={20} />
@@ -515,34 +579,13 @@ const PaginaEstadisticas: React.FC = () => {
               chartType="PieChart"
               width="100%"
               height="300px"
-              data={datosMetodosDePago}
-              options={opcionesMetodosDePago}
+              data={datosVentasPorCategoria}
+              options={opcionesVentasPorCategoria}
             />
           )}
         </div>
 
-        {/* Gráfico 4: Ventas por Hora */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Cantidad de Ventas por Hora</h3>
-          {cargando || !datosVentasPorHora ? (
-            <div className="h-64 flex items-center justify-center text-gray-500">
-              <div className="flex items-center">
-                <RefreshCw className="animate-spin mr-2" size={20} />
-                Cargando datos...
-              </div>
-            </div>
-          ) : (
-            <Chart
-              chartType="ColumnChart"
-              width="100%"
-              height="300px"
-              data={datosVentasPorHora}
-              options={opcionesVentasPorHora}
-            />
-          )}
-        </div>
-
-        {/* Gráfico 3: Volumen de Ventas Mensual */}
+        {/* Volumen de Ventas Mensual */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold text-gray-800">Volumen de Ventas Mensual</h3>
@@ -578,10 +621,10 @@ const PaginaEstadisticas: React.FC = () => {
           )}
         </div>
 
-        {/* Gráfico 6: Ventas por Categoría */}
+        {/* Ventas por Hora */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Categorías con Mayor Facturación</h3>
-          {cargando || !datosVentasPorCategoria ? (
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Cantidad de Ventas por Hora</h3>
+          {cargando || !datosVentasPorHora ? (
             <div className="h-64 flex items-center justify-center text-gray-500">
               <div className="flex items-center">
                 <RefreshCw className="animate-spin mr-2" size={20} />
@@ -590,11 +633,32 @@ const PaginaEstadisticas: React.FC = () => {
             </div>
           ) : (
             <Chart
-              chartType="PieChart"
+              chartType="ColumnChart"
               width="100%"
               height="300px"
-              data={datosVentasPorCategoria}
-              options={opcionesVentasPorCategoria}
+              data={datosVentasPorHora}
+              options={opcionesVentasPorHora}
+            />
+          )}
+        </div>
+
+        {/* Ventas por Método de Pago */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Ventas por Método de Pago</h3>
+          {cargando || !datosMetodosDePago ? (
+            <div className="h-64 flex items-center justify-center text-gray-500">
+              <div className="flex items-center">
+                <RefreshCw className="animate-spin mr-2" size={20} />
+                Cargando datos...
+              </div>
+            </div>
+          ) : (
+            <Chart
+              chartType="BarChart"
+              width="100%"
+              height="300px"
+              data={datosPivoteadosParaGrafico}
+              options={opcionesMetodosDePago}
             />
           )}
         </div>
