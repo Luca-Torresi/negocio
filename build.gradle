@@ -28,8 +28,7 @@ dependencies {
 	//Database
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-	runtimeOnly 'ch.vorburger.mariaDB4j:mariaDB4j:2.5.3'
-	//runtimeOnly 'com.mysql:mysql-connector-j'
+	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	//Lombok
 	compileOnly 'org.projectlombok:lombok'
