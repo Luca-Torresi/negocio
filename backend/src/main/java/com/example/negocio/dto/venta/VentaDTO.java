@@ -16,4 +16,5 @@ public class VentaDTO {
     private MetodoDePago metodoDePago;
     @Valid @NotEmpty
     private List<DetalleVentaDTO> detalles;
+    private Integer descuento;
 }

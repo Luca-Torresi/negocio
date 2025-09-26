@@ -61,6 +61,11 @@ public class VentaService {
         BigDecimal total = detalles.stream()
                 .map(detalle -> detalle.getPrecioUnitario().multiply(new BigDecimal(detalle.getCantidad())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if(dto.getDescuento() != null && dto.getDescuento() > 0){
+            BigDecimal descuento = BigDecimal.valueOf(dto.getDescuento());
+            total = total.subtract(descuento);
+        }
         venta.setTotal(total);
 
         Venta ventaGuardada = ventaRepository.save(venta);

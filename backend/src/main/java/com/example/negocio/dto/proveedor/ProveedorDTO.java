@@ -1,6 +1,5 @@
 package com.example.negocio.dto.proveedor;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +11,5 @@ public class ProveedorDTO {
     @NotNull
     private String nombre;
     private String telefono;
-    @Email
     private String email;
 }

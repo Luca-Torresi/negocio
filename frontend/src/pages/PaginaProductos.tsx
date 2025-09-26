@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Package, Plus, Eye, Pencil, Percent, Gift, ChevronLeft, ChevronRight, AlertTriangle, BrushCleaning, Settings, Check, BadgeCheck } from "lucide-react"
+import { Package, Plus, Eye, Pencil, Percent, Gift, ChevronLeft, ChevronRight, AlertTriangle, BrushCleaning, Settings, BadgeCheck } from "lucide-react"
 import type { PaginaDeProductos, ProductoAbm, MarcaLista, ProveedorLista } from "../types/dto/Producto"
 import { obtenerProductos, cambiarEstadoProducto } from "../api/productoApi"
 import { useCategoriaStore } from "../store/categoriaStore"

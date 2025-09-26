@@ -116,9 +116,7 @@ public class ProductoService {
         LocalDateTime inicioMesActual = primerDiaMesActual.atStartOfDay();
         LocalDateTime inicioMesPasado = primerDiaMesPasado.atStartOfDay();
 
-        System.out.println("ANTES");
         List<MesAnteriorDTO> cantVendida = detalleVentaRepository.findCantidadVendidaMesAnterior(inicioMesPasado, inicioMesActual);
-        System.out.println("DESPUÉS");
         Map<Long, Long> mapaDeVentas = cantVendida.stream()
                 .collect(Collectors.toMap(MesAnteriorDTO::getIdProducto, MesAnteriorDTO::getTotal));
 
