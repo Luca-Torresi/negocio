@@ -270,7 +270,6 @@ const PaginaCategorias: React.FC = () => {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">ID</th>
-              {/* <th className="px-4 py-3 text-left text-sm font-medium text-gray-700"></th> */}
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Nombre</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Descripción</th>
               <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Cant. Productos</th>

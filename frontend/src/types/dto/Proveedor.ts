@@ -10,6 +10,6 @@ export interface Proveedor {
 // Para el cuerpo (body) de POST /nuevo y PUT /modificar
 export interface ProveedorDTO {
   nombre: string
-  telefono: string
-  email: string
+  telefono: string | null
+  email: string | null
 }

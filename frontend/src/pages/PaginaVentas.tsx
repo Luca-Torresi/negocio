@@ -13,17 +13,19 @@ import {
 import { buscarProductoPorCodigo } from "../api/productoApi"
 import { formatCurrency } from "../utils/numberFormatUtils"
 import { toast } from "react-toastify"
+import { InputMoneda } from "../components/InputMoneda"
 
 const PaginaVentas: React.FC = () => {
   const { idVenta } = useParams<{ idVenta: string }>()
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const inputBusquedaRef = useRef<HTMLInputElement>(null);  
+  const inputBusquedaRef = useRef<HTMLInputElement>(null);
 
   // Estados principales
   const [catalogo, setCatalogo] = useState<ItemCatalogo[]>([])
   const [metodosDePago, setMetodosDePago] = useState<string[]>([])
   const [carrito, setCarrito] = useState<ItemVenta[]>([])
   const [metodoPagoSeleccionado, setMetodoPagoSeleccionado] = useState<string>("")
+  const [descuento, setDescuento] = useState<number>(0)
 
   // Estados para el constructor de venta
   const [busquedaItem, setBusquedaItem] = useState<string>("")
@@ -93,7 +95,7 @@ const PaginaVentas: React.FC = () => {
     } catch (error) {
       console.log("Error al buscar el producto.");
     }
-  }, [añadirItemAlCarrito]);  
+  }, [añadirItemAlCarrito]);
 
   // useEffect que escucha el teclado
   useEffect(() => {
@@ -251,6 +253,7 @@ const PaginaVentas: React.FC = () => {
 
   // Calcular total general
   const totalGeneral = carrito.reduce((total, item) => total + item.cantidad * item.precioUnitarioAplicado, 0)
+  const totalConDescuento = Math.max(0, totalGeneral - descuento)
 
   // Finalizar venta
   const finalizarVenta = async (): Promise<void> => {
@@ -265,6 +268,7 @@ const PaginaVentas: React.FC = () => {
 
       const ventaDTO: VentaDTO = {
         metodoDePago: metodoPagoSeleccionado,
+        descuento: descuento,
         detalles: carrito.map((item) => ({
           ...(item.item.tipo === "PRODUCTO" ? { idProducto: item.item.id } : { idPromocion: item.item.id }),
           cantidad: item.cantidad,
@@ -277,6 +281,7 @@ const PaginaVentas: React.FC = () => {
 
       setCarrito([]);
       setMetodoPagoSeleccionado("");
+      setDescuento(0);
 
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -517,25 +522,52 @@ const PaginaVentas: React.FC = () => {
 
           {/* Total y método de pago */}
           <div className="border-t border-gray-200 pt-4">
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
-              <select
-                value={metodoPagoSeleccionado}
-                onChange={(e) => setMetodoPagoSeleccionado(e.target.value)}
-                className="w-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Seleccionar método de pago</option>
-                {metodosDePago.map((metodo) => (
-                  <option key={metodo} value={metodo}>
-                    {metodo}
-                  </option>
-                ))}
-              </select>
+            <div className="mb-4 flex gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
+                <select
+                  value={metodoPagoSeleccionado}
+                  onChange={(e) => setMetodoPagoSeleccionado(e.target.value)}
+                  className="w-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Seleccionar método de pago</option>
+                  {metodosDePago.map((metodo) => (
+                    <option key={metodo} value={metodo}>
+                      {metodo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Descuento</label>
+                <InputMoneda
+                  value={descuento}
+                  onValueChange={(nuevoValor) => {
+                    const valorValidado = Math.min(nuevoValor || 0, totalGeneral);
+                    setDescuento(valorValidado);
+                  }}
+                  className="w-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="$ 0"
+                />
+              </div>
             </div>
 
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-xl font-semibold">Total General:</span>
-              <span className="text-2xl font-bold text-gray-700">{formatCurrency(totalGeneral)}</span>
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-medium">Subtotal:</span>
+                <span className="text-lg font-semibold text-gray-700">{formatCurrency(totalGeneral)}</span>
+              </div>
+              {descuento > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-medium text-red-600">Descuento:</span>
+                  <span className="text-lg font-semibold text-red-600">-{formatCurrency(descuento)}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center border-t border-gray-200 pt-2">
+                <span className="text-xl font-semibold">Total Final:</span>
+                <span className="text-2xl font-bold text-gray-700">{formatCurrency(totalConDescuento)}</span>
+              </div>
             </div>
 
             <div className="flex justify-end">

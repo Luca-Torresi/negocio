@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Package, Plus, Eye, Pencil, Percent, Gift, ChevronLeft, ChevronRight, AlertTriangle, BrushCleaning, Settings } from "lucide-react"
+import { Package, Plus, Eye, Pencil, Percent, Gift, ChevronLeft, ChevronRight, AlertTriangle, BrushCleaning, Settings, Check, BadgeCheck } from "lucide-react"
 import type { PaginaDeProductos, ProductoAbm, MarcaLista, ProveedorLista } from "../types/dto/Producto"
 import { obtenerProductos, cambiarEstadoProducto } from "../api/productoApi"
 import { useCategoriaStore } from "../store/categoriaStore"
@@ -370,8 +370,10 @@ export const PaginaProductos: React.FC = () => {
                             : "bg-green-100 text-green-800"
                             }`}
                         >
-                          {producto.stock <= producto.stockMinimo && (
+                          {producto.stock <= producto.stockMinimo ? (
                             <AlertTriangle size={16} className="mr-1.5" />
+                          ) : (
+                            <BadgeCheck size={16} className="mr-1.5" />
                           )}
                           {producto.stock}
                         </span>

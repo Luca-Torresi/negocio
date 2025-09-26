@@ -21,8 +21,8 @@ export const ModalEditarProveedor: React.FC<ModalEditarProveedorProps> = ({
 }) => {
   const [formData, setFormData] = useState<ProveedorDTO>({
     nombre: "",
-    telefono: "",
-    email: "",
+    telefono: null,
+    email: null,
   })
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export const ModalEditarProveedor: React.FC<ModalEditarProveedorProps> = ({
         email: proveedor.email,
       })
     }
-  }, [proveedor])
+  }, [proveedor, isOpen])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -45,7 +45,7 @@ export const ModalEditarProveedor: React.FC<ModalEditarProveedorProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (proveedor && formData.nombre.trim() && formData.telefono.trim() && formData.email.trim()) {
+    if (proveedor && formData.nombre.trim()) {
       onConfirm(proveedor.idProveedor, formData)
     }
   }
@@ -82,10 +82,9 @@ export const ModalEditarProveedor: React.FC<ModalEditarProveedorProps> = ({
             <input
               type="text"
               name="telefono"
-              value={formData.telefono}
+              value={formData.telefono || ""}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             />
           </div>
 
@@ -94,10 +93,9 @@ export const ModalEditarProveedor: React.FC<ModalEditarProveedorProps> = ({
             <input
               type="email"
               name="email"
-              value={formData.email}
+              value={formData.email || ""}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             />
           </div>
 

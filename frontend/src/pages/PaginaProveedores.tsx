@@ -197,8 +197,18 @@ const PaginaProveedores: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {proveedor.nombre}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{proveedor.telefono}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{proveedor.email}</td>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${!proveedor.telefono
+                      ? 'text-gray-400 italic'
+                      : 'text-gray-900'
+                      }`}>
+                      {proveedor.telefono || "Sin Teléfono"}
+                    </td>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${!proveedor.email
+                      ? 'text-gray-400 italic'
+                      : 'text-gray-900'
+                      }`}>
+                      {proveedor.email || "Sin Email"}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex justify-center items-center gap-4">
 

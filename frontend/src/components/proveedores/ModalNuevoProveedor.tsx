@@ -12,12 +12,14 @@ interface ModalNuevoProveedorProps {
   onConfirm: (data: ProveedorDTO) => void
 }
 
+const estadoInicial = {
+  nombre: "",
+  telefono: null,
+  email: null,
+}
+
 export const ModalNuevoProveedor: React.FC<ModalNuevoProveedorProps> = ({ isOpen, onClose, onConfirm }) => {
-  const [formData, setFormData] = useState<ProveedorDTO>({
-    nombre: "",
-    telefono: "",
-    email: "",
-  })
+  const [formData, setFormData] = useState<ProveedorDTO>(estadoInicial)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -29,18 +31,17 @@ export const ModalNuevoProveedor: React.FC<ModalNuevoProveedorProps> = ({ isOpen
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (formData.nombre.trim() && formData.telefono.trim() && formData.email.trim()) {
+    if (formData.nombre.trim()) {
       onConfirm(formData)
-      setFormData({ nombre: "", telefono: "", email: "" })
     }
   }
 
   const handleClose = () => {
-    setFormData({ nombre: "", telefono: "", email: "" })
+    setFormData(estadoInicial)
     onClose()
   }
 
-  useEscapeKey(onClose, isOpen);
+  useEscapeKey(handleClose, isOpen);
 
   if (!isOpen) return null
 
@@ -72,22 +73,20 @@ export const ModalNuevoProveedor: React.FC<ModalNuevoProveedorProps> = ({ isOpen
             <input
               type="text"
               name="telefono"
-              value={formData.telefono}
+              value={formData.telefono || ""}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
-              type="email"
+              type="text"
               name="email"
-              value={formData.email}
+              value={formData.email || ""}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             />
           </div>
 
