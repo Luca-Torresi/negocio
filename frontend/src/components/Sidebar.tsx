@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import {
   Package,
@@ -17,7 +17,7 @@ import {
   Power,
 } from "lucide-react"
 import { useUsuarioStore } from "../store/usuarioStore"
-import { apagarServidor } from "../api/appApi"
+import ModalConfirmacionApagado from "./ModalConfirmacionApagado"
 
 interface ItemNavegacion {
   label: string
@@ -29,15 +29,15 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate()
   const usuario = useUsuarioStore((state) => state.usuario)
   const clearUsuario = useUsuarioStore((state) => state.clearUsuario)
+  const [mostrarModalApagado, setMostrarModalApagado] = React.useState(false)
 
   const handleLogout = () => {
     clearUsuario()
     navigate("/seleccionar-usuario")
   }
 
-  const handleShutdown = async () => {
-    navigate("/apagado")
-    apagarServidor()
+  const handleShutdown = () => {
+    setMostrarModalApagado(true)
   }
 
   const itemsNavegacion: ItemNavegacion[] = [
@@ -118,6 +118,8 @@ const Sidebar: React.FC = () => {
           <span>Salir del Programa</span>
         </button>
       </div>
+
+      <ModalConfirmacionApagado isOpen={mostrarModalApagado} onClose={() => setMostrarModalApagado(false)} />
     </div>
   )
 }

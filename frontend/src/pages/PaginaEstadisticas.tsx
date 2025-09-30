@@ -295,7 +295,7 @@ const PaginaEstadisticas: React.FC = () => {
     legend: {
       position: 'none'
     },
-    colors: ["#6f92ca"],
+    colors: ["#6d8898"],
     backgroundColor: "transparent",
     chartArea: { left: 120, top: 15, right: 35, width: "100%", height: "80%" },
   }
@@ -333,7 +333,7 @@ const PaginaEstadisticas: React.FC = () => {
         },
         format: '#'
       },
-      colors: ["#8B7E74"],
+      colors: ["#82B3D1"],
       backgroundColor: "transparent",
       chartArea: { left: 60, top: 30, right: 40, width: "80%", height: "70%" },
     };
@@ -354,7 +354,7 @@ const PaginaEstadisticas: React.FC = () => {
     legend: {
       position: 'none'
     },
-    colors: ["#8888C6"],
+    colors: ["#7799ad"],
     backgroundColor: "transparent",
     chartArea: { left: 60, top: 60, bottom: 35, right: 30, width: "80%", height: "70%" },
   }
@@ -370,7 +370,7 @@ const PaginaEstadisticas: React.FC = () => {
         bold: true,
       }
     },
-    colors: ["#6f876f", "#4b576c", "#9c5a4b", "#e2ab70", "#ECCAB1", "#92b2e6"],
+    colors: ["#6f876f", "#4b576c", "#9c5a4b", "#e2ab70", "#ECCAB1", "#837587"],
     chartArea: { left: 30, top: 40, bottom: 30, right: 30, width: "80%", height: "70%" },
   }
 
@@ -402,7 +402,7 @@ const PaginaEstadisticas: React.FC = () => {
         count: 6
       }
     },
-    colors: ["#712A3D", "#8A2D3B", "#BE5B50", "#FBDB93"],
+    colors: ["#72434F", "#94686D", "#FFB37B", "#FBDB93"],
     chartArea: { left: 50, top: 30, bottom: 90, right: 20, width: "80%", height: "70%" },
   }
 
