@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { X, Plus, Trash2 } from "lucide-react"
 import type { CompraDTO } from "../../types/dto/Compra"
 import type { ProductoLista } from "../../types/dto/Producto"
@@ -11,6 +11,7 @@ import { obtenerListaProductosCompra } from "../../api/productoApi"
 import { formatCurrency } from "../../utils/numberFormatUtils"
 import { useEscapeKey } from "../../hooks/useEscapeKey"
 import { toast } from "react-toastify"
+import { useAutocompleteNav } from "../../hooks/useAutocompleteNav"
 
 interface Props {
   isOpen: boolean
@@ -32,11 +33,48 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState<number>(0)
   const [descuento, setDescuento] = useState<number>(0)
   const [detalles, setDetalles] = useState<DetalleItem[]>([])
-
   const [busquedaProducto, setBusquedaProducto] = useState<string>("")
   const [productoSeleccionado, setProductoSeleccionado] = useState<ProductoLista | null>(null)
   const [mostrarSugerencias, setMostrarSugerencias] = useState<boolean>(false)
   const [cantidadInput, setCantidadInput] = useState<number>(1)
+
+  // --- INICIO DE LA LÓGICA DE AUTOCOMPLETADO ---
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const inputBusquedaRef = useRef<HTMLInputElement>(null);
+
+  // const productosFiltrados = productos.filter((producto) =>
+  //   producto.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()),
+  // )
+
+  // Memorizamos la lista filtrada para optimizar
+  const productosFiltrados = useMemo(() => {
+    if (!busquedaProducto) return [];
+    return productos.filter((p) => p.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()));
+  }, [productos, busquedaProducto]);
+
+  // Función para seleccionar un producto (del click o del teclado)
+  const seleccionarProducto = (producto: ProductoLista) => {
+    setProductoSeleccionado(producto);
+    setBusquedaProducto(producto.nombre);
+    setMostrarSugerencias(false);
+  };
+
+  // Llamamos a nuestro hook de navegación
+  const { activeIndex, setActiveIndex, onKeyDown } = useAutocompleteNav(
+    productosFiltrados.length,
+    (index) => seleccionarProducto(productosFiltrados[index])
+  );
+
+  // Efecto para el auto-scroll del dropdown
+  useEffect(() => {
+    if (activeIndex >= 0 && dropdownRef.current) {
+      const activeItem = dropdownRef.current.children[activeIndex] as HTMLElement;
+      if (activeItem) {
+        activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }, [activeIndex]);
+  // --- FIN DE LA LÓGICA DE AUTOCOMPLETADO ---
 
   useEffect(() => {
     if (isOpen) {
@@ -45,10 +83,6 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
       resetearFormulario()
     }
   }, [isOpen])
-
-  const productosFiltrados = productos.filter((producto) =>
-    producto.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()),
-  )
 
   const cargarProveedores = async () => {
     try {
@@ -105,6 +139,10 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
     setProductoSeleccionado(null)
     setMostrarSugerencias(false)
     setCantidadInput(1)
+
+    if (inputBusquedaRef.current) {
+      inputBusquedaRef.current.focus();
+    }
   }
 
   const eliminarProducto = (idProducto: number) => {
@@ -204,6 +242,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Producto</label>
                 <input
+                  ref={inputBusquedaRef}
                   type="text"
                   placeholder="Buscar producto..."
                   value={busquedaProducto}
@@ -213,21 +252,19 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
                     setProductoSeleccionado(null)
                   }}
                   onFocus={() => setMostrarSugerencias(true)}
+                  onKeyDown={onKeyDown}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
 
                 {/* Sugerencias */}
                 {mostrarSugerencias && busquedaProducto && productosFiltrados.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {productosFiltrados.slice(0, 10).map((producto) => (
+                  <div ref={dropdownRef} className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {productosFiltrados.slice(0, 10).map((producto, index) => ( // <-- Necesitamos el 'index'
                       <div
                         key={producto.idProducto}
-                        onClick={() => {
-                          setProductoSeleccionado(producto)
-                          setBusquedaProducto(producto.nombre)
-                          setMostrarSugerencias(false)
-                        }}
-                        className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        onClick={() => seleccionarProducto(producto)}
+                        onMouseEnter={() => setActiveIndex(index)}
+                        className={`p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0 ${index === activeIndex ? "bg-blue-100" : "hover:bg-gray-100"}`}
                       >
                         <div className="flex justify-between items-center">
                           <span className="font-medium">{producto.nombre}</span>

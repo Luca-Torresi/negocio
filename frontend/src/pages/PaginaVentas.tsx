@@ -355,9 +355,6 @@ const PaginaVentas: React.FC = () => {
 
                   case "Enter":
                     e.preventDefault();
-                    // --- 3. LÓGICA CORREGIDA ---
-                    // Si hay un item resaltado, lo seleccionamos.
-                    // Si no, seleccionamos el PRIMERO de la lista.
                     const itemASelleccionar = activeIndex >= 0
                       ? itemsFiltrados[activeIndex]
                       : itemsFiltrados[0];
