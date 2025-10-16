@@ -24,6 +24,10 @@ export default {
           dark: '#AB4949', 
           darker: '#8F3D3D',
         },
+        'yellow': {
+          DEFAULT: '#FFE277',
+          darker: '#C5A944',
+        },
         'toggleOn': '#5ed387',        
         'toggleOff': '#ff6666'        
       },

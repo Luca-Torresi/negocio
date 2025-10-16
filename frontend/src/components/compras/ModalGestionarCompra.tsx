@@ -40,11 +40,7 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
 
   // --- INICIO DE LA LÓGICA DE AUTOCOMPLETADO ---
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const inputBusquedaRef = useRef<HTMLInputElement>(null);
-
-  // const productosFiltrados = productos.filter((producto) =>
-  //   producto.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()),
-  // )
+  const inputBusquedaRef = useRef<HTMLInputElement>(null);  
 
   // Memorizamos la lista filtrada para optimizar
   const productosFiltrados = useMemo(() => {
@@ -118,12 +114,11 @@ export const ModalGestionarCompra: React.FC<Props> = ({ isOpen, onClose, onSucce
     // Verificar si el producto ya está en la lista
     const existeProducto = detalles.find((d) => d.idProducto === productoSeleccionado.idProducto)
     if (existeProducto) {
-      // Actualizar cantidad si ya existe
-      setDetalles((prev) =>
-        prev.map((d) =>
-          d.idProducto === productoSeleccionado.idProducto ? { ...d, cantidad: d.cantidad + cantidadInput } : d,
-        ),
-      )
+      
+      //Infoma al usuario que el producto ya fue añadido a la compra
+      toast.warning(`El producto ${productoSeleccionado.nombre} ya se encuentra cargado en la compra.`)
+      return 
+
     } else {
       // Añadir nuevo producto
       const nuevoDetalle: DetalleItem = {

@@ -34,3 +34,11 @@
   @apply bg-tertiary-darker !important;
 }
 
+.Toastify__toast--warning {
+  @apply bg-yellow text-yellow-900 !important;
+}
+
+.Toastify__progress-bar--warning {
+  @apply bg-yellow-darker !important;
+}
+

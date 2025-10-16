@@ -162,7 +162,7 @@ public class EstadisticaService {
 
         List<KpiDTO> kpis = new ArrayList<>();
         kpis.add(new KpiDTO("Recaudado este Mes", totalRecaudado));
-        kpis.add(new KpiDTO("Gastos fijos del Mes", totalGastos));
+        kpis.add(new KpiDTO("Gastos Fijos del Mes", totalGastos));
         kpis.add(new KpiDTO("Compras del Mes", totalCompras));
         kpis.add(new KpiDTO("Ventas de este Mes", cantidadVentas));
         kpis.add(new KpiDTO("Ticket Promedio", ticketPromedio));

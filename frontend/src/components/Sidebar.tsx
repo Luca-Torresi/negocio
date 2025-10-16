@@ -88,7 +88,7 @@ const Sidebar: React.FC = () => {
               <NavLink
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center px-6 py-3 text-sm font-medium transition-colors duration-200 hover:bg-gray-700 hover:text-white ${isActive ? "bg-gray-700 text-white border-r-2 border-blue-500" : "text-gray-300"
+                  `flex items-center px-6 py-3 text-sm font-medium transition-colors duration-200 hover:bg-gray-700 hover:text-white ${isActive ? "bg-gray-700 text-white pl-[40px] border-gray-500" : "text-gray-300"
                   }`
                 }
               >

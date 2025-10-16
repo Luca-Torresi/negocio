@@ -295,7 +295,7 @@ const PaginaEstadisticas: React.FC = () => {
     legend: {
       position: 'none'
     },
-    colors: ["#6d8898"],
+    colors: ["#7393A6"],
     backgroundColor: "transparent",
     chartArea: { left: 120, top: 15, right: 35, width: "100%", height: "80%" },
   }
@@ -354,7 +354,7 @@ const PaginaEstadisticas: React.FC = () => {
     legend: {
       position: 'none'
     },
-    colors: ["#7799ad"],
+    colors: ["#7393A6"],
     backgroundColor: "transparent",
     chartArea: { left: 60, top: 60, bottom: 35, right: 30, width: "80%", height: "70%" },
   }
