@@ -11,5 +11,6 @@ public interface DetalleCompraMapper {
     DetalleCompra toEntity(DetalleCompraDTO dto);
 
     @Mapping(source = "producto.nombre", target = "producto")
+    @Mapping(source = "producto.idProducto", target = "idProducto")
     DetalleCompraFullDTO toFullDto(DetalleCompra entity);
 }

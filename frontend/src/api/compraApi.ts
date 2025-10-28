@@ -26,9 +26,12 @@ export const obtenerCompras = async (filtros: any): Promise<PaginaDeCompras> => 
   return response.data
 }
 
-// Crear nueva compra
 export const crearCompra = async (data: CompraDTO): Promise<void> => {
   await apiClient.post(`/compra/nueva`, data)
+}
+
+export const modificarCompra = async (id: number, data: CompraDTO): Promise<void> => {
+  await apiClient.put(`/compra/editar/${id}`, data)
 }
 
 export const descargarComprobanteCompra = async (id: number): Promise<void> => {
@@ -41,4 +44,13 @@ export const descargarComprobanteCompra = async (id: number): Promise<void> => {
     console.error("Error al descargar el comprobante:", error)
     throw new Error("No se pudo descargar el comprobante.")
   }
+}
+
+export const obtenerEstadosCompra = async (): Promise<string[]> => {
+  const response = await apiClient.get(`/compra/estadosCompra`)
+  return response.data
+}
+
+export const toggleEstadoPagoCompra = async (id: number): Promise<void> => {
+  await apiClient.patch(`/compra/cambiarEstado/${id}`)
 }

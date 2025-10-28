@@ -2,7 +2,19 @@
 
 import type React from "react"
 import { useState, useEffect, useMemo } from "react"
-import { ChartNoAxesCombined, Activity, RefreshCw, ClipboardList, AlertTriangle, PiggyBank, Coins, ChevronLeft, ChevronRight, TableProperties, Truck } from "lucide-react"
+import {
+  ChartNoAxesCombined,
+  Activity,
+  RefreshCw,
+  ClipboardList,
+  AlertTriangle,
+  PiggyBank,
+  ChevronLeft,
+  ChevronRight,
+  TableProperties,
+  Truck,
+  Coins,
+} from "lucide-react"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import { Chart } from "react-google-charts"
@@ -14,7 +26,7 @@ import {
   obtenerVolumenVentas,
   obtenerVentasPorHora,
   obtenerVentasPorMetodoDePago,
-  obtenerVentasPorCategoria
+  obtenerVentasPorCategoria,
 } from "../api/estadisticaApi"
 import { obtenerListaProductosVenta } from "../api/productoApi"
 import type { ProductoVenta } from "../types/dto/Producto"
@@ -36,51 +48,36 @@ const PaginaEstadisticas: React.FC = () => {
   const datosPivoteadosParaGrafico = useMemo(() => {
     // Usamos el nombre 'datosOriginales' para mayor claridad.
     // Es la misma variable que tú llamas 'datosMetodosDePago'.
-    const datosOriginales = datosMetodosDePago;
+    const datosOriginales = datosMetodosDePago
 
     if (!datosOriginales || datosOriginales.length <= 1) {
-      return [["", ""]];
+      return [["", ""]]
     }
 
-    const encabezadosOriginales = datosOriginales[0];
-    const filasDeDatos = datosOriginales.slice(1);
+    const encabezadosOriginales = datosOriginales[0]
+    const filasDeDatos = datosOriginales.slice(1)
 
     // Calculamos el total para poder sacar los porcentajes
-    const totalGeneral = filasDeDatos.reduce((sum, fila) => sum + (fila[1] as number), 0);
+    const totalGeneral = filasDeDatos.reduce((sum, fila) => sum + (fila[1] as number), 0)
 
     // 1. Creamos la nueva fila de encabezados con las columnas de anotación
-    const nuevoEncabezado: FilaGrafico = [encabezadosOriginales[0]];
-    filasDeDatos.forEach(fila => {
+    const nuevoEncabezado: FilaGrafico = [encabezadosOriginales[0]]
+    filasDeDatos.forEach((fila) => {
       // Para cada categoría (ej: "Efectivo"), añadimos una columna para el valor y otra para la anotación
-      nuevoEncabezado.push(fila[0], { role: 'annotation' });
-    });
+      nuevoEncabezado.push(fila[0], { role: "annotation" })
+    })
 
     // 2. Creamos la nueva fila de datos con los valores y los porcentajes
-    const nuevaFilaDeDatos: FilaGrafico = [encabezadosOriginales[1]];
-    filasDeDatos.forEach(fila => {
-      const valor = fila[1] as number;
-      const porcentaje = totalGeneral > 0 ? `${Math.round((valor / totalGeneral) * 100)}%` : '0%';
+    const nuevaFilaDeDatos: FilaGrafico = [encabezadosOriginales[1]]
+    filasDeDatos.forEach((fila) => {
+      const valor = fila[1] as number
+      const porcentaje = totalGeneral > 0 ? `${Math.round((valor / totalGeneral) * 100)}%` : "0%"
       // Añadimos el valor numérico y, justo después, el string del porcentaje
-      nuevaFilaDeDatos.push(valor, porcentaje);
-    });
+      nuevaFilaDeDatos.push(valor, porcentaje)
+    })
 
-    return [nuevoEncabezado, nuevaFilaDeDatos];
-  }, [datosMetodosDePago]);
-
-  // const datosPivoteadosParaGrafico = useMemo(() => {
-  //   if (!datosMetodosDePago || datosMetodosDePago.length <= 1) {
-  //     return [["", ""]]; // Devuelve datos vacíos si no hay nada
-  //   }
-
-  //   // La misma lógica de pivoteo que ya teníamos
-  //   const etiquetas = datosMetodosDePago.slice(1).map(fila => fila[0]);
-  //   const valores = datosMetodosDePago.slice(1).map(fila => fila[1]);
-
-  //   const nuevoEncabezado = [datosMetodosDePago[0][0], ...etiquetas];
-  //   const nuevaFilaDeDatos = [datosMetodosDePago[0][1], ...valores];
-
-  //   return [nuevoEncabezado, nuevaFilaDeDatos];
-  // }, [datosMetodosDePago]);
+    return [nuevoEncabezado, nuevaFilaDeDatos]
+  }, [datosMetodosDePago])
 
   // Estados de filtros (sin cambios)
   const [fechaInicio, setFechaInicio] = useState<Date | null>(() => {
@@ -91,10 +88,10 @@ const PaginaEstadisticas: React.FC = () => {
   })
 
   const [fechaFin, setFechaFin] = useState<Date | null>(() => {
-    const hoy = new Date();
+    const hoy = new Date()
     // Inicializa con el último día del mes actual
-    return new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
-  });
+    return new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0)
+  })
 
   const [productoSeleccionado, setProductoSeleccionado] = useState<number | null>(null)
   const [paginaRentabilidad, setPaginaRentabilidad] = useState<number>(0)
@@ -107,73 +104,71 @@ const PaginaEstadisticas: React.FC = () => {
     if (date) {
       // Truco de JavaScript: al pedir el día 0 del mes SIGUIENTE,
       // nos devuelve el último día del mes actual.
-      const ultimoDiaDelMes = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-      setFechaFin(ultimoDiaDelMes);
+      const ultimoDiaDelMes = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+      setFechaFin(ultimoDiaDelMes)
     } else {
-      setFechaFin(null);
+      setFechaFin(null)
     }
-  };
+  }
 
   // Rellena los meses faltantes en un set de datos para asegurar consistencia.
   const rellenarYFormatearDatosMensuales = (
     datosApi: DatosParaGrafico,
     fechaInicio: Date,
     fechaFin: Date,
-    config: { tipoEje: 'date' | 'string'; formatoMoneda?: number[] }
+    config: { tipoEje: "date" | "string"; formatoMoneda?: number[] },
   ): DatosParaGrafico => {
-    if (!datosApi || datosApi.length <= 1) return [["Mes", "Valor"]];
+    if (!datosApi || datosApi.length <= 1) return [["Mes", "Valor"]]
 
-    const encabezados = datosApi[0];
-    const datosMapa = new Map(
-      datosApi.slice(1).map(fila => [fila[0] as string, fila.slice(1)])
-    );
+    const encabezados = datosApi[0]
+    const datosMapa = new Map(datosApi.slice(1).map((fila) => [fila[0] as string, fila.slice(1)]))
 
-    const resultadoFinal: FilaGrafico[] = [];
-    let fechaActual = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), 1);
+    const resultadoFinal: FilaGrafico[] = []
+    const fechaActual = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), 1)
 
     while (fechaActual <= fechaFin) {
-      const mesString = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth() + 1).padStart(2, '0')}`;
-      const valores = datosMapa.get(mesString) || Array(encabezados.length - 1).fill(0);
+      const mesString = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth() + 1).padStart(2, "0")}`
+      const valores = datosMapa.get(mesString) || Array(encabezados.length - 1).fill(0)
 
-      let ejeX;
-      if (config.tipoEje === 'date') {
-        ejeX = new Date(`${mesString}-02`);
+      let ejeX
+      if (config.tipoEje === "date") {
+        ejeX = new Date(`${mesString}-02`)
       } else {
-        ejeX = new Date(`${mesString}-02`).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        ejeX = new Date(`${mesString}-02`).toLocaleDateString("en-US", { month: "short", year: "numeric" })
       }
 
       const valoresFormateados = valores.map((valor, index) => {
         if (config.formatoMoneda?.includes(index + 1)) {
-          return { v: valor as number, f: formatCurrency(valor as number) };
+          return { v: valor as number, f: formatCurrency(valor as number) }
         }
-        return valor;
-      });
+        return valor
+      })
 
-      resultadoFinal.push([ejeX, ...valoresFormateados]);
-      fechaActual.setMonth(fechaActual.getMonth() + 1);
+      resultadoFinal.push([ejeX, ...valoresFormateados])
+      fechaActual.setMonth(fechaActual.getMonth() + 1)
     }
 
     // Modificamos el encabezado para el tipo 'date' si es necesario
-    if (config.tipoEje === 'date') {
-      encabezados[0] = { type: 'date', label: 'Mes' };
+    if (config.tipoEje === "date") {
+      encabezados[0] = { type: "date", label: "Mes" }
     }
 
-    return [encabezados, ...resultadoFinal];
-  };
+    return [encabezados, ...resultadoFinal]
+  }
 
   // --- 2. useEffect PRINCIPAL SIMPLIFICADO ---
   useEffect(() => {
-    if (!fechaInicio || !fechaFin) return;
+    if (!fechaInicio || !fechaFin) return
 
     const cargarTodosLosDatos = async () => {
-      setCargando(true);
-      setError(null);
+      setCargando(true)
+      setError(null)
 
       try {
         const fechasParams = {
           fechaInicio: fechaInicio.toISOString().split("T")[0],
           fechaFin: fechaFin.toISOString().split("T")[0],
-        };
+        }
 
         const [
           kpisData,
@@ -183,7 +178,7 @@ const PaginaEstadisticas: React.FC = () => {
           ventasHoraData,
           productosListaData,
           metodosPagoData,
-          ventasPorCategoriaData
+          ventasPorCategoriaData,
         ] = await Promise.all([
           obtenerKpis(),
           obtenerIngresosVsEgresos(fechasParams),
@@ -192,89 +187,89 @@ const PaginaEstadisticas: React.FC = () => {
           obtenerVentasPorHora(fechasParams),
           obtenerListaProductosVenta(),
           obtenerVentasPorMetodoDePago(fechasParams),
-          obtenerVentasPorCategoria(fechasParams)
-        ]);
+          obtenerVentasPorCategoria(fechasParams),
+        ])
 
         // --- 3. APLICAMOS LAS TRANSFORMACIONES ---
         setDatosIngresosVsEgresos(
-          rellenarYFormatearDatosMensuales(ingresosData, fechaInicio, fechaFin, { tipoEje: 'date', formatoMoneda: [1, 2] })
-        );
+          rellenarYFormatearDatosMensuales(ingresosData, fechaInicio, fechaFin, {
+            tipoEje: "date",
+            formatoMoneda: [1, 2],
+          }),
+        )
         setDatosVolumenVentas(
-          rellenarYFormatearDatosMensuales(volumenData, fechaInicio, fechaFin, { tipoEje: 'string' })
-        );
+          rellenarYFormatearDatosMensuales(volumenData, fechaInicio, fechaFin, { tipoEje: "string" }),
+        )
 
         // Transformaciones que no necesitan rellenar meses
         if (productosData && productosData.length > 1) {
-          const encabezados = productosData[0];
-          const filas = productosData.slice(1).map(fila => {
-            const [producto, ganancia] = fila as [string, number];
-            return [producto, { v: ganancia, f: formatCurrency(ganancia) }];
-          });
-          setDatosProductosRentables([encabezados, ...filas]);
+          const encabezados = productosData[0]
+          const filas = productosData.slice(1).map((fila) => {
+            const [producto, ganancia] = fila as [string, number]
+            return [producto, { v: ganancia, f: formatCurrency(ganancia) }]
+          })
+          setDatosProductosRentables([encabezados, ...filas])
         } else {
-          setDatosProductosRentables(productosData);
+          setDatosProductosRentables(productosData)
         }
 
         // 4. Transformación para "Ventas por Hora" (en un rango específico)
         if (ventasHoraData && ventasHoraData.length > 1) {
-          const encabezados = ventasHoraData[0];
+          const encabezados = ventasHoraData[0]
 
-          const datosMapa = new Map(
-            ventasHoraData.slice(1).map(fila => [fila[0] as number, fila[1] as number])
-          );
+          const datosMapa = new Map(ventasHoraData.slice(1).map((fila) => [fila[0] as number, fila[1] as number]))
 
-          const horaInicio = 8;
-          const horaFin = 22;
-          const numeroDeHoras = horaFin - horaInicio + 1;
+          const horaInicio = 8
+          const horaFin = 22
+          const numeroDeHoras = horaFin - horaInicio + 1
 
           const filasCompletas = Array.from({ length: numeroDeHoras }, (_, i) => {
-            const hora = horaInicio + i;
-            const cantidad = datosMapa.get(hora) || 0;
-            return [`${hora}hs`, cantidad];
-          });
+            const hora = horaInicio + i
+            const cantidad = datosMapa.get(hora) || 0
+            return [`${hora}hs`, cantidad]
+          })
 
-          setDatosVentasPorHora([encabezados, ...filasCompletas]);
+          setDatosVentasPorHora([encabezados, ...filasCompletas])
         } else {
           // Si no hay datos, creamos un gráfico vacío en el rango deseado
-          const encabezados = ["Hora", "Cantidad"];
-          const horaInicio = 8;
-          const horaFin = 22;
-          const numeroDeHoras = horaFin - horaInicio + 1;
-          const filasVacias = Array.from({ length: numeroDeHoras }, (_, i) => [`${horaInicio + i}hs`, 0]);
-          setDatosVentasPorHora([encabezados, ...filasVacias]);
+          const encabezados = ["Hora", "Cantidad"]
+          const horaInicio = 8
+          const horaFin = 22
+          const numeroDeHoras = horaFin - horaInicio + 1
+          const filasVacias = Array.from({ length: numeroDeHoras }, (_, i) => [`${horaInicio + i}hs`, 0])
+          setDatosVentasPorHora([encabezados, ...filasVacias])
         }
-        setKpis(kpisData);
-        setProductosVenta(productosListaData);
-        setDatosMetodosDePago(metodosPagoData);
-        setDatosVentasPorCategoria(ventasPorCategoriaData);
-
+        setKpis(kpisData)
+        setProductosVenta(productosListaData)
+        setDatosMetodosDePago(metodosPagoData)
+        setDatosVentasPorCategoria(ventasPorCategoriaData)
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al cargar estadísticas");
+        setError(err instanceof Error ? err.message : "Error al cargar estadísticas")
       } finally {
-        setCargando(false);
+        setCargando(false)
       }
-    };
+    }
 
-    cargarTodosLosDatos();
-  }, [fechaInicio, fechaFin, productoSeleccionado, paginaRentabilidad]);
+    cargarTodosLosDatos()
+  }, [fechaInicio, fechaFin, productoSeleccionado, paginaRentabilidad])
 
-  let ticksIngresosVsEgresos: Date[] = [];
+  let ticksIngresosVsEgresos: Date[] = []
   if (datosIngresosVsEgresos && datosIngresosVsEgresos.length > 1) {
     // Extraemos la primera columna (las fechas) de cada fila de datos.
     ticksIngresosVsEgresos = datosIngresosVsEgresos
       .slice(1) // Omitimos el encabezado
-      .map(fila => fila[0] as Date); // Extraemos solo la fecha de cada fila
+      .map((fila) => fila[0] as Date) // Extraemos solo la fecha de cada fila
   }
 
   const opcionesIngresosVsEgresos = {
     hAxis: {
-      format: 'MMM y',
+      format: "MMM y",
       slantedText: true,
       slantedTextAngle: 60,
       ticks: ticksIngresosVsEgresos,
     },
     vAxis: {
-      format: '$ #,##0'
+      format: "$ #,##0",
     },
     colors: ["#4dbe7a", "#EF4444"],
     backgroundColor: "transparent",
@@ -282,44 +277,44 @@ const PaginaEstadisticas: React.FC = () => {
       position: "top",
       alignment: "center",
       textStyle: {
-        fontSize: 13
-      }
+        fontSize: 13,
+      },
     },
     chartArea: { left: 65, top: 30, right: 10, width: "80%", height: "70%" },
   }
 
   const opcionesProductosRentables = {
     hAxis: {
-      format: '$ #,##0'
+      format: "$ #,##0",
     },
     legend: {
-      position: 'none'
+      position: "none",
     },
     colors: ["#7393A6"],
     backgroundColor: "transparent",
-    chartArea: { left: 120, top: 15, right: 35, width: "100%", height: "80%" },
+    chartArea: { left: 135, top: 15, right: 35, width: "100%", height: "80%" },
   }
 
   const opcionesVolumenVentas = useMemo(() => {
-    let maxValor = 0;
+    let maxValor = 0
     // Buscamos el valor más alto en los datos actuales
     if (datosVolumenVentas && datosVolumenVentas.length > 1) {
       // Usamos .slice(1) para ignorar la fila de encabezados
-      maxValor = Math.max(...datosVolumenVentas.slice(1).map(fila => fila[1] as number));
+      maxValor = Math.max(...datosVolumenVentas.slice(1).map((fila) => fila[1] as number))
     }
 
     // Calculamos el nuevo techo, añadiendo un 20% de margen y redondeando hacia arriba
-    const techoGrafico = Math.ceil(maxValor * 1.2);
+    const techoGrafico = Math.ceil(maxValor * 1.2)
 
     return {
       bar: {
-        groupWidth: "40px"
+        groupWidth: "40px",
       },
       legend: {
-        position: 'none'
+        position: "none",
       },
       hAxis: {
-        format: 'MMM y',
+        format: "MMM y",
         slantedText: true,
         slantedTextAngle: 60,
         ticks: ticksIngresosVsEgresos,
@@ -331,28 +326,28 @@ const PaginaEstadisticas: React.FC = () => {
           min: 0,
           max: techoGrafico,
         },
-        format: '#'
+        format: "#",
       },
-      colors: ["#82B3D1"],
+      colors: ["#7393A6"],
       backgroundColor: "transparent",
       chartArea: { left: 60, top: 30, right: 40, width: "80%", height: "70%" },
-    };
-  }, [datosVolumenVentas, productoSeleccionado, productosVenta]);
+    }
+  }, [datosVolumenVentas, productoSeleccionado, productosVenta])
 
   const opcionesVentasPorHora = {
     hAxis: {
       showTextEvery: 1,
       slantedText: true,
       slantedTextAngle: 60,
-      format: '#hs'
+      format: "#hs",
     },
     vAxis: {
       title: "Cantidad de Ventas",
       titleTextStyle: { color: "#374151", fontSize: 12 },
-      format: '#'
+      format: "#",
     },
     legend: {
-      position: 'none'
+      position: "none",
     },
     colors: ["#7393A6"],
     backgroundColor: "transparent",
@@ -365,48 +360,53 @@ const PaginaEstadisticas: React.FC = () => {
     legend: {
       position: "labeled",
       textStyle: {
-        color: '#4B5563',
+        color: "#4B5563",
         fontSize: 12,
         bold: true,
-      }
+      },
     },
     colors: ["#6f876f", "#4b576c", "#9c5a4b", "#e2ab70", "#ECCAB1", "#837587"],
     chartArea: { left: 30, top: 40, bottom: 30, right: 30, width: "80%", height: "70%" },
   }
 
   const opcionesMetodosDePago = {
-    isStacked: 'percent',
+    isStacked: "percent",
     backgroundColor: "transparent",
     bar: {
-      groupWidth: '27%'
+      groupWidth: "27%",
     },
     annotations: {
       textStyle: {
         fontSize: 12,
-        bold: false
+        bold: false,
       },
     },
     legend: {
       position: "bottom",
       textStyle: {
-        color: '#4B5563',
+        color: "#4B5563",
         fontSize: 12,
-        bold: true
-      }
+        bold: true,
+      },
     },
     hAxis: {
       minValue: 0,
       ticks: [0, 0.2, 0.4, 0.6, 0.8, 1],
-      format: 'percent',
+      format: "percent",
       gridlines: {
-        count: 6
-      }
+        count: 6,
+      },
     },
     colors: ["#72434F", "#94686D", "#FFB37B", "#FBDB93"],
     chartArea: { left: 50, top: 30, bottom: 90, right: 20, width: "80%", height: "70%" },
   }
 
-  console.log("Datos para el gráfico de barras:", datosMetodosDePago);
+  const recaudadoMes = (kpis.find((kpi) => kpi.titulo === "Recaudado este Mes")?.valor as number) || 0
+  const gananciaMes = (kpis.find((kpi) => kpi.titulo === "Ganancia este Mes")?.valor as number) || 0
+  const porcentajeGanancia = recaudadoMes > 0 ? (gananciaMes / recaudadoMes) * 100 : 0
+
+  const enStock = (kpis.find((kpi) => kpi.titulo === "En Stock")?.valor as number) || 0
+  const enPosiblesVentas = (kpis.find((kpi) => kpi.titulo === "En Posibles Ventas")?.valor as number) || 0
 
   return (
     <div className="p-6 min-h-screen">
@@ -465,57 +465,97 @@ const PaginaEstadisticas: React.FC = () => {
       {/* Mensaje de Error */}
       {error && <div className="p-4 bg-red-100 border-l-4 border-red-500 text-red-700 mb-6">{error}</div>}
 
-      {/* Sección de KPIs */}
       <div className="grid grid-cols-6 gap-6 mb-6">
-        {kpis.map((kpi, index) => (
-          <div key={index} className="bg-white rounded-lg shadow-sm px-4 py-5">
-            <p className="text-sm text-center font-medium text-gray-600 mb-3">{kpi.titulo}</p>
-            <div className="flex items-center justify-center">
-              <div className="flex-shrink-0">
-                {/* Lógica de íconos (sin cambios) */}
-                {index === 0 && <PiggyBank className="h-8 w-8 text-pink-400" />}
-                {index === 1 && <Coins className="h-8 w-8 text-yellow-500" />}
-                {index === 2 && <Truck className="h-8 w-8 text-gray-600" />}
-                {index === 3 && <ClipboardList className="h-8 w-8 text-gray-600" />}
-                {index === 4 && <Activity className="h-8 w-8 text-gray-600" />}
-                {index === 5 && <AlertTriangle className="h-8 w-8 text-red-600" />}
-              </div>
-              <div className="ml-3">
+        {kpis
+          .filter((kpi) => kpi.titulo !== "Ganancia este Mes" && kpi.titulo !== "En Stock" && kpi.titulo !== "En Posibles Ventas")
+          .map((kpi, index) => (
+            <div key={index} className="bg-white rounded-lg shadow-sm px-4 py-5">
+              <p className="text-sm text-center font-medium text-gray-600 mb-3">{kpi.titulo}</p>
+              <div className="flex items-center justify-center">
+                <div className="flex-shrink-0">
+                  {/* Lógica de íconos (sin cambios) */}
+                  {index === 0 && <PiggyBank className="h-8 w-8 text-pink-400" />}
+                  {index === 1 && <Coins className="h-8 w-8 text-yellow-500" />}
+                  {index === 2 && <Truck className="h-8 w-8 text-gray-600" />}
+                  {index === 3 && <ClipboardList className="h-8 w-8 text-gray-600" />}
+                  {index === 4 && <Activity className="h-8 w-8 text-gray-600" />}
+                  {index === 5 && <AlertTriangle className="h-8 w-8 text-tertiary" />}
+                </div>
+                <div className="ml-3">
 
-                <p className="text-xl font-semibold text-center text-gray-900">
-                  {index === 0 || index === 1 || index === 2 || index === 4
-                    ? formatCurrency(kpi.valor as number)
-                    : kpi.valor.toString()}
-                </p>
+                  <p className="text-xl font-semibold text-center text-gray-900">
+                    {index === 0 || index === 1 || index === 2 || index === 4 || index === 6
+                      ? formatCurrency(kpi.valor as number)
+                      : kpi.valor.toString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+
+        <div className="col-span-4 bg-white rounded-lg shadow-sm px-4 py-5">
+          <p className="text-xl text-center font-medium text-gray-700 ml-5 mb-4">Ganancia sobre lo Recaudado del Mes</p>
+
+          <div className="space-y-2">
+            <div className="relative h-7 bg-gray-200 rounded-lg overflow-hidden">
+              <div
+                className="absolute left-0 top-0 h-full bg-secondary transition-all duration-300"
+                style={{ width: `${porcentajeGanancia}%` }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-sm font-medium text-white drop-shadow-sm">
+                  {porcentajeGanancia.toFixed(1)}%
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <div className="ml-4">
+                  <p className="text-sm text-gray-500">Ganancia</p>
+                  <p className="text-base font-semibold text-gray-900">{formatCurrency(gananciaMes)}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 mr-4">
+                <div className="text-right">
+                  <p className="text-sm text-gray-500">Recaudado</p>
+                  <p className="text-base font-semibold text-gray-900">{formatCurrency(recaudadoMes)}</p>
+                </div>
               </div>
             </div>
           </div>
-        ))}
+        </div>
+
+        <div className="col-span-2 bg-white rounded-lg shadow-sm p-6 flex flex-col justify-between h-full">
+          {/* Título */}
+          <p className="text-xl text-center font-medium text-gray-700 mb-4">
+            Estado Actual del Inventario
+          </p>
+
+          {/* Contenedor para los valores */}
+          <div className="flex justify-around items-center text-center mt-2 flex-grow">
+            <div>
+              <p className="text-sm text-gray-500 font-medium">En Stock</p>
+              <p className="text-xl font-bold text-gray-800 mt-1">
+                {formatCurrency(enStock)}
+              </p>
+            </div>
+
+            <div className="border-l border-gray-200 h-16"></div>
+
+            <div>
+              <p className="text-sm text-gray-500 font-medium">En Posibles Ventas</p>
+              <p className="text-xl font-bold text-gray-800 mt-1">
+                {formatCurrency(enPosiblesVentas)}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Sección de Gráficos */}
-      <div className="grid grid-cols-2 gap-6">
-
-        {/* Gráfico 1: Ingresos vs Egresos */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Ingresos vs. Egresos</h3>
-          {cargando || !datosIngresosVsEgresos ? (
-            <div className="h-64 flex items-center justify-center text-gray-500">
-              <div className="flex items-center">
-                <RefreshCw className="animate-spin mr-2" size={20} />
-                Cargando datos...
-              </div>
-            </div>
-          ) : (
-            <Chart
-              chartType="AreaChart"
-              width="100%"
-              height="300px"
-              data={datosIngresosVsEgresos}
-              options={opcionesIngresosVsEgresos}
-            />
-          )}
-        </div>
+      <div className="grid grid-cols-2 gap-6">        
 
         {/* Top Productos Rentables */}
         <div className="bg-white rounded-lg shadow-sm p-6">
@@ -525,7 +565,7 @@ const PaginaEstadisticas: React.FC = () => {
             {/* Controles de Paginación */}
             <div className="flex items-center space-x-2">
               <button
-                onClick={() => setPaginaRentabilidad(p => Math.max(0, p - 1))}
+                onClick={() => setPaginaRentabilidad((p) => Math.max(0, p - 1))}
                 disabled={paginaRentabilidad === 0 || cargando}
                 className="p-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
               >
@@ -538,7 +578,7 @@ const PaginaEstadisticas: React.FC = () => {
 
               <button
                 disabled={!datosProductosRentables || datosProductosRentables.slice(1).length < 7 || cargando}
-                onClick={() => setPaginaRentabilidad(p => p + 1)}
+                onClick={() => setPaginaRentabilidad((p) => p + 1)}
                 className="p-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
               >
                 <ChevronRight size={20} />
@@ -564,10 +604,10 @@ const PaginaEstadisticas: React.FC = () => {
           )}
         </div>
 
-        {/* Ventas por Categoría */}
+        {/* Ventas por Método de Pago */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Categorías con Mayor Facturación</h3>
-          {cargando || !datosVentasPorCategoria ? (
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Ventas por Método de Pago</h3>
+          {cargando || !datosMetodosDePago ? (
             <div className="h-64 flex items-center justify-center text-gray-500">
               <div className="flex items-center">
                 <RefreshCw className="animate-spin mr-2" size={20} />
@@ -576,14 +616,14 @@ const PaginaEstadisticas: React.FC = () => {
             </div>
           ) : (
             <Chart
-              chartType="PieChart"
+              chartType="BarChart"
               width="100%"
               height="300px"
-              data={datosVentasPorCategoria}
-              options={opcionesVentasPorCategoria}
+              data={datosPivoteadosParaGrafico}
+              options={opcionesMetodosDePago}
             />
           )}
-        </div>
+        </div>        
 
         {/* Volumen de Ventas Mensual */}
         <div className="bg-white rounded-lg shadow-sm p-6">
@@ -621,6 +661,27 @@ const PaginaEstadisticas: React.FC = () => {
           )}
         </div>
 
+        {/* Gráfico 1: Ingresos vs Egresos */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Ingresos vs. Egresos</h3>
+          {cargando || !datosIngresosVsEgresos ? (
+            <div className="h-64 flex items-center justify-center text-gray-500">
+              <div className="flex items-center">
+                <RefreshCw className="animate-spin mr-2" size={20} />
+                Cargando datos...
+              </div>
+            </div>
+          ) : (
+            <Chart
+              chartType="AreaChart"
+              width="100%"
+              height="300px"
+              data={datosIngresosVsEgresos}
+              options={opcionesIngresosVsEgresos}
+            />
+          )}
+        </div>
+
         {/* Ventas por Hora */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Cantidad de Ventas por Hora</h3>
@@ -642,10 +703,10 @@ const PaginaEstadisticas: React.FC = () => {
           )}
         </div>
 
-        {/* Ventas por Método de Pago */}
+        {/* Ventas por Categoría */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Ventas por Método de Pago</h3>
-          {cargando || !datosMetodosDePago ? (
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Categorías con Mayor Facturación</h3>
+          {cargando || !datosVentasPorCategoria ? (
             <div className="h-64 flex items-center justify-center text-gray-500">
               <div className="flex items-center">
                 <RefreshCw className="animate-spin mr-2" size={20} />
@@ -654,18 +715,18 @@ const PaginaEstadisticas: React.FC = () => {
             </div>
           ) : (
             <Chart
-              chartType="BarChart"
+              chartType="PieChart"
               width="100%"
               height="300px"
-              data={datosPivoteadosParaGrafico}
-              options={opcionesMetodosDePago}
+              data={datosVentasPorCategoria}
+              options={opcionesVentasPorCategoria}
             />
           )}
         </div>
+
       </div>
 
       <ModalExportarReporte isOpen={modalExportarAbierto} onClose={() => setModalExportarAbierto(false)} />
-
     </div>
   )
 }

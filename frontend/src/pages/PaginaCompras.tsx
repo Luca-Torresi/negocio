@@ -2,11 +2,20 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { ShoppingCart, Plus, Eye, ChevronLeft, ChevronRight, BrushCleaning, Printer } from "lucide-react"
+import {
+  ShoppingCart,
+  Plus,
+  Eye,
+  Pencil,
+  ChevronLeft,
+  ChevronRight,
+  BrushCleaning,
+  Printer,
+} from "lucide-react"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import type { PaginaDeCompras, Compra } from "../types/dto/Compra"
-import { descargarComprobanteCompra, obtenerCompras } from "../api/compraApi"
+import { descargarComprobanteCompra, obtenerCompras, toggleEstadoPagoCompra } from "../api/compraApi"
 import { obtenerListaProveedores } from "../api/proveedorApi"
 import { formatearFecha, formatearHora } from "../utils/fechaUtils"
 import { ModalGestionarCompra } from "../components/compras/ModalGestionarCompra"
@@ -14,6 +23,7 @@ import { ModalDetallesCompra } from "../components/compras/ModalDetallesCompra"
 import { formatCurrency } from "../utils/numberFormatUtils"
 import type { Usuario } from "../types/dto/Usuario"
 import { obtenerUsuarios } from "../api/usuarioApi"
+import { toast } from "react-toastify"
 
 const PaginaCompras: React.FC = () => {
   // Estados principales
@@ -34,7 +44,8 @@ const PaginaCompras: React.FC = () => {
   })
 
   // Estados de modales
-  const [modalNuevoAbierto, setModalNuevoAbierto] = useState(false)
+  const [modalGestionarAbierto, setModalGestionarAbierto] = useState(false)
+  const [compraParaEditar, setCompraParaEditar] = useState<Compra | null>(null)
   const [modalDetallesAbierto, setModalDetallesAbierto] = useState(false)
   const [compraSeleccionada, setCompraSeleccionada] = useState<Compra | null>(null)
 
@@ -133,14 +144,36 @@ const PaginaCompras: React.FC = () => {
     setModalDetallesAbierto(true)
   }
 
+  const abrirModalNuevo = () => {
+    setCompraParaEditar(null)
+    setModalGestionarAbierto(true)
+  }
+
+  const abrirModalEditar = (compra: Compra) => {
+    setCompraParaEditar(compra)
+    setModalGestionarAbierto(true)
+  }
+
   const refrescarDatos = () => {
     cargarCompras()
   }
 
   const cerrarModales = () => {
-    setModalNuevoAbierto(false)
+    setModalGestionarAbierto(false)
     setModalDetallesAbierto(false)
     setCompraSeleccionada(null)
+    setCompraParaEditar(null)
+  }
+
+  const handleToggleEstado = async (idCompra: number): Promise<void> => {
+    try {
+      await toggleEstadoPagoCompra(idCompra)
+      toast.info("Se modificó el estado de la compra")
+
+      await cargarCompras()
+    } catch (error) {
+      toast.error("Error al cambiar el estado de la compra")
+    }
   }
 
   return (
@@ -155,7 +188,7 @@ const PaginaCompras: React.FC = () => {
           </div>
         </div>
         <button
-          onClick={() => setModalNuevoAbierto(true)}
+          onClick={abrirModalNuevo}
           className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
         >
           <Plus size={20} />
@@ -166,7 +199,6 @@ const PaginaCompras: React.FC = () => {
       {/* Panel de Filtros */}
       <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
         <div className="inline-grid grid-cols-[0.9fr_0.9fr_1.1fr_1.1fr_auto] gap-4 mb-2">
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
             <DatePicker
@@ -268,6 +300,9 @@ const PaginaCompras: React.FC = () => {
                       Hora
                     </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
                   </tr>
@@ -287,8 +322,24 @@ const PaginaCompras: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatearHora(compra.fechaHora)}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                        <button
+                          onClick={() => handleToggleEstado(compra.idCompra)}
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                            compra.estadoCompra === "PAGADO"
+                              ? "bg-green-200 text-green-800 focus:ring-green-500"
+                              : "bg-[#FFF599] text-yellow-800 focus:ring-yellow-500"
+                          }`}
+                        >
+                          {compra.estadoCompra}
+                        </button>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex justify-center space-x-2">
+                          <button onClick={() => abrirModalEditar(compra)} className="text-black" title="Editar compra">
+                            <Pencil size={18} />
+                          </button>
+
                           <button
                             onClick={() => abrirModalDetalles(compra)}
                             className="text-black"
@@ -334,7 +385,8 @@ const PaginaCompras: React.FC = () => {
                 <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                   <div className="flex items-center space-x-4">
                     <p className="text-sm text-gray-700">
-                      Mostrando <span className="font-medium">{paginaDeCompras.number * paginaDeCompras.size + 1}</span> a{" "}
+                      Mostrando <span className="font-medium">{paginaDeCompras.number * paginaDeCompras.size + 1}</span>{" "}
+                      a{" "}
                       <span className="font-medium">
                         {Math.min((paginaDeCompras.number + 1) * paginaDeCompras.size, paginaDeCompras.totalElements)}
                       </span>{" "}
@@ -380,9 +432,10 @@ const PaginaCompras: React.FC = () => {
 
       {/* Modales */}
       <ModalGestionarCompra
-        isOpen={modalNuevoAbierto}
+        isOpen={modalGestionarAbierto}
         onClose={cerrarModales}
         onSuccess={refrescarDatos}
+        compraParaEditar={compraParaEditar}
       />
 
       <ModalDetallesCompra isOpen={modalDetallesAbierto} onClose={cerrarModales} compra={compraSeleccionada} />

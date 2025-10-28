@@ -15,11 +15,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // Aplica esta configuración a TODOS los endpoints
-                .allowedOrigins("http://localhost:5173") // Permite peticiones desde tu frontend
-                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS") // Permite estos métodos HTTP
-                .allowedHeaders("*") // Permite todas las cabeceras
-                .allowCredentials(true); // Permite el envío de credenciales (como cookies)
+        registry.addMapping("/**")
+                .allowedOrigins("http://localhost:5173")
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 
     @Override
@@ -31,8 +31,6 @@ public class WebConfig implements WebMvcConfigurer {
                     @Override
                     protected Resource getResource(String resourcePath, Resource location) throws IOException {
                         Resource requestedResource = location.createRelative(resourcePath);
-                        // Si el recurso existe (es un archivo .js, .css, etc.), lo sirve.
-                        // Si no (es una ruta de React como /productos), devuelve index.html.
                         return requestedResource.exists() && requestedResource.isReadable() ? requestedResource
                                 : new ClassPathResource("/static/index.html");
                     }

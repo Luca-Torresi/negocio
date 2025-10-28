@@ -14,12 +14,11 @@ interface Props {
 }
 
 export const ModalDetallesVenta: React.FC<Props> = ({ isOpen, onClose, venta }) => {
-  
   const calcularSubtotal = (cantidad: number, precioUnitario: number) => {
     return cantidad * precioUnitario
   }
 
-  useEscapeKey(onClose, isOpen);
+  useEscapeKey(onClose, isOpen)
 
   if (!isOpen || !venta) return null
 
@@ -75,6 +74,12 @@ export const ModalDetallesVenta: React.FC<Props> = ({ isOpen, onClose, venta }) 
                     {venta.detalles.reduce((total, detalle) => total + detalle.cantidad, 0)}
                   </span>
                 </div>
+                {venta.descuento != null && venta.descuento > 0 && (
+                  <div className="flex justify-between text-red-600">
+                    <span className="font-medium">Descuento:</span>
+                    <span className="font-semibold">-{formatCurrency(venta.descuento)}</span>
+                  </div>
+                )}
                 <div className="border-t pt-2 mt-2">
                   <div className="flex justify-between">
                     <span className="text-lg font-semibold text-gray-800">Total:</span>

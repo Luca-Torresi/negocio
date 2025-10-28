@@ -25,7 +25,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -62,16 +64,16 @@ public class VentaService {
                 .map(detalle -> detalle.getPrecioUnitario().multiply(new BigDecimal(detalle.getCantidad())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        if(dto.getDescuento() != null && dto.getDescuento() > 0){
-            BigDecimal descuento = BigDecimal.valueOf(dto.getDescuento());
+        BigDecimal descuento = dto.getDescuento();
+        if (descuento != null && descuento.compareTo(BigDecimal.ZERO) > 0) {
             total = total.subtract(descuento);
         }
-        venta.setTotal(total);
+
+        venta.setTotal(total.setScale(0, RoundingMode.HALF_UP));
 
         Venta ventaGuardada = ventaRepository.save(venta);
 
         for (DetalleVenta detalle : ventaGuardada.getDetalles()) {
-
             if (detalle.getProducto() != null) {
                 productoService.descontarStock(
                         detalle.getProducto().getIdProducto(),
@@ -123,7 +125,7 @@ public class VentaService {
         return detalle;
     }
 
-    public List<CatalogoDTO> obtenerCatalogo(){
+    public List<CatalogoDTO> obtenerCatalogo() {
         List<Producto> productos = productoRepository.findByEstadoTrue();
         List<Promocion> promociones = promocionRepository.findByEstadoTrue();
 
@@ -142,7 +144,7 @@ public class VentaService {
         return catalogo;
     }
 
-    public Page<VentaListaDTO> obtenerVentas(Integer page, Integer size, LocalDate fechaInicio, LocalDate fechaFin, Long idUsuario, MetodoDePago metodoDePago){
+    public Page<VentaListaDTO> obtenerVentas(Integer page, Integer size, LocalDate fechaInicio, LocalDate fechaFin, Long idUsuario, MetodoDePago metodoDePago) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("fechaHora").descending());
         Specification<Venta> spec = VentaSpecification.porFechaInicio(fechaInicio)
                 .and(VentaSpecification.porFechaFin(fechaFin))
@@ -153,7 +155,7 @@ public class VentaService {
                 .map(ventaMapper::toDto);
     }
 
-    public List<String> listarMetodosDePago(){
+    public List<String> listarMetodosDePago() {
         return Arrays.stream(MetodoDePago.values())
                 .map(Enum::name)
                 .toList();

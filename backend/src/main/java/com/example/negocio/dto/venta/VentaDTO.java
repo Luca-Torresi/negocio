@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data @Builder @AllArgsConstructor @NoArgsConstructor
@@ -16,5 +18,5 @@ public class VentaDTO {
     private MetodoDePago metodoDePago;
     @Valid @NotEmpty
     private List<DetalleVentaDTO> detalles;
-    private Integer descuento;
+    private BigDecimal descuento;
 }

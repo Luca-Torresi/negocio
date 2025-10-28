@@ -4,6 +4,8 @@ import com.example.negocio.dto.compra.CompraDTO;
 import com.example.negocio.dto.compra.CompraFullDTO;
 import com.example.negocio.dto.compra.DetalleCompraDTO;
 import com.example.negocio.entity.*;
+import com.example.negocio.enums.EstadoCompra;
+import com.example.negocio.enums.MetodoDePago;
 import com.example.negocio.exception.CompraNoEncontradaException;
 import com.example.negocio.exception.ProductoNoEncontradoException;
 import com.example.negocio.exception.ProveedorNoEncontradoException;
@@ -31,11 +33,16 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +54,7 @@ public class CompraService {
     private final DetalleCompraMapper detalleCompraMapper;
     private final UsuarioRepository usuarioRepository;
 
+    @Transactional
     public Compra nuevaCompra(Long idUsuario, CompraDTO dto){
         Usuario usuario = usuarioRepository.findById(idUsuario).orElseThrow(() -> new UsuarioNoEncontradoException());
         Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor()).orElseThrow(() -> new ProveedorNoEncontradoException("No se encontró el proveedor con el ID: " + dto.getIdProveedor()));
@@ -55,6 +63,7 @@ public class CompraService {
         compra.setFechaHora(LocalDateTime.now());
         compra.setUsuario(usuario);
         compra.setProveedor(proveedor);
+        compra.setEstadoCompra(EstadoCompra.PENDIENTE);
 
         BigDecimal total = BigDecimal.ZERO;
 
@@ -64,7 +73,7 @@ public class CompraService {
 
             DetalleCompra detalle = detalleCompraMapper.toEntity(detalleDto);
             detalle.setProducto(producto);
-            detalle.setCostoUnitario(producto.getCosto());
+            detalle.setCostoUnitario(detalleDto.getCostoUnitario());
             detalle.setCompra(compra);
 
             producto.setStock(producto.getStock() + detalle.getCantidad());
@@ -77,17 +86,86 @@ public class CompraService {
             detalles.add(detalle);
         }
         compra.setDetalles(detalles);
+        compra.setTotal(total.setScale(0, RoundingMode.HALF_UP));
 
-        if (dto.getDescuento() != null && dto.getDescuento() > 0) {
-            BigDecimal descuentoPorcentaje = new BigDecimal(dto.getDescuento());
-            BigDecimal cien = new BigDecimal("100");
+        return compraRepository.save(compra);
+    }
 
-            BigDecimal multiplicador = BigDecimal.ONE.subtract(descuentoPorcentaje.divide(cien));
+    @Transactional
+    public Compra editarCompra(Long idCompra, CompraDTO dto) {
+        Compra compra = compraRepository.findById(idCompra)
+                .orElseThrow(() -> new CompraNoEncontradaException());
+        Proveedor proveedor = proveedorRepository.findById(dto.getIdProveedor()).orElseThrow(() -> new ProveedorNoEncontradoException("No se encontró el proveedor con el ID: " + dto.getIdProveedor()));
 
-            total = total.multiply(multiplicador);
+        compra.setProveedor(proveedor);
+
+        // Creamos un mapa de los detalles *existentes* para fácil acceso
+        Map<Long, DetalleCompra> detallesActualesMap = compra.getDetalles().stream()
+                .collect(Collectors.toMap(dc -> dc.getProducto().getIdProducto(), Function.identity()));
+
+        // Creamos un mapa de los detalles *nuevos* (del DTO)
+        Map<Long, DetalleCompraDTO> detallesNuevosMap = dto.getDetalles().stream()
+                .collect(Collectors.toMap(DetalleCompraDTO::getIdProducto, Function.identity()));
+
+        // --- Lógica de Stock y Actualización de Detalles ---
+        List<DetalleCompra> detallesFinales = new ArrayList<>();
+        BigDecimal nuevoTotal = BigDecimal.ZERO;
+
+        // Iteramos sobre los NUEVOS detalles del DTO
+        for (DetalleCompraDTO detalleDto : dto.getDetalles()) {
+            Producto producto = productoRepository.findById(detalleDto.getIdProducto())
+                    .orElseThrow(() -> new ProductoNoEncontradoException());
+
+            DetalleCompra detalleExistente = detallesActualesMap.get(producto.getIdProducto());
+
+            int cantidadNueva = detalleDto.getCantidad();
+            int cantidadVieja = (detalleExistente != null) ? detalleExistente.getCantidad() : 0;
+            int diferenciaCantidad = cantidadNueva - cantidadVieja;
+
+            // Ajustamos el stock del producto
+            producto.setStock(producto.getStock() + diferenciaCantidad);
+            productoRepository.save(producto);
+
+            // Creamos o actualizamos el detalle
+            DetalleCompra detalleActualizado;
+            if (detalleExistente != null) {
+                detalleExistente.setCantidad(cantidadNueva);
+                detalleExistente.setCostoUnitario(detalleDto.getCostoUnitario());
+                detalleActualizado = detalleExistente;
+            } else {
+                detalleActualizado = detalleCompraMapper.toEntity(detalleDto);
+                detalleActualizado.setProducto(producto);
+                detalleActualizado.setCostoUnitario(detalleDto.getCostoUnitario());
+                detalleActualizado.setCompra(compra);
+            }
+            detallesFinales.add(detalleActualizado);
+
+            // Calculamos el subtotal para el nuevo total general
+            BigDecimal subtotal = detalleActualizado.getCostoUnitario().multiply(BigDecimal.valueOf(detalleActualizado.getCantidad()));
+            nuevoTotal = nuevoTotal.add(subtotal);
+
+            // Quitamos el detalle del mapa de existentes para saber cuáles eliminar
+            if (detalleExistente != null) {
+                detallesActualesMap.remove(producto.getIdProducto());
+            }
         }
 
-        compra.setTotal(total);
+        // --- Eliminamos los detalles que ya no están en el DTO ---
+        if (!detallesActualesMap.isEmpty()) {
+            List<DetalleCompra> detallesAEliminar = new ArrayList<>(detallesActualesMap.values());
+            for (DetalleCompra detalleAEliminar : detallesAEliminar) {
+                Producto producto = detalleAEliminar.getProducto();
+                // Devolvemos el stock al producto
+                producto.setStock(producto.getStock() - detalleAEliminar.getCantidad());
+                productoRepository.save(producto);
+            }
+        }
+
+        // 4. Actualizamos la lista de detalles en la compra
+        compra.getDetalles().clear();
+        compra.getDetalles().addAll(detallesFinales);
+
+        compra.setTotal(nuevoTotal.setScale(0, RoundingMode.HALF_UP));
 
         return compraRepository.save(compra);
     }
@@ -101,6 +179,26 @@ public class CompraService {
 
         return compraRepository.findAll(spec, pageable)
                 .map(compraMapper::toFullDto);
+    }
+
+    public void cambiarEstadoCompra(Long idCompra){
+        Compra compra = compraRepository.findById(idCompra).orElseThrow(() -> new CompraNoEncontradaException());
+
+        System.out.println("Estado Anterior: " + compra.getEstadoCompra() + "=============================================================================");
+
+        if(compra.getEstadoCompra() == EstadoCompra.PENDIENTE){
+            compra.setEstadoCompra(EstadoCompra.PAGADO);
+        } else if (compra.getEstadoCompra() == EstadoCompra.PAGADO) {
+            compra.setEstadoCompra(EstadoCompra.PENDIENTE);
+        }
+
+        compraRepository.save(compra);
+    }
+
+    public List<String> listarEstadosCompra(){
+        return Arrays.stream(EstadoCompra.values())
+                .map(Enum::name)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -161,26 +259,8 @@ public class CompraService {
 
     // --- MÉTODO drawSummary() COMPLETO ---
     private void drawSummary(PDPageContentStream stream, Compra compra, PDType1Font bold, PDType1Font regular, Integer yPosition) throws IOException {
-        // 1. Calculamos el subtotal (la suma de los detalles sin el descuento final)
-        BigDecimal subtotal = compra.getDetalles().stream()
-                .map(detalle -> detalle.getCostoUnitario().multiply(BigDecimal.valueOf(detalle.getCantidad())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         int xPositionLabels = 380;
         int xPositionValues = 500;
-
-        // Fila de Subtotal
-        escribirTexto(stream, regular, 12, xPositionLabels, yPosition, "Subtotal:");
-        escribirTexto(stream, regular, 12, xPositionValues, yPosition, "$" + subtotal.toString());
-        yPosition -= 20;
-
-        // Fila de Descuento (solo si existe)
-        if (compra.getDescuento() != null && compra.getDescuento() > 0) {
-            escribirTexto(stream, regular, 12, xPositionLabels, yPosition, "Descuento (" + compra.getDescuento() + "%):");
-            BigDecimal montoDescuento = subtotal.subtract(compra.getTotal());
-            escribirTexto(stream, regular, 12, xPositionValues, yPosition, "-$" + montoDescuento.toString());
-            yPosition -= 20;
-        }
 
         // Fila de Total Final
         escribirTexto(stream, bold, 14, xPositionLabels, yPosition, "TOTAL:");

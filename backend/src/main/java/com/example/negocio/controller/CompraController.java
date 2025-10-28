@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,6 +27,13 @@ public class CompraController {
             @RequestHeader("X-Usuario-ID") Long idUsuario,
             @Valid @RequestBody CompraDTO dto) {
         return compraService.nuevaCompra(idUsuario, dto);
+    }
+
+    @PutMapping("/editar/{idCompra}")
+    public Compra editarCompra(
+            @PathVariable Long idCompra,
+            @RequestBody CompraDTO dto) {
+        return compraService.editarCompra(idCompra, dto);
     }
 
     @GetMapping("/obtener")
@@ -51,5 +59,16 @@ public class CompraController {
                 .headers(headers)
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(new InputStreamResource(pdf));
+    }
+
+    @PatchMapping("/cambiarEstado/{idCompra}")
+    public ResponseEntity<Void> cambiarEstadoCompra(@PathVariable Long idCompra) {
+        compraService.cambiarEstadoCompra(idCompra);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/estadosCompra")
+    public ResponseEntity<List<String>> listarEstadosCompra() {
+        return ResponseEntity.ok(compraService.listarEstadosCompra());
     }
 }

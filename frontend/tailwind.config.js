@@ -7,10 +7,9 @@ export default {
     extend: {
       colors: {
         'primary': {
-          DEFAULT: '#3e57a3',
-          light: '#5c76c1',
-          dark: '#324785',
-          darker: '#273768',
+          DEFAULT: '#546D99',
+          dark: '#485E84',
+          darker: '#3A4B69',
         },
         'secondary': {
           DEFAULT: '#6e9e6d',
@@ -24,7 +23,7 @@ export default {
           dark: '#AB4949', 
           darker: '#8F3D3D',
         },
-        'yellow': {
+        'amarillo': {
           DEFAULT: '#FFE277',
           darker: '#C5A944',
         },

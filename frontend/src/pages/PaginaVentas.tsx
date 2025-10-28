@@ -3,22 +3,19 @@
 import type React from "react"
 import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { useParams } from "react-router-dom"
-import { Search, Plus, Trash2, ListPlus, ShoppingBasket } from "lucide-react"
+import { Search, Plus, Trash2, ListPlus, ShoppingBasket, RefreshCw } from "lucide-react"
 import type { ItemCatalogo, ItemVenta, VentaDTO } from "../types/dto/Venta"
-import {
-  obtenerCatalogoVenta,
-  obtenerMetodosDePago,
-  crearVenta,
-} from "../api/ventaApi"
+import { obtenerCatalogoVenta, obtenerMetodosDePago, crearVenta } from "../api/ventaApi"
 import { buscarProductoPorCodigo } from "../api/productoApi"
 import { formatCurrency } from "../utils/numberFormatUtils"
 import { toast } from "react-toastify"
 import { InputMoneda } from "../components/InputMoneda"
+import { InputPorcentaje } from "../components/InputPorcentaje"
 
 const PaginaVentas: React.FC = () => {
   const { idVenta } = useParams<{ idVenta: string }>()
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const inputBusquedaRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const inputBusquedaRef = useRef<HTMLInputElement>(null)
 
   // Estados principales
   const [catalogo, setCatalogo] = useState<ItemCatalogo[]>([])
@@ -26,13 +23,14 @@ const PaginaVentas: React.FC = () => {
   const [carrito, setCarrito] = useState<ItemVenta[]>([])
   const [metodoPagoSeleccionado, setMetodoPagoSeleccionado] = useState<string>("")
   const [descuento, setDescuento] = useState<number>(0)
+  const [tipoDescuento, setTipoDescuento] = useState<"MONTO" | "PORCENTAJE">("MONTO")
 
   // Estados para el constructor de venta
   const [busquedaItem, setBusquedaItem] = useState<string>("")
   const [itemSeleccionado, setItemSeleccionado] = useState<ItemCatalogo | null>(null)
   const [cantidad, setCantidad] = useState<number>(1)
   const [mostrarSugerencias, setMostrarSugerencias] = useState<boolean>(false)
-  const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const [activeIndex, setActiveIndex] = useState<number>(-1)
 
   // Estados de carga y error
   const [cargando, setCargando] = useState<boolean>(true)
@@ -40,89 +38,95 @@ const PaginaVentas: React.FC = () => {
   const [procesandoVenta, setProcesandoVenta] = useState<boolean>(false)
 
   const seleccionarItem = (item: ItemCatalogo) => {
-    setItemSeleccionado(item);
-    setBusquedaItem(item.nombre);
-    setMostrarSugerencias(false);
-    setActiveIndex(-1); // Reseteamos el índice
-  };
+    setItemSeleccionado(item)
+    setBusquedaItem(item.nombre)
+    setMostrarSugerencias(false)
+    setActiveIndex(-1) // Reseteamos el índice
+  }
 
   // --- 3. INICIO DE LA LÓGICA DEL LECTOR DE CÓDIGO DE BARRAS ---
-  const [codigoDeBarras, setCodigoDeBarras] = useState("");
-  const timerRef = useRef<number | null>(null);
+  const [codigoDeBarras, setCodigoDeBarras] = useState("")
+  const timerRef = useRef<number | null>(null)
 
   // Lógica para añadir un item al carrito (ahora en useCallback)
-  const añadirItemAlCarrito = useCallback((itemToAdd: ItemCatalogo, cantidadToAdd: number): void => {
-    if (!itemToAdd || cantidadToAdd <= 0) return
+  const añadirItemAlCarrito = useCallback(
+    (itemToAdd: ItemCatalogo, cantidadToAdd: number): void => {
+      if (!itemToAdd || cantidadToAdd <= 0) return
 
-    const precioUnitario = calcularPrecioUnitario(itemToAdd, cantidadToAdd)
-    const indiceExistente = carrito.findIndex(
-      (carritoItem) => carritoItem.item.id === itemToAdd.id && carritoItem.item.tipo === itemToAdd.tipo,
-    )
+      const precioUnitario = calcularPrecioUnitario(itemToAdd, cantidadToAdd)
+      const indiceExistente = carrito.findIndex(
+        (carritoItem) => carritoItem.item.id === itemToAdd.id && carritoItem.item.tipo === itemToAdd.tipo,
+      )
 
-    if (indiceExistente >= 0) {
-      setCarrito((prevCarrito) => {
-        const nuevoCarrito = [...prevCarrito];
-        const itemExistente = nuevoCarrito[indiceExistente];
-        const nuevaCantidad = itemExistente.cantidad + cantidadToAdd;
-        nuevoCarrito[indiceExistente] = {
-          ...itemExistente,
-          cantidad: nuevaCantidad,
-          precioUnitarioAplicado: calcularPrecioUnitario(itemExistente.item, nuevaCantidad),
-        };
-        return nuevoCarrito;
-      });
-    } else {
-      const nuevoItem: ItemVenta = {
-        item: itemToAdd,
-        cantidad: cantidadToAdd,
-        precioUnitarioAplicado: precioUnitario,
+      if (indiceExistente >= 0) {
+        setCarrito((prevCarrito) => {
+          const nuevoCarrito = [...prevCarrito]
+          const itemExistente = nuevoCarrito[indiceExistente]
+          const nuevaCantidad = itemExistente.cantidad + cantidadToAdd
+          nuevoCarrito[indiceExistente] = {
+            ...itemExistente,
+            cantidad: nuevaCantidad,
+            precioUnitarioAplicado: calcularPrecioUnitario(itemExistente.item, nuevaCantidad),
+          }
+          return nuevoCarrito
+        })
+      } else {
+        const nuevoItem: ItemVenta = {
+          item: itemToAdd,
+          cantidad: cantidadToAdd,
+          precioUnitarioAplicado: precioUnitario,
+        }
+        setCarrito((prevCarrito) => [...prevCarrito, nuevoItem])
       }
-      setCarrito((prevCarrito) => [...prevCarrito, nuevoItem])
-    }
-  }, [carrito]); // Depende del estado 'carrito'
+    },
+    [carrito],
+  ) // Depende del estado 'carrito'
 
   // Función que se llama cuando se completa un escaneo
-  const procesarCodigoDeBarras = useCallback(async (codigo: string) => {
-    try {
-      const productoEncontrado = await buscarProductoPorCodigo(codigo);
-      if (productoEncontrado) {
-        añadirItemAlCarrito(productoEncontrado, 1);
-        setBusquedaItem('');
-        toast.info(`Se agregó ${productoEncontrado.nombre} al carrito`)
-      } else {
-        toast.error(`El código ${codigo} no pertenece a ningún producto.`);
+  const procesarCodigoDeBarras = useCallback(
+    async (codigo: string) => {
+      try {
+        const productoEncontrado = await buscarProductoPorCodigo(codigo)
+        if (productoEncontrado) {
+          añadirItemAlCarrito(productoEncontrado, 1)
+          setBusquedaItem("")
+          toast.info(`Se agregó ${productoEncontrado.nombre} al carrito`)
+        } else {
+          toast.error(`El código ${codigo} no pertenece a ningún producto.`)
+        }
+      } catch (error) {
+        console.log("Error al buscar el producto.")
       }
-    } catch (error) {
-      console.log("Error al buscar el producto.");
-    }
-  }, [añadirItemAlCarrito]);
+    },
+    [añadirItemAlCarrito],
+  )
 
   // useEffect que escucha el teclado
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (timerRef.current) clearTimeout(timerRef.current)
 
       if (e.key === "Enter") {
         if (codigoDeBarras.length > 5) {
-          e.preventDefault();
-          procesarCodigoDeBarras(codigoDeBarras);
+          e.preventDefault()
+          procesarCodigoDeBarras(codigoDeBarras)
         }
-        setCodigoDeBarras("");
+        setCodigoDeBarras("")
       } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        setCodigoDeBarras((prevCodigo) => prevCodigo + e.key);
+        setCodigoDeBarras((prevCodigo) => prevCodigo + e.key)
       }
 
       timerRef.current = window.setTimeout(() => {
-        setCodigoDeBarras("");
-      }, 100); // Aumentado a 100ms para más flexibilidad
-    };
+        setCodigoDeBarras("")
+      }, 100) // Aumentado a 100ms para más flexibilidad
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown)
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [codigoDeBarras, procesarCodigoDeBarras]);
+      window.removeEventListener("keydown", handleKeyDown)
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [codigoDeBarras, procesarCodigoDeBarras])
   // --- FIN DE LA LÓGICA DEL LECTOR ---
 
   // Cargar datos iniciales
@@ -134,7 +138,6 @@ const PaginaVentas: React.FC = () => {
 
         setCatalogo(catalogoData)
         setMetodosDePago(metodosData)
-
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error al cargar datos")
       } finally {
@@ -146,31 +149,29 @@ const PaginaVentas: React.FC = () => {
   }, [idVenta])
 
   const itemsFiltrados = useMemo(() => {
-    if (!busquedaItem) return [];
-    return catalogo.filter((item) =>
-      item.nombre.toLowerCase().includes(busquedaItem.toLowerCase())
-    );
-  }, [catalogo, busquedaItem]);
+    if (!busquedaItem) return []
+    return catalogo.filter((item) => item.nombre.toLowerCase().includes(busquedaItem.toLowerCase()))
+  }, [catalogo, busquedaItem])
 
   useEffect(() => {
-    setActiveIndex(-1);
-  }, [itemsFiltrados]);
+    setActiveIndex(-1)
+  }, [itemsFiltrados])
 
   useEffect(() => {
     // Verificamos si hay un elemento activo y si el contenedor existe
     if (activeIndex >= 0 && dropdownRef.current) {
       // Buscamos el hijo del contenedor que corresponde al índice activo
-      const activeItem = dropdownRef.current.children[activeIndex] as HTMLElement;
+      const activeItem = dropdownRef.current.children[activeIndex] as HTMLElement
 
       if (activeItem) {
         // Le pedimos al navegador que mueva el scroll para que este item sea visible
         activeItem.scrollIntoView({
-          block: 'nearest', // Se desplazará lo mínimo necesario para que sea visible
-          behavior: 'smooth' // Le da una animación suave al scroll
-        });
+          block: "nearest", // Se desplazará lo mínimo necesario para que sea visible
+          behavior: "smooth", // Le da una animación suave al scroll
+        })
       }
     }
-  }, [activeIndex]); // Se dispara solo cuando cambia el activeIndex
+  }, [activeIndex]) // Se dispara solo cuando cambia el activeIndex
 
   // Calcular precio unitario aplicado según ofertas
   const calcularPrecioUnitario = (item: ItemCatalogo, cantidad: number): number => {
@@ -182,52 +183,52 @@ const PaginaVentas: React.FC = () => {
 
   // --- 2. AÑADIMOS LA NUEVA LÓGICA DE SELECCIÓN ---
   const añadirItem = (itemToAdd: ItemCatalogo | null, cantidadToAdd: number): void => {
-    if (!itemToAdd || cantidadToAdd <= 0) return;
+    if (!itemToAdd || cantidadToAdd <= 0) return
 
-    const precioUnitario = calcularPrecioUnitario(itemToAdd, cantidadToAdd);
+    const precioUnitario = calcularPrecioUnitario(itemToAdd, cantidadToAdd)
     const indiceExistente = carrito.findIndex(
-      (carritoItem) => carritoItem.item.id === itemToAdd.id && carritoItem.item.tipo === itemToAdd.tipo
-    );
+      (carritoItem) => carritoItem.item.id === itemToAdd.id && carritoItem.item.tipo === itemToAdd.tipo,
+    )
 
     if (indiceExistente >= 0) {
       setCarrito((prev) =>
         prev.map((item, index) => {
           if (index === indiceExistente) {
-            const nuevaCantidad = item.cantidad + cantidadToAdd;
+            const nuevaCantidad = item.cantidad + cantidadToAdd
             return {
               ...item,
               cantidad: nuevaCantidad,
               precioUnitarioAplicado: calcularPrecioUnitario(item.item, nuevaCantidad),
-            };
+            }
           }
-          return item;
-        })
-      );
+          return item
+        }),
+      )
     } else {
       const nuevoItem: ItemVenta = {
         item: itemToAdd,
         cantidad: cantidadToAdd,
         precioUnitarioAplicado: precioUnitario,
-      };
-      setCarrito((prev) => [...prev, nuevoItem]);
+      }
+      setCarrito((prev) => [...prev, nuevoItem])
     }
-  };
+  }
 
   // Añadir item al carrito
   const añadirManualmente = (): void => {
-    if (!itemSeleccionado || cantidad <= 0) return;
-    añadirItem(itemSeleccionado, cantidad);
+    if (!itemSeleccionado || cantidad <= 0) return
+    añadirItem(itemSeleccionado, cantidad)
 
     // Limpiar selección del buscador manual
-    setBusquedaItem("");
-    setItemSeleccionado(null);
-    setCantidad(1);
-    setMostrarSugerencias(false);
+    setBusquedaItem("")
+    setItemSeleccionado(null)
+    setCantidad(1)
+    setMostrarSugerencias(false)
 
     if (inputBusquedaRef.current) {
-      inputBusquedaRef.current.focus();
+      inputBusquedaRef.current.focus()
     }
-  };
+  }
 
   // Modificar cantidad en el carrito
   const modificarCantidadCarrito = (indice: number, nuevaCantidad: number): void => {
@@ -253,7 +254,8 @@ const PaginaVentas: React.FC = () => {
 
   // Calcular total general
   const totalGeneral = carrito.reduce((total, item) => total + item.cantidad * item.precioUnitarioAplicado, 0)
-  const totalConDescuento = Math.max(0, totalGeneral - descuento)
+  const descuentoMonto = tipoDescuento === "PORCENTAJE" ? Math.round((totalGeneral * descuento) / 100) : descuento
+  const totalConDescuento = Math.max(0, totalGeneral - descuentoMonto)
 
   // Finalizar venta
   const finalizarVenta = async (): Promise<void> => {
@@ -268,7 +270,7 @@ const PaginaVentas: React.FC = () => {
 
       const ventaDTO: VentaDTO = {
         metodoDePago: metodoPagoSeleccionado,
-        descuento: descuento,
+        descuento: descuentoMonto,
         detalles: carrito.map((item) => ({
           ...(item.item.tipo === "PRODUCTO" ? { idProducto: item.item.id } : { idPromocion: item.item.id }),
           cantidad: item.cantidad,
@@ -277,12 +279,11 @@ const PaginaVentas: React.FC = () => {
 
       await crearVenta(ventaDTO)
 
-      toast.success('¡Venta realizada con éxito!');
+      toast.success("¡Venta realizada con éxito!")
 
-      setCarrito([]);
-      setMetodoPagoSeleccionado("");
-      setDescuento(0);
-
+      setCarrito([])
+      setMetodoPagoSeleccionado("")
+      setDescuento(0)
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.error(err.response.data)
@@ -290,7 +291,7 @@ const PaginaVentas: React.FC = () => {
         console.error("Error al procesar la venta")
       }
     } finally {
-      setProcesandoVenta(false);
+      setProcesandoVenta(false)
     }
   }
 
@@ -340,31 +341,29 @@ const PaginaVentas: React.FC = () => {
               }}
               onFocus={() => setMostrarSugerencias(true)}
               onKeyDown={(e) => {
-                if (itemsFiltrados.length === 0) return;
+                if (itemsFiltrados.length === 0) return
 
                 switch (e.key) {
                   case "ArrowDown":
-                    e.preventDefault();
-                    setActiveIndex((prev) => Math.min(prev + 1, itemsFiltrados.length - 1));
-                    break;
+                    e.preventDefault()
+                    setActiveIndex((prev) => Math.min(prev + 1, itemsFiltrados.length - 1))
+                    break
 
                   case "ArrowUp":
-                    e.preventDefault();
-                    setActiveIndex((prev) => Math.max(0, prev - 1));
-                    break;
+                    e.preventDefault()
+                    setActiveIndex((prev) => Math.max(0, prev - 1))
+                    break
 
                   case "Enter":
-                    e.preventDefault();
-                    const itemASelleccionar = activeIndex >= 0
-                      ? itemsFiltrados[activeIndex]
-                      : itemsFiltrados[0];
+                    e.preventDefault()
+                    const itemASelleccionar = activeIndex >= 0 ? itemsFiltrados[activeIndex] : itemsFiltrados[0]
 
-                    seleccionarItem(itemASelleccionar);
-                    break;
+                    seleccionarItem(itemASelleccionar)
+                    break
 
                   case "Escape":
-                    setMostrarSugerencias(false);
-                    break;
+                    setMostrarSugerencias(false)
+                    break
                 }
               }}
             />
@@ -443,7 +442,7 @@ const PaginaVentas: React.FC = () => {
                 )}
               </div>
               <div className="font-semibold text-green-600 mt-1">
-                Subtotal: {formatCurrency((calcularPrecioUnitario(itemSeleccionado, cantidad) * cantidad))}
+                Subtotal: {formatCurrency(calcularPrecioUnitario(itemSeleccionado, cantidad) * cantidad)}
               </div>
             </div>
           )}
@@ -537,16 +536,51 @@ const PaginaVentas: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Descuento</label>
-                <InputMoneda
-                  value={descuento}
-                  onValueChange={(nuevoValor) => {
-                    const valorValidado = Math.min(nuevoValor || 0, totalGeneral);
-                    setDescuento(valorValidado);
-                  }}
-                  className="w-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="$ 0"
-                />
+                {tipoDescuento === "MONTO" ? (
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Descuento por monto ($)
+                  </label>
+                ) : (
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Descuento por porcentaje (%)
+                  </label>
+                )}
+                <div className="flex gap-2">
+                  {tipoDescuento === "MONTO" ? (
+                    <InputMoneda
+                      value={descuento}
+                      onValueChange={(nuevoValor) => {
+                        const valorValidado = Math.min(nuevoValor || 0, totalGeneral)
+                        setDescuento(valorValidado)
+                      }}
+                      className="w-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="$ 0"
+                    />
+                  ) : (
+                    <InputPorcentaje
+                      value={descuento}
+                      onValueChange={(nuevoValor) => setDescuento(nuevoValor)} // El componente ya devuelve el número validado (0-100)
+                      className="w-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+                      placeholder="0 %"
+                    />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTipoDescuento(tipoDescuento === "MONTO" ? "PORCENTAJE" : "MONTO")
+                      setDescuento(0)
+                    }}
+                    className="px-3 py-2 rounded-lg hover:bg-gray-100"
+                    title={tipoDescuento === "MONTO" ? "Cambiar a porcentaje" : "Cambiar a monto"}
+                  >
+                    <RefreshCw size={20} className="text-gray-700" />
+                    {/* {tipoDescuento === "MONTO" ? (
+                      <DollarSign size={20} className="text-gray-700" />
+                    ) : (
+                      <Percent size={20} className="text-gray-700" />
+                    )} */}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -557,8 +591,10 @@ const PaginaVentas: React.FC = () => {
               </div>
               {descuento > 0 && (
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-medium text-red-600">Descuento:</span>
-                  <span className="text-lg font-semibold text-red-600">-{formatCurrency(descuento)}</span>
+                  <span className="text-lg font-medium text-red-600">
+                    Descuento {tipoDescuento === "PORCENTAJE" && `(${descuento}%)`}:
+                  </span>
+                  <span className="text-lg font-semibold text-red-600">-{formatCurrency(descuentoMonto)}</span>
                 </div>
               )}
               <div className="flex justify-between items-center border-t border-gray-200 pt-2">

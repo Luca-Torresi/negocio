@@ -197,10 +197,9 @@ public class ReporteService {
         List<ReporteVentasDTO> datosDetallados = detalleVentaRepository.findDatosParaReporteVentas(inicioDelMes, finDelMes);
         List<ReporteProductosDTO> datosInventario = productoRepository.findDatosParaReportesMensuales(); // <-- Usaremos este nombre
         BigDecimal totalRecaudadoReal = ventaRepository.findRecaudadoVentasDiarias(inicioDelMes, finDelMes);
-        BigDecimal costoTotalVentas = detalleVentaRepository.findCostoTotalDeVentasEnRango(inicioDelMes, finDelMes);
 
         // --- CÁLCULOS PARA RESÚMENES ---
-        BigDecimal gananciaTotalReal = totalRecaudadoReal.subtract(costoTotalVentas);
+        BigDecimal gananciaTotalReal = detalleVentaRepository.findGananciaNetaVentasEnRango(inicioDelMes, finDelMes);
         BigDecimal totalValorInventario = datosInventario.stream()
                 .map(p -> p.getCosto().multiply(BigDecimal.valueOf(p.getStock())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

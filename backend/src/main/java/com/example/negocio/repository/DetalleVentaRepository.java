@@ -227,4 +227,36 @@ public interface DetalleVentaRepository extends JpaRepository<DetalleVenta, Long
             @Param("fechaInicio") LocalDateTime fechaInicio,
             @Param("fechaFin") LocalDateTime fechaFin
     );
+
+    @Query(
+            value = "SELECT COALESCE(SUM(t.ganancia_linea), 0) " +
+                    "FROM ( " +
+                    "    SELECT SUM((dv.precioUnitario - COALESCE((SELECT dc.costoUnitario FROM detalleCompra dc JOIN compra c ON dc.idCompra = c.idCompra WHERE dc.idProducto = p.idProducto AND c.fechaHora <= v.fechaHora ORDER BY c.fechaHora DESC LIMIT 1), p.costo)) * dv.cantidad) AS ganancia_linea " +
+                    "    FROM detalleVenta dv JOIN producto p ON dv.idProducto = p.idProducto JOIN venta v ON dv.idVenta = v.idVenta " +
+                    "    WHERE dv.idProducto IS NOT NULL AND v.fechaHora >= :fechaInicio AND v.fechaHora < :fechaFin " +
+                    " " +
+                    "    UNION ALL " +
+                    " " +
+                    "    SELECT SUM((dv.precioUnitario * dv.cantidad) - (t_costo_promo.costo_total_promo * dv.cantidad)) AS ganancia_linea " +
+                    "    FROM detalleVenta dv JOIN venta v ON dv.idVenta = v.idVenta JOIN promocion promo ON dv.idPromocion = promo.idPromocion " +
+                    "    JOIN ( " +
+                    "        SELECT " +
+                    "            dp.idPromocion, " +
+                    "            v_outer.idVenta, " +
+                    "            SUM(COALESCE((SELECT dc_inner.costoUnitario FROM detalleCompra dc_inner JOIN compra c_inner ON dc_inner.idCompra = c_inner.idCompra WHERE dc_inner.idProducto = p_inner.idProducto AND c_inner.fechaHora <= v_outer.fechaHora ORDER BY c_inner.fechaHora DESC LIMIT 1), p_inner.costo) * dp.cantidad) AS costo_total_promo " +
+                    "        FROM detallePromocion dp " +
+                    "        JOIN producto p_inner ON dp.idProducto = p_inner.idProducto " +
+                    "        JOIN detalleVenta dv_outer ON dp.idPromocion = dv_outer.idPromocion " +
+                    "        JOIN venta v_outer ON dv_outer.idVenta = v_outer.idVenta "+
+                    "        WHERE v_outer.fechaHora >= :fechaInicio AND v_outer.fechaHora < :fechaFin " +
+                    "        GROUP BY dp.idPromocion, v_outer.idVenta  " +
+                    "    ) AS t_costo_promo ON promo.idPromocion = t_costo_promo.idPromocion AND v.idVenta = t_costo_promo.idVenta " + // <-- Usamos la columna del alias t_costo_promo
+                    "    WHERE dv.idPromocion IS NOT NULL AND v.fechaHora >= :fechaInicio AND v.fechaHora < :fechaFin " +
+                    ") AS t",
+            nativeQuery = true
+    )
+    BigDecimal findGananciaNetaVentasEnRango(
+            @Param("fechaInicio") LocalDateTime fechaInicio,
+            @Param("fechaFin") LocalDateTime fechaFin
+    );
 }

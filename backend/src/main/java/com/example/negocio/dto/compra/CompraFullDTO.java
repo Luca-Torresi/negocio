@@ -1,5 +1,6 @@
 package com.example.negocio.dto.compra;
 
+import com.example.negocio.enums.EstadoCompra;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,7 @@ public class CompraFullDTO {
     private BigDecimal total;
     private Integer descuento;
     private LocalDateTime fechaHora;
+    private EstadoCompra estadoCompra;
     private String proveedor;
     private String usuario;
     private List<DetalleCompraFullDTO> detalles;

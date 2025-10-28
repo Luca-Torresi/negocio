@@ -1,5 +1,6 @@
 package com.example.negocio.dto.compra;
 
+import com.example.negocio.enums.EstadoCompra;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -13,7 +14,6 @@ import java.util.List;
 public class CompraDTO {
     @NotNull
     private Long idProveedor;
-    private Integer descuento;
     @Valid @NotEmpty
     private List<DetalleCompraDTO> detalles;
 }

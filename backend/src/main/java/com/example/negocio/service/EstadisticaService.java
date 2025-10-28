@@ -153,20 +153,31 @@ public class EstadisticaService {
     }
 
     public List<KpiDTO> obtenerKpis() {
+        LocalDate hoy = LocalDate.now();
+        LocalDate primerDiaDelMes = hoy.withDayOfMonth(1);
+        LocalDateTime inicioMesActual = primerDiaDelMes.atStartOfDay();
+        LocalDateTime inicioMesSiguiente = primerDiaDelMes.plusMonths(1).atStartOfDay();
+
+        BigDecimal gananciaNeta = detalleVentaRepository.findGananciaNetaVentasEnRango(inicioMesActual, inicioMesSiguiente);
         BigDecimal totalRecaudado = ventaRepository.findTotalRecaudadoMesActual();
         BigDecimal totalGastos = gastoRepository.findTotalGastosMesActual();
         BigDecimal totalCompras = compraRepository.findTotalComprasMesActual();
         Long cantidadVentas = ventaRepository.countVentasMesActual();
         BigDecimal ticketPromedio = ventaRepository.findTicketPromedioMesActual();
         Long productosStockBajo = productoRepository.countProductosConStockBajo();
+        BigDecimal enStock = productoRepository.findValorTotalEnStock();
+        BigDecimal enPosiblesVentas = productoRepository.findValorTotalEnPosiblesVentas();
 
         List<KpiDTO> kpis = new ArrayList<>();
+        kpis.add(new KpiDTO("Ganancia este Mes", gananciaNeta));
         kpis.add(new KpiDTO("Recaudado este Mes", totalRecaudado));
-        kpis.add(new KpiDTO("Gastos Fijos del Mes", totalGastos));
+        kpis.add(new KpiDTO("Gastos del Mes", totalGastos));
         kpis.add(new KpiDTO("Compras del Mes", totalCompras));
         kpis.add(new KpiDTO("Ventas de este Mes", cantidadVentas));
         kpis.add(new KpiDTO("Ticket Promedio", ticketPromedio));
         kpis.add(new KpiDTO("Productos Bajo Stock", productosStockBajo));
+        kpis.add(new KpiDTO("En Stock", enStock));
+        kpis.add(new KpiDTO("En Posibles Ventas", enPosiblesVentas));
 
         return kpis;
     }

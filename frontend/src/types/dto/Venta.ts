@@ -33,6 +33,7 @@ export interface VentaDTO {
 export interface VentaHistorial {
   idVenta: number
   total: number
+  descuento: number
   metodoDePago: string
   usuario: string
   fechaHora: string  

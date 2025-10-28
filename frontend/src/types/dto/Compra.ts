@@ -1,4 +1,5 @@
 export interface DetalleCompra {
+  idProducto: number
   producto: string
   cantidad: number
   costoUnitario: number
@@ -8,10 +9,10 @@ export interface DetalleCompra {
 export interface Compra {
   idCompra: number
   total: number
-  descuento?: number | null
   fechaHora: string
   proveedor: string
   usuario: string
+  estadoCompra: string
   detalles: DetalleCompra[]
 }
 
@@ -25,9 +26,9 @@ export interface PaginaDeCompras {
 
 export interface CompraDTO {
   idProveedor: number
-  descuento?: number | null
   detalles: {
     idProducto: number
     cantidad: number
+    costoUnitario: number
   }[]
 }

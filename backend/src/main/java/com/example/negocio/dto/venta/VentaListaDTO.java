@@ -13,6 +13,7 @@ import java.util.List;
 public class VentaListaDTO {
     private Long idVenta;
     private BigDecimal total;
+    private BigDecimal descuento;
     private LocalDateTime fechaHora;
     private MetodoDePago metodoDePago;
     private List<DetalleVentaListaDTO> detalles;

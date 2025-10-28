@@ -22,10 +22,10 @@ export const InputMoneda: React.FC<Props> = ({ value, onValueChange, ...props })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
-    
+
     // 1. Limpiamos el input: quitamos todo lo que no sea un número.
     const numeroLimpio = Number(inputValue.replace(/[^0-9]/g, ''));
-    
+
     // 2. Actualizamos el valor numérico en el estado del componente padre.
     //    Dividimos por 100 si no manejas centavos, o puedes ajustarlo.
     //    Para este caso, asumimos que no hay centavos, así que no dividimos.
@@ -42,8 +42,8 @@ export const InputMoneda: React.FC<Props> = ({ value, onValueChange, ...props })
 
   return (
     <input
-      type="text" // Usamos tipo 'text' para permitir el formato
-      inputMode="decimal" // Ayuda en móviles a mostrar el teclado numérico
+      type="text" 
+      inputMode="decimal" 
       value={displayValue}
       onChange={handleChange}
       onBlur={handleBlur}

@@ -18,6 +18,7 @@ public class Venta {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idVenta;
     private BigDecimal total;
+    private BigDecimal descuento;
     private LocalDateTime fechaHora;
 
     @Enumerated(EnumType.STRING)

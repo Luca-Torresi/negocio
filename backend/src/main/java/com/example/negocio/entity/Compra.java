@@ -1,5 +1,6 @@
 package com.example.negocio.entity;
 
+import com.example.negocio.enums.EstadoCompra;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,9 @@ public class Compra {
     private Long idCompra;
     private BigDecimal total;
     private LocalDateTime fechaHora;
-    private Integer descuento;
+
+    @Enumerated(EnumType.STRING)
+    private EstadoCompra estadoCompra;
 
     @ManyToOne @JoinColumn(name = "idProveedor")
     private Proveedor proveedor;

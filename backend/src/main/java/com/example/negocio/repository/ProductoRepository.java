@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,4 +25,14 @@ public interface ProductoRepository extends JpaRepository<Producto, Long>, JpaSp
     @Query(value = "SELECT nombre AS producto, stock, precio, costo FROM producto",
             nativeQuery = true)
     List<ReporteProductosDTO> findDatosParaReportesMensuales();
+
+    // Calcula el valor total del inventario activo al costo
+    @Query("SELECT COALESCE(SUM(p.costo * p.stock), 0) " +
+            "FROM Producto p WHERE p.estado = true")
+    BigDecimal findValorTotalEnStock();
+
+    // Calcula el valor total del inventario activo al precio de venta
+    @Query("SELECT COALESCE(SUM(p.precio * p.stock), 0) " +
+            "FROM Producto p WHERE p.estado = true")
+    BigDecimal findValorTotalEnPosiblesVentas();
 }
