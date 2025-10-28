@@ -73,14 +73,7 @@ export const ModalDetallesCompra: React.FC<Props> = ({ isOpen, onClose, compra }
                   <span className="font-medium">
                     {compra.detalles.reduce((total, detalle) => total + detalle.cantidad, 0)}
                   </span>
-                </div>
-
-                {compra.descuento && compra.descuento > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Descuento Aplicado:</span>
-                    <span className="font-medium text-red-600">{compra.descuento}%</span>
-                  </div>
-                )}
+                </div>                
 
                 <div className="border-t pt-2 mt-2">
                   <div className="flex justify-between">
