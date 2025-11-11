@@ -116,6 +116,16 @@ export const ModalDetallesVenta: React.FC<Props> = ({ isOpen, onClose, venta }) 
                       </td>
                     </tr>
                   ))}
+                  {venta.montoAdicional !== null && venta.montoAdicional > 0 && (
+                    <tr className="hover:bg-gray-50 bg-gray-50">
+                      <td className="px-6 py-4 text-sm text-gray-900 font-medium">Otros</td>
+                      <td className="px-6 py-4 text-sm text-gray-400 text-center">-</td>
+                      <td className="px-6 py-4 text-sm text-gray-400 text-right">-</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 font-semibold text-right">
+                        {formatCurrency(venta.montoAdicional)}
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
                 <tfoot className="bg-gray-50">
                   <tr>

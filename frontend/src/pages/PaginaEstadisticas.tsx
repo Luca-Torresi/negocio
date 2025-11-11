@@ -502,7 +502,10 @@ const PaginaEstadisticas: React.FC = () => {
                 className="absolute left-0 top-0 h-full bg-secondary transition-all duration-300"
                 style={{ width: `${porcentajeGanancia}%` }}
               />
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div
+                className="absolute top-0 h-full flex items-center"
+                style={{ left: `${porcentajeGanancia / 2}%`, transform: "translateX(-50%)" }}
+              >
                 <span className="text-sm font-medium text-white drop-shadow-sm">
                   {porcentajeGanancia.toFixed(1)}%
                 </span>
@@ -723,7 +726,6 @@ const PaginaEstadisticas: React.FC = () => {
             />
           )}
         </div>
-
       </div>
 
       <ModalExportarReporte isOpen={modalExportarAbierto} onClose={() => setModalExportarAbierto(false)} />

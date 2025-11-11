@@ -20,8 +20,9 @@ export interface ItemVenta {
 
 // DTO para enviar al backend al crear/modificar una venta
 export interface VentaDTO {
-  metodoDePago: string 
+  metodoDePago: string
   descuento: number
+  montoAdicional: number | null
   detalles: {
     idProducto?: number
     idPromocion?: number
@@ -34,17 +35,18 @@ export interface VentaHistorial {
   idVenta: number
   total: number
   descuento: number
+  montoAdicional: number | null
   metodoDePago: string
   usuario: string
-  fechaHora: string  
+  fechaHora: string
   detalles: DetalleVentaHistorial[]
 }
 
 // Detalle de venta para el historial
-export interface DetalleVentaHistorial {  
+export interface DetalleVentaHistorial {
   nombre: string
   cantidad: number
-  precioUnitario: number  
+  precioUnitario: number
 }
 
 // Respuesta paginada de ventas
@@ -55,4 +57,3 @@ export interface PaginaDeVentas {
   number: number
   size: number
 }
-

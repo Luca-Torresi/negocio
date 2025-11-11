@@ -64,6 +64,11 @@ public class VentaService {
                 .map(detalle -> detalle.getPrecioUnitario().multiply(new BigDecimal(detalle.getCantidad())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        BigDecimal montoAdicional = dto.getMontoAdicional();
+        if(montoAdicional != null && montoAdicional.compareTo(BigDecimal.ZERO) > 0) {
+            total = total.add(montoAdicional);
+        }
+
         BigDecimal descuento = dto.getDescuento();
         if (descuento != null && descuento.compareTo(BigDecimal.ZERO) > 0) {
             total = total.subtract(descuento);

@@ -22,8 +22,10 @@ const PaginaVentas: React.FC = () => {
   const [metodosDePago, setMetodosDePago] = useState<string[]>([])
   const [carrito, setCarrito] = useState<ItemVenta[]>([])
   const [metodoPagoSeleccionado, setMetodoPagoSeleccionado] = useState<string>("")
-  const [descuento, setDescuento] = useState<number>(0)
+  const [descuento, setDescuento] = useState<number | null>(null)
   const [tipoDescuento, setTipoDescuento] = useState<"MONTO" | "PORCENTAJE">("MONTO")
+  const [montoAdicional, setMontoAdicional] = useState<number | null>(null)
+  const [inputOtros, setInputOtros] = useState<number | null>(null)
 
   // Estados para el constructor de venta
   const [busquedaItem, setBusquedaItem] = useState<string>("")
@@ -45,6 +47,7 @@ const PaginaVentas: React.FC = () => {
   }
 
   // --- 3. INICIO DE LA LÓGICA DEL LECTOR DE CÓDIGO DE BARRAS ---
+
   const [codigoDeBarras, setCodigoDeBarras] = useState("")
   const timerRef = useRef<number | null>(null)
 
@@ -252,9 +255,22 @@ const PaginaVentas: React.FC = () => {
     setCarrito(carrito.filter((_, i) => i !== indice))
   }
 
+  const agregarMontoOtros = (): void => {
+    if (!inputOtros || inputOtros <= 0) return
+
+    setMontoAdicional((prev) => (prev || 0) + inputOtros)
+    setInputOtros(null)
+  }
+
+  const eliminarOtros = (): void => {
+    setMontoAdicional(null)
+  }
+
   // Calcular total general
-  const totalGeneral = carrito.reduce((total, item) => total + item.cantidad * item.precioUnitarioAplicado, 0)
-  const descuentoMonto = tipoDescuento === "PORCENTAJE" ? Math.round((totalGeneral * descuento) / 100) : descuento
+  const totalGeneral =
+    carrito.reduce((total, item) => total + item.cantidad * item.precioUnitarioAplicado, 0) + (montoAdicional || 0)
+  const descuentoMonto =
+    tipoDescuento === "PORCENTAJE" ? Math.round((totalGeneral * (descuento || 0)) / 100) : descuento || 0
   const totalConDescuento = Math.max(0, totalGeneral - descuentoMonto)
 
   // Finalizar venta
@@ -271,6 +287,7 @@ const PaginaVentas: React.FC = () => {
       const ventaDTO: VentaDTO = {
         metodoDePago: metodoPagoSeleccionado,
         descuento: descuentoMonto,
+        montoAdicional: montoAdicional,
         detalles: carrito.map((item) => ({
           ...(item.item.tipo === "PRODUCTO" ? { idProducto: item.item.id } : { idPromocion: item.item.id }),
           cantidad: item.cantidad,
@@ -283,7 +300,9 @@ const PaginaVentas: React.FC = () => {
 
       setCarrito([])
       setMetodoPagoSeleccionado("")
-      setDescuento(0)
+      setDescuento(null)
+      setMontoAdicional(null)
+      setInputOtros(null)
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.error(err.response.data)
@@ -446,6 +465,29 @@ const PaginaVentas: React.FC = () => {
               </div>
             </div>
           )}
+
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="flex gap-3 items-end mr-32">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Otros</label>
+                <InputMoneda
+                  value={inputOtros}
+                  onValueChange={setInputOtros}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="$ 0"
+                />
+              </div>
+              <button
+                onClick={agregarMontoOtros}
+                disabled={!inputOtros || inputOtros <= 0}
+                className="px-6 py-3 bg-secondary text-white rounded-lg hover:bg-secondary-dark disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+              >
+                <Plus size={16} className="mr-1" />
+                Añadir
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 italic mt-2">Productos que no se encuentran cargados en el sistema</p>
+          </div>
         </div>
 
         {/* Columna Derecha: Carrito/Ticket */}
@@ -457,7 +499,7 @@ const PaginaVentas: React.FC = () => {
 
           {/* Tabla de items */}
           <div className="mb-6">
-            {carrito.length === 0 ? (
+            {carrito.length === 0 && !montoAdicional ? (
               <div className="text-center text-gray-500 py-8">No hay items en el carrito</div>
             ) : (
               <div className="overflow-x-auto">
@@ -510,6 +552,24 @@ const PaginaVentas: React.FC = () => {
                         </td>
                       </tr>
                     ))}
+                    {montoAdicional !== null && montoAdicional > 0 && (
+                      <tr className="border-b border-gray-100 bg-gray-50">
+                        <td className="py-3">
+                          <div>
+                            <div className="font-medium mb-1">Otros</div>
+                            <span className="text-xs px-2 py-1 rounded bg-purple-100 text-purple-800">ADICIONAL</span>
+                          </div>
+                        </td>
+                        <td className="py-3 text-center text-gray-400">-</td>
+                        <td className="py-3 text-center text-gray-400">-</td>
+                        <td className="py-3 text-center font-semibold">{formatCurrency(montoAdicional)}</td>
+                        <td className="py-3 text-center">
+                          <button onClick={eliminarOtros} className="text-red-600 hover:text-red-800">
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -537,13 +597,9 @@ const PaginaVentas: React.FC = () => {
 
               <div>
                 {tipoDescuento === "MONTO" ? (
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Descuento por monto ($)
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Descuento por monto ($)</label>
                 ) : (
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Descuento por porcentaje (%)
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Descuento por porcentaje (%)</label>
                 )}
                 <div className="flex gap-2">
                   {tipoDescuento === "MONTO" ? (
@@ -558,7 +614,7 @@ const PaginaVentas: React.FC = () => {
                     />
                   ) : (
                     <InputPorcentaje
-                      value={descuento}
+                      value={descuento ?? 0}
                       onValueChange={(nuevoValor) => setDescuento(nuevoValor)} // El componente ya devuelve el número validado (0-100)
                       className="w-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
                       placeholder="0 %"
@@ -568,17 +624,12 @@ const PaginaVentas: React.FC = () => {
                     type="button"
                     onClick={() => {
                       setTipoDescuento(tipoDescuento === "MONTO" ? "PORCENTAJE" : "MONTO")
-                      setDescuento(0)
+                      setDescuento(null)
                     }}
                     className="px-3 py-2 rounded-lg hover:bg-gray-100"
                     title={tipoDescuento === "MONTO" ? "Cambiar a porcentaje" : "Cambiar a monto"}
                   >
                     <RefreshCw size={20} className="text-gray-700" />
-                    {/* {tipoDescuento === "MONTO" ? (
-                      <DollarSign size={20} className="text-gray-700" />
-                    ) : (
-                      <Percent size={20} className="text-gray-700" />
-                    )} */}
                   </button>
                 </div>
               </div>
@@ -589,7 +640,7 @@ const PaginaVentas: React.FC = () => {
                 <span className="text-lg font-medium">Subtotal:</span>
                 <span className="text-lg font-semibold text-gray-700">{formatCurrency(totalGeneral)}</span>
               </div>
-              {descuento > 0 && (
+              {descuento !== null && descuento > 0 && (
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-medium text-red-600">
                     Descuento {tipoDescuento === "PORCENTAJE" && `(${descuento}%)`}:

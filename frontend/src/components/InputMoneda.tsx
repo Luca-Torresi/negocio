@@ -1,53 +1,55 @@
-// src/components/InputMoneda.tsx
+"use client"
 
-import React, { useState, useEffect } from 'react';
-import { formatCurrency } from '../utils/numberFormatUtils'; // Importamos tu función
+import type React from "react"
+import { useState, useEffect, useRef } from "react"
+import { formatCurrency } from "../utils/numberFormatUtils"
 
-interface Props extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
-  value: number | null;
-  onValueChange: (value: number | null) => void;
+interface Props extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
+  value: number | null
+  onValueChange: (value: number | null) => void
 }
 
 export const InputMoneda: React.FC<Props> = ({ value, onValueChange, ...props }) => {
-  const [displayValue, setDisplayValue] = useState('');
+  const [displayValue, setDisplayValue] = useState("")
+  const isTypingRef = useRef(false)
 
-  // Sincroniza el valor mostrado cuando el valor numérico cambia desde fuera
   useEffect(() => {
-    if (value !== null && value !== undefined) {
-      setDisplayValue(formatCurrency(value));
-    } else {
-      setDisplayValue('');
+    if (!isTypingRef.current) {
+      if (value !== null && value !== undefined) {
+        setDisplayValue(formatCurrency(value))
+      } else {
+        setDisplayValue("")
+      }
     }
-  }, [value]);
+  }, [value])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
+    isTypingRef.current = true
 
-    // 1. Limpiamos el input: quitamos todo lo que no sea un número.
-    const numeroLimpio = Number(inputValue.replace(/[^0-9]/g, ''));
+    const inputValue = e.target.value
+    const numeroLimpio = Number(inputValue.replace(/[^0-9]/g, ""))
 
-    // 2. Actualizamos el valor numérico en el estado del componente padre.
-    //    Dividimos por 100 si no manejas centavos, o puedes ajustarlo.
-    //    Para este caso, asumimos que no hay centavos, así que no dividimos.
-    onValueChange(numeroLimpio || null);
+    if (numeroLimpio > 0) {
+      setDisplayValue(formatCurrency(numeroLimpio))
+    } else {
+      setDisplayValue("")
+    }
 
-    // 3. Actualizamos el valor visible formateado.
-    setDisplayValue(formatCurrency(numeroLimpio));
-  };
+    onValueChange(numeroLimpio || null)
+  }
 
   const handleBlur = () => {
-    // Al salir del input, nos aseguramos de que el formato sea el correcto
-    setDisplayValue(formatCurrency(value));
+    isTypingRef.current = false
   }
 
   return (
     <input
-      type="text" 
-      inputMode="decimal" 
+      type="text"
+      inputMode="decimal"
       value={displayValue}
       onChange={handleChange}
       onBlur={handleBlur}
       {...props}
     />
-  );
-};
+  )
+}

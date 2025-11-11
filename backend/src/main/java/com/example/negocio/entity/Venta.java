@@ -20,6 +20,7 @@ public class Venta {
     private BigDecimal total;
     private BigDecimal descuento;
     private LocalDateTime fechaHora;
+    private BigDecimal montoAdicional;
 
     @Enumerated(EnumType.STRING)
     private MetodoDePago metodoDePago;

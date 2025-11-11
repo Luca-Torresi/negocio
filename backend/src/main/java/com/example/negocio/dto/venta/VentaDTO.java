@@ -19,4 +19,5 @@ public class VentaDTO {
     @Valid @NotEmpty
     private List<DetalleVentaDTO> detalles;
     private BigDecimal descuento;
+    private BigDecimal montoAdicional;
 }
