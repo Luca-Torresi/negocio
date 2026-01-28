@@ -1,5 +1,6 @@
 package com.example.negocio.service;
 
+import com.example.negocio.dto.reporte.ReporteMetodoDePagoDTO;
 import com.example.negocio.dto.reporte.ReporteProductosDTO;
 import com.example.negocio.dto.reporte.ReporteVentasDTO;
 import com.example.negocio.repository.DetalleVentaRepository;
@@ -31,11 +32,20 @@ public class ReporteService {
         LocalDateTime finDelDia = fecha.plusDays(1).atStartOfDay();
 
         List<ReporteVentasDTO> datosDetallados = detalleVentaRepository.findDatosParaReporteVentas(inicioDelDia, finDelDia);
+
         BigDecimal totalRecaudadoReal = ventaRepository.findRecaudadoVentasDiarias(inicioDelDia, finDelDia);
-        BigDecimal totalTeorico = datosDetallados.stream()
+
+        BigDecimal sumaProductosRegistrados = datosDetallados.stream()
                 .map(dto -> dto.getPrecio().multiply(BigDecimal.valueOf(dto.getCantidad())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalAdicionalesDiario = ventaRepository.sumMontoAdicionalPorFechas(inicioDelDia, finDelDia);
+
+        BigDecimal totalTeorico = sumaProductosRegistrados.add(totalAdicionalesDiario);
+
         BigDecimal totalDescuentos = totalTeorico.subtract(totalRecaudadoReal);
+
+        List<ReporteMetodoDePagoDTO> desglosePagos = ventaRepository.obtenerTotalesPorMetodoPago(inicioDelDia, finDelDia);
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream();) {
             Sheet sheet = workbook.createSheet();
@@ -49,13 +59,10 @@ public class ReporteService {
 
             CellStyle headerStyleLeft = workbook.createCellStyle();
             headerStyleLeft.setFont(headerFont);
-            headerStyleLeft.setBorderBottom(BorderStyle.THIN);
 
             CellStyle headerStyleCentered = workbook.createCellStyle();
             headerStyleCentered.cloneStyleFrom(headerStyleLeft);
             headerStyleCentered.setAlignment(HorizontalAlignment.CENTER);
-            headerStyleCentered.setBorderLeft(BorderStyle.THIN);
-            headerStyleCentered.setBorderRight(BorderStyle.THIN);
 
             CellStyle headerStyleRight = workbook.createCellStyle();
             headerStyleRight.cloneStyleFrom(headerStyleLeft);
@@ -63,43 +70,25 @@ public class ReporteService {
 
             // Estilo para filas de datos
             CellStyle dataRowStyle = workbook.createCellStyle();
-            dataRowStyle.setBorderBottom(BorderStyle.THIN);
 
             // Estilo para celdas de moneda
             CellStyle currencyCellStyle = workbook.createCellStyle();
-            currencyCellStyle.setDataFormat(currencyFormat.getFormat("$#,##0"));
-            currencyCellStyle.setBorderBottom(BorderStyle.THIN);
+            currencyCellStyle.setDataFormat(currencyFormat.getFormat("$ #,##0"));
+
+            CellStyle negativeCurrencyCellStyle = workbook.createCellStyle();
+            negativeCurrencyCellStyle.setDataFormat(currencyFormat.getFormat("- $ #,##0"));
 
             // Estilo de celdas de cantidad
             CellStyle quantityStyle = workbook.createCellStyle();
             quantityStyle.setAlignment(HorizontalAlignment.CENTER);
-            quantityStyle.setBorderBottom(BorderStyle.THIN);
-            quantityStyle.setBorderLeft(BorderStyle.THIN);
-            quantityStyle.setBorderRight(BorderStyle.THIN);
-
-            // Estilos con colores de fondo
-            CellStyle finalNumberStyle = workbook.createCellStyle();
-            finalNumberStyle.cloneStyleFrom(currencyCellStyle);
-            //finalNumberStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
-            //finalNumberStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            finalNumberStyle.setBorderLeft(BorderStyle.THIN);
-            finalNumberStyle.setBorderRight(BorderStyle.THIN);
-            finalNumberStyle.setBorderTop(BorderStyle.THIN);
-
-            CellStyle descuentosLabelStyle = workbook.createCellStyle();
-            descuentosLabelStyle.setBorderTop(BorderStyle.THIN);
-            descuentosLabelStyle.setBorderLeft(BorderStyle.THIN);
 
             CellStyle totalLabelStyle = workbook.createCellStyle();
             totalLabelStyle.setFont(headerFont);
-            totalLabelStyle.setBorderBottom(BorderStyle.THIN);
-            totalLabelStyle.setBorderTop(BorderStyle.THIN);
-            totalLabelStyle.setBorderLeft(BorderStyle.THIN);
 
             // --- 2. CREACIÓN DE FILAS Y CELDAS ---
             // Fila de Encabezados
             Row headerRow = sheet.createRow(0);
-            String[] headers = {"Producto", "Cantidad", "Subtotal"};
+            String[] headers = {"Producto", "Cantidad Vendida", "Subtotal"};
             headerRow.createCell(0).setCellValue(headers[0]);
             headerRow.createCell(1).setCellValue(headers[1]);
             headerRow.createCell(2).setCellValue(headers[2]);
@@ -122,59 +111,97 @@ public class ReporteService {
                 row.getCell(0).setCellStyle(dataRowStyle);
             }
 
-            // Fila de Total Teórico (sin título, fondo amarillo)
-            Row totalTeoricoRow = sheet.createRow(rowIdx++);
-            Cell totalTeoricoCell = totalTeoricoRow.createCell(2);
+            // Fila Otros (Permanecen en la tabla principal)
+            Row totalAdicionalesRow = sheet.createRow(rowIdx++);
+            Cell otrosCell = totalAdicionalesRow.createCell(0);
+            otrosCell.setCellValue("Otros");
+            otrosCell.setCellStyle(dataRowStyle);
+            Cell cantidadCell = totalAdicionalesRow.createCell(1);
+            cantidadCell.setCellValue("-");
+            cantidadCell.setCellStyle(quantityStyle);
+            Cell totalAdicionalesCell = totalAdicionalesRow.createCell(2);
+            totalAdicionalesCell.setCellValue(totalAdicionalesDiario.doubleValue());
+            totalAdicionalesCell.setCellStyle(currencyCellStyle);
+
+            // --- SECCIÓN DERECHA: Resúmenes y Desglose ---
+            int colResumen = 4; // Columna F (0 based -> 5)
+
+            Row rowResumenDiario = sheet.getRow(1); 
+            Cell resumenDiarioCell = rowResumenDiario.createCell(colResumen);
+            resumenDiarioCell.setCellValue("Resumen diario");
+            resumenDiarioCell.setCellStyle(totalLabelStyle);
+
+            // Fila de Total Teórico
+            // Aprovechamos las filas existentes, comenzando desde la fila 1 (row index 1)
+            Row totalTeoricoRow = sheet.getRow(2);
+            if (totalTeoricoRow == null) totalTeoricoRow = sheet.createRow(2);
+            
+            Cell totalTeoricoLabel = totalTeoricoRow.createCell(colResumen);
+            totalTeoricoLabel.setCellValue("Total teórico:");
+            
+            Cell totalTeoricoCell = totalTeoricoRow.createCell(colResumen + 1);
             totalTeoricoCell.setCellValue(totalTeorico.doubleValue());
-            totalTeoricoCell.setCellStyle(finalNumberStyle);
+            totalTeoricoCell.setCellStyle(currencyCellStyle);
 
-            rowIdx++;
+            // Fila de Descuentos
+            Row descuentosRow = sheet.getRow(3);
+            if (descuentosRow == null) descuentosRow = sheet.createRow(3);
 
-            // Fila de Descuentos (fondo rojo)
-            Row descuentosRow = sheet.createRow(rowIdx++);
-            Cell descuentosLabelCell = descuentosRow.createCell(1);
-            descuentosLabelCell.setCellValue("Descuentos, Ofertas y Promociones");
-            descuentosLabelCell.setCellStyle(descuentosLabelStyle);
-            Cell totalDescuentosCell = descuentosRow.createCell(2);
+            Cell descuentosLabelCell = descuentosRow.createCell(colResumen);
+            descuentosLabelCell.setCellValue("Descuentos, ofertas y promociones:");
+
+            Cell totalDescuentosCell = descuentosRow.createCell(colResumen + 1);
             totalDescuentosCell.setCellValue(totalDescuentos.doubleValue());
-            totalDescuentosCell.setCellStyle(finalNumberStyle);
+            totalDescuentosCell.setCellStyle(negativeCurrencyCellStyle);
 
-            // Fila de Total Recaudado (fondo verde)
-            Row totalRealRow = sheet.createRow(rowIdx++);
-            Cell totalRealLabelCell = totalRealRow.createCell(1);
-            totalRealLabelCell.setCellValue("TOTAL RECAUDADO");
-            totalRealLabelCell.setCellStyle(totalLabelStyle);
-            Cell totalRealCell = totalRealRow.createCell(2);
+            // Fila de Total Recaudado
+            Row totalRealRow = sheet.getRow(4);
+            if (totalRealRow == null) totalRealRow = sheet.createRow(4);
+
+            Cell totalRealLabelCell = totalRealRow.createCell(colResumen);
+            totalRealLabelCell.setCellValue("Total recaudado:");
+
+            Cell totalRealCell = totalRealRow.createCell(colResumen + 1);
             totalRealCell.setCellValue(totalRecaudadoReal.doubleValue());
-            totalRealCell.setCellStyle(finalNumberStyle);
+            totalRealCell.setCellStyle(currencyCellStyle);
+            
+            // --- Tabla de Métodos de Pago (Debajo de los resúmenes de la derecha) ---
+            int rowIdxPagos = 6; // Dejamos una fila de espacio (fila 4 vacía)
 
-            // --- 3. APLICACIÓN DE BORDES LATERALES PARA EL CUADRO ---
-            for (int i = 0; i <= rowIdx - 5; i++) {
-                Row row = sheet.getRow(i);
-                if (row == null) row = sheet.createRow(i);
+            Row headerPagos = sheet.getRow(rowIdxPagos);
+            if (headerPagos == null) headerPagos = sheet.createRow(rowIdxPagos);
+            
+            rowIdxPagos++;
 
-                // Borde izquierdo
-                Cell firstCell = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-                CellStyle newFirstStyle = workbook.createCellStyle();
-                newFirstStyle.cloneStyleFrom(firstCell.getCellStyle());
-                newFirstStyle.setBorderLeft(BorderStyle.THIN);
-                firstCell.setCellStyle(newFirstStyle);
+            Cell metodosDePagoCell = headerPagos.createCell(colResumen);
+            metodosDePagoCell.setCellValue("Método de pago");
+            metodosDePagoCell.setCellStyle(totalLabelStyle);
+            
+            Cell metodosMontoCell = headerPagos.createCell(colResumen + 1);
+            metodosMontoCell.setCellValue("Monto");
+            metodosMontoCell.setCellStyle(headerStyleRight);
 
-                // Borde derecho
-                Cell lastCell = row.getCell(headers.length - 1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-                CellStyle newLastStyle = workbook.createCellStyle();
-                newLastStyle.cloneStyleFrom(lastCell.getCellStyle());
-                newLastStyle.setBorderRight(BorderStyle.THIN);
-                lastCell.setCellStyle(newLastStyle);
+            // --- Llenar los datos de pagos ---
+            for (ReporteMetodoDePagoDTO item : desglosePagos) {
+                Row row = sheet.getRow(rowIdxPagos);
+                if (row == null) row = sheet.createRow(rowIdxPagos);
+                
+                // Columna Nombre
+                row.createCell(colResumen).setCellValue(item.getMetodoDePago().toString());
+
+                // Columna Monto
+                Cell cellMonto = row.createCell(colResumen + 1);
+                cellMonto.setCellValue(item.getTotal().doubleValue());
+                cellMonto.setCellStyle(currencyCellStyle);
+                
+                rowIdxPagos++;
             }
-            // Borde superior para la fila de encabezado
-            for (int i = 0; i < headers.length; i++) {
-                Cell cell = headerRow.getCell(i);
-                CellStyle newStyle = workbook.createCellStyle();
-                newStyle.cloneStyleFrom(cell.getCellStyle());
-                newStyle.setBorderTop(BorderStyle.THIN);
-                cell.setCellStyle(newStyle);
-            }
+            
+            // Autoajustar columnas del resumen
+            sheet.autoSizeColumn(colResumen);
+            sheet.autoSizeColumn(colResumen + 1);
+            sheet.setColumnWidth(colResumen, sheet.getColumnWidth(colResumen) + 512);
+            sheet.setColumnWidth(colResumen + 1, sheet.getColumnWidth(colResumen + 1) + 512);
 
             // Autoajustar el ancho de las columnas
             for (int i = 0; i < headers.length; i++) {
@@ -197,6 +224,8 @@ public class ReporteService {
         List<ReporteVentasDTO> datosDetallados = detalleVentaRepository.findDatosParaReporteVentas(inicioDelMes, finDelMes);
         List<ReporteProductosDTO> datosInventario = productoRepository.findDatosParaReportesMensuales(); // <-- Usaremos este nombre
         BigDecimal totalRecaudadoReal = ventaRepository.findRecaudadoVentasDiarias(inicioDelMes, finDelMes);
+        BigDecimal totalAdicionalesMensual = ventaRepository.sumMontoAdicionalPorFechas(inicioDelMes, finDelMes);
+        List<ReporteMetodoDePagoDTO> desglosePagos = ventaRepository.obtenerTotalesPorMetodoPago(inicioDelMes, finDelMes);
 
         // --- CÁLCULOS PARA RESÚMENES ---
         BigDecimal gananciaTotalReal = detalleVentaRepository.findGananciaNetaVentasEnRango(inicioDelMes, finDelMes);
@@ -231,7 +260,7 @@ public class ReporteService {
 
             DataFormat currencyFormat = workbook.createDataFormat();
             CellStyle currencyStyle = workbook.createCellStyle();
-            currencyStyle.setDataFormat(currencyFormat.getFormat("$#,##0"));
+            currencyStyle.setDataFormat(currencyFormat.getFormat("$ #,##0"));
 
             // ======================================================
             // --- HOJA 1: VENTAS DEL MES ---
@@ -284,6 +313,19 @@ public class ReporteService {
                 gananciaCell.setCellStyle(currencyStyle);
             }
 
+            Row totalAdicionalesMensualRow = sheetVentas.createRow(rowIdxVentas++);
+            Cell otrosMensual = totalAdicionalesMensualRow.createCell(0);
+            otrosMensual.setCellValue("Otros");
+            totalAdicionalesMensualRow.createCell(1).setCellValue("-");
+            totalAdicionalesMensualRow.getCell(1).setCellStyle(quantityStyle);
+            totalAdicionalesMensualRow.createCell(2).setCellValue("-");
+            totalAdicionalesMensualRow.getCell(2).setCellStyle(quantityStyle);
+            totalAdicionalesMensualRow.createCell(3).setCellValue("-");
+            totalAdicionalesMensualRow.getCell(3).setCellStyle(quantityStyle);
+            Cell totalAdicionalesMensualCell = totalAdicionalesMensualRow.createCell(4);
+            totalAdicionalesMensualCell.setCellValue(totalAdicionalesMensual.doubleValue());
+            totalAdicionalesMensualCell.setCellStyle(currencyStyle);
+
             // Auto-ajuste de columnas para la hoja de ventas
             for (int i = 0; i < headersVentas.length; i++) {
                 sheetVentas.autoSizeColumn(i);
@@ -317,13 +359,40 @@ public class ReporteService {
             sheetVentas.setColumnWidth(6, sheetVentas.getColumnWidth(6) + 512);
             sheetVentas.setColumnWidth(7, sheetVentas.getColumnWidth(7) + 512);
 
+            // --- AÑADIR DESGLOSE POR MÉTODO DE PAGO (Mensual) ---
+            int rowIdxPagosMensual = 5; // Dejamos espacio tras el resumen (Filas 1,2,3 ocupadas, 4 libre)
+            
+            Row headerPagosMensual = sheetVentas.getRow(rowIdxPagosMensual);
+            if (headerPagosMensual == null) headerPagosMensual = sheetVentas.createRow(rowIdxPagosMensual);
+            
+            rowIdxPagosMensual++;
+
+            headerPagosMensual.createCell(colResumenVentas).setCellValue("Método de Pago");
+            headerPagosMensual.getCell(colResumenVentas).setCellStyle(headerLeftStyle);
+            
+            headerPagosMensual.createCell(colResumenVentas + 1).setCellValue("Monto");
+            headerPagosMensual.getCell(colResumenVentas + 1).setCellStyle(headerRightStyle);
+            
+             for (ReporteMetodoDePagoDTO item : desglosePagos) {
+                Row row = sheetVentas.getRow(rowIdxPagosMensual);
+                if (row == null) row = sheetVentas.createRow(rowIdxPagosMensual);
+                
+                row.createCell(colResumenVentas).setCellValue(item.getMetodoDePago().toString());
+                
+                Cell cellMonto = row.createCell(colResumenVentas + 1);
+                cellMonto.setCellValue(item.getTotal().doubleValue());
+                cellMonto.setCellStyle(currencyStyle);
+                
+                rowIdxPagosMensual++;
+            }
+
             // ======================================================
             // --- HOJA 2: ESTADO DE INVENTARIO ---
             // ======================================================
             Sheet sheetInventario = workbook.createSheet("Estado de Inventario");
             // Encabezados de la tabla de inventario
             Row headerInventario = sheetInventario.createRow(0);
-            String[] headersInventario = {"Producto", "Stock Actual", "Costo", "En Stock ($)", "En Posibles Ventas ($)"};
+            String[] headersInventario = {"Producto", "Stock Actual", "Costo", "En Stock", "En Posibles Ventas"};
 
             headerInventario.createCell(0).setCellValue(headersInventario[0]);
             headerInventario.getCell(0).setCellStyle(headerLeftStyle);
