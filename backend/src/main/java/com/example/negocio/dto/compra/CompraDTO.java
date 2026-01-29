@@ -1,6 +1,5 @@
 package com.example.negocio.dto.compra;
 
-import com.example.negocio.enums.EstadoCompra;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

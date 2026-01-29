@@ -2,7 +2,6 @@ package com.example.negocio.dto.producto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,9 +17,11 @@ public class ProductoDTO {
     private BigDecimal precio;
     @NotNull
     private BigDecimal costo;
-    @NotNull @PositiveOrZero
+    @NotNull
+    @PositiveOrZero
     private Integer stock;
-    @NotNull @PositiveOrZero
+    @NotNull
+    @PositiveOrZero
     private Integer stockMinimo;
     private String codigoDeBarras;
     private Long idMarca;

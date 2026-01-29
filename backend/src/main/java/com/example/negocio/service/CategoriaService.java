@@ -3,7 +3,6 @@ package com.example.negocio.service;
 import com.example.negocio.dto.categoria.CategoriaAbmDTO;
 import com.example.negocio.dto.categoria.CategoriaDTO;
 import com.example.negocio.entity.Categoria;
-import com.example.negocio.entity.Producto;
 import com.example.negocio.exception.CategoriaNoEncontradaException;
 import com.example.negocio.exception.NombreRepetidoException;
 import com.example.negocio.mapper.CategoriaMapper;

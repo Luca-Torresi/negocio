@@ -5,7 +5,6 @@ import com.example.negocio.dto.compra.CompraFullDTO;
 import com.example.negocio.dto.compra.DetalleCompraDTO;
 import com.example.negocio.entity.*;
 import com.example.negocio.enums.EstadoCompra;
-import com.example.negocio.enums.MetodoDePago;
 import com.example.negocio.exception.CompraNoEncontradaException;
 import com.example.negocio.exception.ProductoNoEncontradoException;
 import com.example.negocio.exception.ProveedorNoEncontradoException;
@@ -102,10 +101,6 @@ public class CompraService {
         // Creamos un mapa de los detalles *existentes* para fácil acceso
         Map<Long, DetalleCompra> detallesActualesMap = compra.getDetalles().stream()
                 .collect(Collectors.toMap(dc -> dc.getProducto().getIdProducto(), Function.identity()));
-
-        // Creamos un mapa de los detalles *nuevos* (del DTO)
-        Map<Long, DetalleCompraDTO> detallesNuevosMap = dto.getDetalles().stream()
-                .collect(Collectors.toMap(DetalleCompraDTO::getIdProducto, Function.identity()));
 
         // --- Lógica de Stock y Actualización de Detalles ---
         List<DetalleCompra> detallesFinales = new ArrayList<>();
