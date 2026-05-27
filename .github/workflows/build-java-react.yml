@@ -56,7 +56,14 @@ jobs:
         run: chmod +x backend/gradlew
 
       # 7. Construye el Backend (.jar)
+      # Los secrets de GitHub se inyectan como variables de entorno.
+      # Spring Boot las lee gracias a los placeholders ${VAR:default} en application.properties.
       - name: Construir el backend con Gradle
+        env:
+          DB_URL: ${{ secrets.PROD_DB_URL }}
+          DB_USERNAME: ${{ secrets.PROD_DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
+          DDL_AUTO: ${{ secrets.PROD_DDL_AUTO }}
         run: |
           cd backend
           ./gradlew bootJar
