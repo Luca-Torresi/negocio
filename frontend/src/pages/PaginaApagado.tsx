@@ -7,7 +7,7 @@ export const PaginaApagado: React.FC = () => {
       <PowerOff className="h-16 w-16 text-gray-500 mb-4" />
       <h1 className="text-2xl font-bold text-gray-800">Servidor Apagado</h1>
       <p className="text-gray-600 mt-2">
-        La aplicación se ha cerrado correctamente. Ya puedes cerrar esta pestaña del navegador.
+        La aplicación se ha cerrado correctamente. Ya puedes salir del navegador.
       </p>
     </div>
   )
