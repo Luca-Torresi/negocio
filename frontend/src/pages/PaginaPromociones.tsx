@@ -92,7 +92,7 @@ export const PaginaPromociones: React.FC = () => {
           <ShoppingBag className="text-primary" size={32} />
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Promociones</h1>
-            <p className="text-gray-600">Gestiona las promociones del negocio</p>
+            <p className="text-gray-600">Gestioná las promociones del negocio</p>
           </div>
         </div>
         <button
