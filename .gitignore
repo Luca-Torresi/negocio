@@ -1,0 +1,6 @@
+# Base de datos y dumps SQL
+*.sql
+
+# Logs y temporales
+*.log
+.DS_Store

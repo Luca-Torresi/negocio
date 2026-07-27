@@ -44,11 +44,6 @@ jobs:
         run: chmod +x backend/gradlew
 
       - name: Construir el backend con Gradle
-        env:
-          DB_URL: ${{ secrets.PROD_DB_URL }}
-          DB_USERNAME: ${{ secrets.PROD_DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
-          DDL_AUTO: ${{ secrets.PROD_DDL_AUTO }}
         run: |
           cd backend
           ./gradlew bootJar
