@@ -1,0 +1,63 @@
+services:
+  # Base de Datos (MySQL)
+  db:
+    image: mysql:8.0
+    container_name: negocio-db
+    restart: always
+    command: --lower_case_table_names=1
+    environment:
+      MYSQL_DATABASE: negocio
+      MYSQL_ROOT_PASSWORD: "panaleraPEPA#123"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./dump.sql:/docker-entrypoint-initdb.d/init.sql
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppanaleraPEPA#123"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Backend (Java 17 Spring Boot)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: negocio-backend
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_URL=jdbc:mysql://db:3306/negocio?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - DB_USERNAME=root
+      - DB_PASSWORD=panaleraPEPA#123
+      - DDL_AUTO=update
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+  # Frontend (React + Vite)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: negocio-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8080
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+
+  
