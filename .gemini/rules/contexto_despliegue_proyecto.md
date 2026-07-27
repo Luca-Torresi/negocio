@@ -39,3 +39,13 @@ start http://localhost:8080
   - `db`: MySQL 8.0 con el parámetro `--lower_case_table_names=1` (insensible a mayúsculas/minúsculas como en Windows), volumen persistente `mysql_data` e importación inicial mediante `./dump.sql`.
   - `backend`: Java 17 Spring Boot compilado con multi-stage Dockerfile (Gradle), escuchando en puerto `8080`.
   - `frontend`: React con Vite, escuchando en puerto `5173` con soporte para Hot Reloading en WSL2.
+
+---
+
+## 4. Flujo de Compilación (GitHub Actions) y Variables de Entorno
+- **Workflow:** `.github/workflows/build-java-react.yml` se dispara automáticamente al hacer push o merge a `main`.
+- **Comportamiento de Spring Boot:**
+  - Las variables de entorno en Spring Boot (`${DB_URL:default}`) se leen en **tiempo de ejecución** (`runtime`), NO en tiempo de compilación (`build-time`).
+  - No se requieren Secrets ni bloque `env:` en el build de GitHub Actions. El `.jar` generado es agnóstico y limpio.
+  - Al ejecutarse el `.jar` en la PC del negocio, Spring Boot usa los valores por defecto en `application.properties` (`localhost:3306`, `root`, `panaleraPEPA#123`, `validate`).
+  - En desarrollo, `docker-compose.yml` sobreescribe `DB_URL` a `db:3306` y `DDL_AUTO` a `update`.

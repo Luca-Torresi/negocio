@@ -26,6 +26,8 @@ const PaginaVentas: React.FC = () => {
   const [tipoDescuento, setTipoDescuento] = useState<"MONTO" | "PORCENTAJE">("MONTO")
   const [montoAdicional, setMontoAdicional] = useState<number | null>(null)
   const [inputOtros, setInputOtros] = useState<number | null>(null)
+  const [montoAbonado, setMontoAbonado] = useState<number | null>(null)
+
 
   // Estados para el constructor de venta
   const [busquedaItem, setBusquedaItem] = useState<string>("")
@@ -272,6 +274,8 @@ const PaginaVentas: React.FC = () => {
   const descuentoMonto =
     tipoDescuento === "PORCENTAJE" ? Math.round((totalGeneral * (descuento || 0)) / 100) : descuento || 0
   const totalConDescuento = Math.max(0, totalGeneral - descuentoMonto)
+  const esEfectivo = metodoPagoSeleccionado.toUpperCase() === "EFECTIVO"
+
 
   // Finalizar venta
   const finalizarVenta = async (): Promise<void> => {
@@ -303,6 +307,8 @@ const PaginaVentas: React.FC = () => {
       setDescuento(null)
       setMontoAdicional(null)
       setInputOtros(null)
+      setMontoAbonado(null)
+
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.error(err.response.data)
@@ -578,61 +584,96 @@ const PaginaVentas: React.FC = () => {
 
           {/* Total y método de pago */}
           <div className="border-t border-gray-200 pt-4">
-            <div className="mb-4 flex gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
-                <select
-                  value={metodoPagoSeleccionado}
-                  onChange={(e) => setMetodoPagoSeleccionado(e.target.value)}
-                  className="w-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Seleccionar método de pago</option>
-                  {metodosDePago.map((metodo) => (
-                    <option key={metodo} value={metodo}>
-                      {metodo}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                {tipoDescuento === "MONTO" ? (
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Descuento por monto ($)</label>
-                ) : (
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Descuento por porcentaje (%)</label>
-                )}
-                <div className="flex gap-2">
-                  {tipoDescuento === "MONTO" ? (
-                    <InputMoneda
-                      value={descuento}
-                      onValueChange={(nuevoValor) => {
-                        const valorValidado = Math.min(nuevoValor || 0, totalGeneral)
-                        setDescuento(valorValidado)
-                      }}
-                      className="w-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="$ 0"
-                    />
-                  ) : (
-                    <InputPorcentaje
-                      value={descuento ?? 0}
-                      onValueChange={(nuevoValor) => setDescuento(nuevoValor)} // El componente ya devuelve el número validado (0-100)
-                      className="w-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
-                      placeholder="0 %"
-                    />
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTipoDescuento(tipoDescuento === "MONTO" ? "PORCENTAJE" : "MONTO")
-                      setDescuento(null)
+            <div className="space-y-4 mb-4">
+              {/* Fila superior: Método de Pago y Descuento */}
+              <div className="flex flex-wrap gap-4 items-end">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
+                  <select
+                    value={metodoPagoSeleccionado}
+                    onChange={(e) => {
+                      const nuevoMetodo = e.target.value
+                      setMetodoPagoSeleccionado(nuevoMetodo)
+                      if (nuevoMetodo.toUpperCase() !== "EFECTIVO") {
+                        setMontoAbonado(null)
+                      }
                     }}
-                    className="px-3 py-2 rounded-lg hover:bg-gray-100"
-                    title={tipoDescuento === "MONTO" ? "Cambiar a porcentaje" : "Cambiar a monto"}
+                    className="w-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <RefreshCw size={20} className="text-gray-700" />
-                  </button>
+                    <option value="">Seleccionar método de pago</option>
+                    {metodosDePago.map((metodo) => (
+                      <option key={metodo} value={metodo}>
+                        {metodo}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  {tipoDescuento === "MONTO" ? (
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Descuento por monto ($)</label>
+                  ) : (
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Descuento por porcentaje (%)</label>
+                  )}
+                  <div className="flex gap-2">
+                    {tipoDescuento === "MONTO" ? (
+                      <InputMoneda
+                        value={descuento}
+                        onValueChange={(nuevoValor) => {
+                          const valorValidado = Math.min(nuevoValor || 0, totalGeneral)
+                          setDescuento(valorValidado)
+                        }}
+                        className="w-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="$ 0"
+                      />
+                    ) : (
+                      <InputPorcentaje
+                        value={descuento ?? 0}
+                        onValueChange={(nuevoValor) => setDescuento(nuevoValor)} // El componente ya devuelve el número validado (0-100)
+                        className="w-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+                        placeholder="0 %"
+                      />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTipoDescuento(tipoDescuento === "MONTO" ? "PORCENTAJE" : "MONTO")
+                        setDescuento(null)
+                      }}
+                      className="px-3 py-2 rounded-lg hover:bg-gray-100"
+                      title={tipoDescuento === "MONTO" ? "Cambiar a porcentaje" : "Cambiar a monto"}
+                    >
+                      <RefreshCw size={20} className="text-gray-700" />
+                    </button>
+                  </div>
                 </div>
               </div>
+
+              {/* Fila inferior: Paga con y Vuelto (solo si es EFECTIVO) */}
+              {esEfectivo && (
+                <div className="flex flex-wrap gap-4 items-end">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Paga con ($)</label>
+                    <InputMoneda
+                      value={montoAbonado}
+                      onValueChange={(nuevoValor) => setMontoAbonado(nuevoValor)}
+                      className="w-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="$ 0"
+                    />
+                  </div>
+
+                  {montoAbonado !== null && (
+                    <div className={`p-2.5 px-4 rounded-lg flex items-center gap-3 border ${montoAbonado >= totalConDescuento ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-700"}`}>
+                      <span className="text-base font-semibold">
+                        {montoAbonado >= totalConDescuento ? "Vuelto:" : "Falta:"}
+                      </span>
+                      <span className={`text-2xl font-bold ${montoAbonado >= totalConDescuento ? "text-green-700" : "text-red-700"}`}>
+                        {formatCurrency(Math.abs(montoAbonado - totalConDescuento))}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2 mb-4">
@@ -654,6 +695,7 @@ const PaginaVentas: React.FC = () => {
               </div>
             </div>
 
+
             <div className="flex justify-end">
               <button
                 onClick={finalizarVenta}
@@ -664,6 +706,7 @@ const PaginaVentas: React.FC = () => {
               </button>
             </div>
           </div>
+
         </div>
       </div>
     </div>

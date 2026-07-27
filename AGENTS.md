@@ -8,4 +8,8 @@
   - Backend (`backend`): Spring Boot Java 17 en puerto 8080.
   - Frontend (`frontend`): React + Vite en puerto 5173.
 
+## Flujo de CI/CD y Variables de Entorno
+- **GitHub Actions (`.github/workflows/build-java-react.yml`):** Compila el `.jar` al hacer push/merge a `main`. No usa Secrets de build.
+- **Spring Boot Config:** `application.properties` contiene los valores por defecto para producción local (`localhost:3306`, `root`, `panaleraPEPA#123`, `validate`). En desarrollo, `docker-compose.yml` sobreescribe la URL a `db:3306`.
+
 Para más detalles, consultar [.gemini/rules/contexto_despliegue_proyecto.md](file://.gemini/rules/contexto_despliegue_proyecto.md).
