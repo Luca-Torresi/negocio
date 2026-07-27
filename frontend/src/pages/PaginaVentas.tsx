@@ -652,22 +652,22 @@ const PaginaVentas: React.FC = () => {
               {/* Fila inferior: Paga con y Vuelto (solo si es EFECTIVO) */}
               {esEfectivo && (
                 <div className="flex flex-wrap gap-4 items-end">
-                  <div>
+                  <div className="w-48">
                     <label className="block text-sm font-medium text-gray-700 mb-2">Paga con ($)</label>
                     <InputMoneda
                       value={montoAbonado}
                       onValueChange={(nuevoValor) => setMontoAbonado(nuevoValor)}
-                      className="w-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="$ 0"
                     />
                   </div>
 
                   {montoAbonado !== null && (
-                    <div className={`p-2.5 px-4 rounded-lg flex items-center gap-3 border ${montoAbonado >= totalConDescuento ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-700"}`}>
+                    <div className={`p-2.5 px-4 flex items-center gap-3 ${montoAbonado >= totalConDescuento ? "bg-green-100 text-gray-700" : "bg-red-100 text-gray-700"}`}>
                       <span className="text-base font-semibold">
                         {montoAbonado >= totalConDescuento ? "Vuelto:" : "Falta:"}
                       </span>
-                      <span className={`text-2xl font-bold ${montoAbonado >= totalConDescuento ? "text-green-700" : "text-red-700"}`}>
+                      <span className="text-2xl font-bold text-gray-700">
                         {formatCurrency(Math.abs(montoAbonado - totalConDescuento))}
                       </span>
                     </div>
